@@ -233,8 +233,9 @@ function Home() {
     >
       {data.homeCoverUrl ? (
         <div className="fixed inset-0 z-[-1] pointer-events-none">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${data.homeCoverUrl})` }}></div>
-          <div className="absolute inset-0 bg-neutral-950/70 backdrop-blur-3xl"></div>
+          <div className="absolute inset-x-0 top-0 h-[80vh] min-h-[500px] bg-cover" style={{ backgroundImage: `url(${data.homeCoverUrl})`, backgroundPosition: 'center 20%' }}></div>
+          <div className="absolute inset-x-0 top-0 h-[80vh] min-h-[500px] bg-gradient-to-b from-transparent via-neutral-950/60 to-neutral-950"></div>
+          <div className="absolute inset-x-0 top-0 h-[80vh] min-h-[500px] bg-gradient-to-t from-neutral-950 via-transparent to-transparent"></div>
         </div>
       ) : (
         <div className="fixed inset-0 z-[-1] pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-900 via-neutral-950 to-neutral-950"></div>
@@ -511,20 +512,20 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
 
   const waves = Array.from({ length: 32 });
 
-  const isLight = ['1', '4', '6', '7', '9'].includes(template);
+  const isLight = ['1', '4', '6', '7'].includes(template);
   let waveColor = "bg-white";
   if (template === '1') waveColor = "bg-orange-500";
   if (template === '2') waveColor = "bg-fuchsia-300";
   if (template === '3') waveColor = "bg-slate-300";
   if (template === '4') waveColor = "bg-teal-600";
   if (template === '5') waveColor = "bg-red-100";
-  if (template === '6') waveColor = "bg-pink-500";
+  if (template === '6') waveColor = "bg-pink-600";
   if (template === '7') waveColor = "bg-stone-800";
   if (template === '8') waveColor = "bg-yellow-400";
-  if (template === '9') waveColor = "bg-purple-600";
+  if (template === '9') waveColor = "bg-white";
 
   return (
-    <div className={`flex flex-col w-full gap-2 md:gap-4 ${isLight ? 'text-stone-900 font-bold drop-shadow-sm' : 'text-white font-bold drop-shadow-md'}`}>
+    <div className={`flex flex-col w-full gap-2 md:gap-4 ${isLight ? 'text-stone-900 font-extrabold drop-shadow-sm' : 'text-white font-extrabold drop-shadow-md'}`}>
       <audio 
         ref={audioRef} 
         src={src} 
@@ -542,7 +543,7 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
           return (
              <div 
               key={i} 
-              className={`w-1 rounded-full ${waveColor} transition-all duration-300 origin-bottom opacity-80`}
+              className={`w-1 rounded-full ${waveColor} transition-all duration-300 origin-bottom opacity-90 drop-shadow-sm`}
               style={{
                 height: isPlaying ? '100%' : '15%',
                 animation: isPlaying ? `pulse-wave ${randDur}s ease-in-out infinite alternate` : 'none',
@@ -552,7 +553,7 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
         })}
       </div>
 
-      <div className="flex items-center justify-between text-[10px] md:text-xs font-mono opacity-60">
+      <div className="flex items-center justify-between text-[11px] md:text-xs font-mono opacity-100">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>
@@ -563,13 +564,13 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
         max={duration || 0} 
         value={currentTime} 
         onChange={handleProgressChange}
-        className={`w-full h-1 md:h-1.5 ${isLight ? 'bg-black/10' : 'bg-white/20'} rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 ${isLight ? '[&::-webkit-slider-thumb]:bg-stone-800' : '[&::-webkit-slider-thumb]:bg-white'} [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:scale-125 transition-transform outline-none`}
+        className={`w-full h-1 md:h-1.5 ${isLight ? 'bg-black/20' : 'bg-white/30'} rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 ${isLight ? '[&::-webkit-slider-thumb]:bg-stone-800' : '[&::-webkit-slider-thumb]:bg-white'} [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:scale-125 transition-transform outline-none`}
       />
 
       <div className="flex items-center justify-between mt-1 md:mt-2">
          {/* Volume */}
          <div className="flex items-center gap-2 group w-20 md:w-24">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60 hover:opacity-100 cursor-pointer md:w-[16px] md:h-[16px]"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-90 hover:opacity-100 cursor-pointer drop-shadow-sm"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
             <input 
               type="range" 
               min={0} 
@@ -577,7 +578,7 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
               step={0.01} 
               value={volume} 
               onChange={handleVolumeChange}
-              className={`w-full h-1 ${isLight ? 'bg-black/10' : 'bg-white/20'} rounded-lg appearance-none cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 ${isLight ? '[&::-webkit-slider-thumb]:bg-stone-800' : '[&::-webkit-slider-thumb]:bg-white'} [&::-webkit-slider-thumb]:rounded-full outline-none`}
+              className={`w-full h-1.5 ${isLight ? 'bg-black/20' : 'bg-white/30'} rounded-lg appearance-none cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 ${isLight ? '[&::-webkit-slider-thumb]:bg-stone-800' : '[&::-webkit-slider-thumb]:bg-white'} [&::-webkit-slider-thumb]:rounded-full outline-none`}
             />
          </div>
 
@@ -684,11 +685,11 @@ function LeavesEffect() {
 
 function FlagEffect() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 flex items-center justify-center">
        <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[linear-gradient(45deg,transparent,rgba(255,255,255,0.4),transparent)] animate-[pulse_4s_infinite_linear]" style={{ backgroundSize: '150% 150%' }}></div>
-       <div className="absolute inset-x-0 bottom-0 top-1/4 flex flex-col items-center justify-center opacity-10 blur-sm pointer-events-none z-0 overflow-hidden">
-         <svg viewBox="0 0 24 24" className="w-[120vw] h-[120vw] max-w-[800px] max-h-[800px] text-yellow-500 animate-[bounce_8s_infinite] drop-shadow-2xl" fill="currentColor">
-           <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+       <div className="fixed inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-60">
+         <svg viewBox="0 0 100 100" className="w-[100vw] h-[100vw] max-w-[500px] max-h-[500px] text-yellow-500 drop-shadow-[0_0_80px_rgba(250,204,21,0.6)]" fill="currentColor">
+           <polygon points="50,0 61.23,34.55 97.55,34.55 68.16,55.9 79.39,90.45 50,69.1 20.61,90.45 31.84,55.9 2.45,34.55 38.77,34.55" />
          </svg>
        </div>
     </div>
@@ -799,10 +800,10 @@ function DemoPlayer() {
     themeClasses = "bg-[#faf9f6] text-stone-800 bg-[url('https://www.transparenttextures.com/patterns/notebook.png')]";
     accentClass = "bg-stone-800 text-[#faf9f6]";
   } else if (templateType === '8') {
-    themeClasses = "bg-red-600 text-yellow-100 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-500 to-red-700";
+    themeClasses = "bg-red-600 text-yellow-50 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-500 to-red-700 [text-shadow:0_2px_4px_rgba(153,27,27,0.8)]";
     accentClass = "bg-yellow-400 text-red-900 font-bold shadow-[0_0_15px_rgba(250,204,21,0.5)]";
   } else if (templateType === '9') {
-    themeClasses = "bg-sky-200 text-blue-900 bg-[linear-gradient(135deg,_var(--tw-gradient-stops))] from-sky-300 via-purple-200 to-pink-300";
+    themeClasses = "bg-sky-200 text-white drop-shadow-md bg-[linear-gradient(135deg,_var(--tw-gradient-stops))] from-sky-300 via-purple-200 to-pink-300";
     accentClass = "bg-white/80 backdrop-blur text-purple-700 shadow-xl shadow-purple-200/50";
   }
 
@@ -915,7 +916,7 @@ function DemoPlayer() {
             templateType === '5' ? 'shadow-xl rounded-full border-4 animate-[bounce_2s_infinite] shadow-red-900/50' : 
             templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
             templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
-            templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400 animate-[pulse_3s_infinite]' :
+            templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400' :
             templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 'shadow-2xl rounded-3xl border-4'
           }`}>
             {demo.coverUrl ? (
@@ -941,9 +942,9 @@ function DemoPlayer() {
           {!demo.singer && !demo.author && !demo.composer && <div className="mb-4 md:mb-6"></div>}
           
           <div 
-            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto backdrop-blur-md`}
+            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto backdrop-blur-xl`}
           >
-            <div className={`absolute inset-0 ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'bg-white/10' : (isLight ? 'bg-white/40' : 'bg-black/30')}`}></div>
+            <div className={`absolute inset-0 ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'bg-black/40' : (isLight ? 'bg-white/50' : 'bg-black/50')}`}></div>
             {demo.coverUrl && (
               <div 
                 className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay saturate-150"
