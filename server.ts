@@ -3,6 +3,23 @@ import path from 'path';
 import fs from 'fs/promises';
 import { createServer as createViteServer } from 'vite';
 import multer from 'multer';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+
+const firebaseConfig = {
+  projectId: "nice-momentum-trwfn",
+  appId: "1:439820764953:web:abcf8a172f204668bc2788",
+  apiKey: "AIzaSyAz8j_0SLubaQMiNw2ZnugPyzWPrvGYQyE",
+  authDomain: "nice-momentum-trwfn.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-55e9d594-1864-4eda-b3a6-811c2fea9f04",
+  storageBucket: "nice-momentum-trwfn.firebasestorage.app",
+  messagingSenderId: "439820764953",
+  measurementId: ""
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp, "ai-studio-55e9d594-1864-4eda-b3a6-811c2fea9f04");
+const DOC_REF = doc(db, 'app_data', 'main');
 
 const DATA_FILE = path.join(process.cwd(), 'data.json');
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
@@ -28,26 +45,48 @@ const upload = multer({
 
 async function loadData() {
   try {
-    const data = await fs.readFile(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
+    const docSnap = await getDoc(DOC_REF);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
   } catch (error) {
-    // Return default data if file doesn't exist
-    return {
-      artistName: 'A.C Xuân Tài',
-      artistBio: 'Nơi mình chia sẻ các demo nhạc mới',
-      homeCoverUrl: '',
-      faviconUrl: '',
-      ogImageUrl: '',
-      youtubePlaylistUrl: '',
-      spotifyUrl: '',
-      releasedSongs: [],
-      demos: []
-    };
+    console.error("Firebase load error:", error);
   }
+  
+  // Migrate from local if Firebase fails or is empty
+  try {
+    const data = await fs.readFile(DATA_FILE, 'utf-8');
+    const parsedData = JSON.parse(data);
+    await setDoc(DOC_REF, parsedData); // upload to firebase for next time
+    return parsedData;
+  } catch (error) {}
+
+  // Return default data
+  return {
+    pageTitle: '',
+    artistName: 'A.C Xuân Tài',
+    artistBio: 'Nơi mình chia sẻ các demo nhạc mới',
+    homeCoverUrl: '',
+    faviconUrl: '',
+    ogImageUrl: '',
+    youtubePlaylistUrl: '',
+    spotifyUrl: '',
+    releasedSongs: [],
+    demos: []
+  };
 }
 
 async function saveData(data: any) {
-  await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  try {
+    await setDoc(DOC_REF, data);
+  } catch (error) {
+    console.error("Firebase save error:", error);
+  }
+  
+  // Keep local backup just in case
+  try {
+    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {}
 }
 
 async function startServer() {
@@ -57,7 +96,7 @@ async function startServer() {
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
   // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=3333
   // hoặc thiết lập App Port: 3333 trực tiếp trên giao diện CloudPanel.
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT || 3000);
 
   app.use(express.json());
 
@@ -78,6 +117,7 @@ async function startServer() {
 
   app.post('/api/profile', async (req, res) => {
     const data = await loadData();
+    data.pageTitle = req.body.pageTitle ?? data.pageTitle;
     data.artistName = req.body.artistName ?? data.artistName;
     data.artistBio = req.body.artistBio ?? data.artistBio;
     data.homeCoverUrl = req.body.homeCoverUrl ?? data.homeCoverUrl;
@@ -314,6 +354,7 @@ async function startServer() {
               title: demo.title,
               singer: demo.singer,
               author: demo.author,
+              composer: demo.composer,
               template: demo.template,
               coverUrl: demo.coverUrl,
               requiresPassword: true 

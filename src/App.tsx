@@ -204,7 +204,7 @@ function Home() {
     fetch('/api/data').then(res => res.json()).then(data => {
       setData(data);
       if (data) {
-        document.title = data.artistName + ' - ' + t.lDemos;
+        document.title = data.pageTitle || `${t.dDesc} ${data.artistName || 'A.C Xuân Tài'}`;
         if (data.faviconUrl) {
           let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
           if (!link) {
@@ -905,7 +905,7 @@ function DemoPlayer() {
   }
 
   return (
-    <div className={`min-h-screen px-4 py-12 flex flex-col ${themeClasses} transition-colors duration-1000 overflow-hidden relative`}>
+    <div className={`min-h-screen px-4 py-8 ${themeClasses} transition-colors duration-1000 relative`}>
       <motion.div 
         initial={{ scaleY: 1 }} 
         animate={{ scaleY: 0 }} 
@@ -914,27 +914,46 @@ function DemoPlayer() {
         className="fixed inset-0 z-[9999] bg-black origin-bottom pointer-events-none" 
       />
 
-      <div className="absolute inset-0 pointer-events-none fade-in-layer opacity-0 animate-[fade_1s_forwards]" />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.3 }}
+        className="absolute inset-0 pointer-events-none z-0" 
+      />
       {templateType === '3' && <SnowEffect />}
       {templateType === '5' && <CuteEffect />}
       {templateType === '6' && <BlossomEffect />}
       {templateType === '7' && <LeavesEffect />}
       {templateType === '8' && <FlagEffect />}
       {templateType === '9' && <RainEffect />}
-      <Link to="/" className="fixed top-6 left-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-10 transition-opacity font-medium">
+      {/* Top blur overlay */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.3 }}
+        className="fixed top-0 inset-x-0 h-32 z-40 pointer-events-none backdrop-blur-[20px]"
+        style={{ maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)' }}
+      />
+
+      <Link to="/" className="fixed top-6 left-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-50 transition-opacity font-medium drop-shadow-md">
         <ArrowLeft className="w-5 h-5" /> {t.back}
       </Link>
 
       {isAdmin && demo && (
-        <Link to={`/admin/edit/${demo.id}`} className="fixed top-6 right-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-10 transition-opacity font-medium bg-black/20 px-4 py-2 rounded-full backdrop-blur-md border border-white/10 text-white shadow-xl">
+        <Link to={`/admin/edit/${demo.id}`} className="fixed top-6 right-6 opacity-80 hover:opacity-100 flex items-center gap-2 z-50 transition-opacity font-medium bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl">
           <Edit3 className="w-4 h-4" /> {t.edit}
         </Link>
       )}
       
-      <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col md:flex-row gap-4 md:gap-12 items-center md:items-start pt-6 md:pt-12 relative">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="max-w-4xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
+      >
         {/* Left: Player */}
         <div className="flex-1 w-full max-w-sm flex flex-col items-center">
-          <div className={`w-full max-w-[280px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 ${
+          <div className={`w-full max-w-[240px] md:max-w-[280px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
             templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
             templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
             templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
@@ -955,7 +974,7 @@ function DemoPlayer() {
             <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '5' || templateType === '8' ? 'rounded-full' : ''} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
           </div>
-          <h1 className="text-3xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
+          <h1 className="text-2xl md:text-3xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
             <span className="relative inline-block">
               {formatText(demo.title)}
                <div className="absolute -top-3 -right-10 origin-bottom-left rotate-[15deg] bg-rose-600 text-[10px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
@@ -963,14 +982,14 @@ function DemoPlayer() {
                </div>
             </span>
           </h1>
-          {(demo.singer || demo.author) && <p className="text-xl font-medium text-center mb-1 opacity-90">{formatText(demo.singer || demo.author)}</p>}
-          {demo.composer && <p className="text-sm font-medium text-center mb-4 md:mb-6 opacity-60">{t.sAuth} {formatText(demo.composer)}</p>}
-          {!demo.singer && !demo.author && !demo.composer && <div className="mb-4 md:mb-6"></div>}
+          {(demo.singer || demo.author) && <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">{formatText(demo.singer || demo.author)}</p>}
+          {demo.composer && <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">{t.sAuth} {formatText(demo.composer)}</p>}
+          {!demo.singer && !demo.author && !demo.composer && <div className="mb-0 md:mb-6"></div>}
           
           <div 
             className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto backdrop-blur-xl`}
           >
-            <div className={`absolute inset-0 ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'bg-black/40' : (isLight ? 'bg-white/50' : 'bg-black/50')}`}></div>
+            <div className={`absolute inset-0 bg-gradient-to-t ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'from-black/70 via-black/30' : (isLight ? 'from-white/80 via-white/40' : 'from-black/80 via-black/40')} to-transparent`}></div>
             <div className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${isLight ? 'from-white/40' : 'from-white/10'} to-transparent opacity-60`}></div>
             {demo.coverUrl && (
               <div 
@@ -985,21 +1004,21 @@ function DemoPlayer() {
         </div>
 
         {/* Right: Lyrics */}
-        <div className="flex-1 w-full flex flex-col h-[70vh] pb-32 md:pb-0 pt-2 md:pt-0">
-          <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4">{t.lyric}</h3>
-          <div className="flex-1 overflow-y-auto pr-4 scrollbar-hide">
+        <div className="flex-1 w-full pb-32 md:pb-0 mt-8 md:mt-0">
+          <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 md:mt-0 mt-0">{t.lyric}</h3>
+          <div className="pr-4">
             {demo.lyrics ? (
               <pre className="whitespace-pre-wrap font-sans text-lg/relaxed sm:text-xl/loose font-medium opacity-80 pb-20 pl-4 border-l border-white/10">
                 {demo.lyrics}
               </pre>
             ) : (
-              <div className="h-full flex items-center justify-center opacity-30 italic">
+              <div className="flex items-center justify-center opacity-30 italic py-20">
                 {t.nLyric}
               </div>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -1037,6 +1056,7 @@ function AdminDashboard() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        pageTitle: payload.pageTitle,
         artistName: payload.artistName,
         artistBio: payload.artistBio,
         homeCoverUrl: payload.homeCoverUrl,
@@ -1149,6 +1169,10 @@ function AdminDashboard() {
             <div className="max-w-2xl">
               <h2 className="text-2xl font-bold mb-8">Thông tin hồ sơ</h2>
               <form onSubmit={handleProfileSave} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Tiêu đề Website</label>
+                  <input name="pageTitle" defaultValue={data.pageTitle} placeholder="Để trống sẽ dùng mặc định: Thiên Đường Demo của [Tên nghệ sĩ]" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" />
+                </div>
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Tên nghệ sĩ</label>
                   <input name="artistName" defaultValue={data.artistName} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" />

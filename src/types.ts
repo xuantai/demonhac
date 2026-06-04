@@ -21,6 +21,7 @@ export interface DemoSong {
 }
 
 export interface AppData {
+  pageTitle?: string;
   artistName: string;
   artistBio: string;
   homeCoverUrl?: string;
