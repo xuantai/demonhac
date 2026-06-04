@@ -55,8 +55,8 @@ async function startServer() {
   const app = express();
   
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
-  // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=1994
-  // hoặc thiết lập App Port: 1994 trực tiếp trên giao diện CloudPanel.
+  // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=3333
+  // hoặc thiết lập App Port: 3333 trực tiếp trên giao diện CloudPanel.
   const PORT = process.env.PORT || 3000;
 
   app.use(express.json());

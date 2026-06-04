@@ -5,7 +5,7 @@ module.exports = {
       script: "./dist/server.cjs",
       env: {
         NODE_ENV: "production",
-        PORT: 1994,
+        PORT: 3333,
       },
     },
   ],
