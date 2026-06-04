@@ -27,12 +27,12 @@ function formatText(text: string | null | undefined) {
 // Global styles added in index.css
 
 const translations: Record<string, Record<string, string>> = {
-  vi: { dDesc: "Website dành cho các demo nhạc mới", btnSpot: "Nghe trên Spotify", lDemos: "Demo Mới Nhất", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt" },
-  en: { dDesc: "New music demos website", btnSpot: "Listen on Spotify", lDemos: "Latest Demos", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
-  ko: { dDesc: "새로운 데모 웹사이트", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
-  ja: { dDesc: "新しいデモサイト", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
-  th: { dDesc: "เว็บไซต์ตัวอย่างเพลงใหม่", btnSpot: "ฟังบน Spotify", lDemos: "ตัวอย่างล่าสุด", pReq: "รหัสผ่าน", pNow: "ฟังเลย", nDemo: "ไม่มีตัวอย่าง", rMv: "มิวสิควิดีโอ", nMv: "ไม่มี MV", lMore: "โหลดเพิ่ม", mList: "ผู้ฟังรายเดือน", load: "กำลังโหลด...", back: "กลับ", adm: "แอดมิน", edit: "แก้ไข", pPrompt: "ต้องใช้รหัสผ่าน", unlock: "ปลดล็อค", wPass: "รหัสผ่านผิด", lyric: "เนื้อเพลง", nLyric: "ไม่มีเนื้อเพลง", sAuth: "แต่งโดย:", lang: "ไทย" },
-  zh: { dDesc: "新音乐演示网站", btnSpot: "在Spotify收听", lDemos: "最新演示", pReq: "需要密码", pNow: "立即收听", nDemo: "暂无演示", rMv: "已发行的视频", nMv: "暂无视频", lMore: "加载更多", mList: "月度听众", load: "载入中...", back: "返回", adm: "管理", edit: "编辑", pPrompt: "需要密码", unlock: "解锁", wPass: "密码错误", lyric: "歌词", nLyric: "暂无歌词", sAuth: "作曲:", lang: "中文" }
+  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Demo Mới Nhất", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt" },
+  en: { dDesc: "Demo paradise of", btnSpot: "Listen on Spotify", lDemos: "Latest Demos", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
+  ko: { dDesc: "데모 파라다이스", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", pPrompt2: "이 데모를 들으려면 비밀번호를 입력하세요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
+  ja: { dDesc: "デモパラダイス", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", pPrompt2: "このデモを聴くにはパスワードを入力してください", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
+  th: { dDesc: "สวรรค์แห่งเพลงเดโม่ของ", btnSpot: "ฟังบน Spotify", lDemos: "ตัวอย่างล่าสุด", pReq: "รหัสผ่าน", pNow: "ฟังเลย", nDemo: "ไม่มีตัวอย่าง", rMv: "มิวสิควิดีโอ", nMv: "ไม่มี MV", lMore: "โหลดเพิ่ม", mList: "ผู้ฟังรายเดือน", load: "กำลังโหลด...", back: "กลับ", adm: "แอดมิน", edit: "แก้ไข", pPrompt: "ต้องใช้รหัสผ่าน", pPrompt2: "ใส่รหัสผ่านเพื่อฟังเดโม่นี้", unlock: "ปลดล็อค", wPass: "รหัสผ่านผิด", lyric: "เนื้อเพลง", nLyric: "ไม่มีเนื้อเพลง", sAuth: "แต่งโดย:", lang: "ไทย" },
+  zh: { dDesc: "的演示天堂", btnSpot: "在Spotify收听", lDemos: "最新演示", pReq: "需要密码", pNow: "立即收听", nDemo: "暂无演示", rMv: "已发行的视频", nMv: "暂无视频", lMore: "加载更多", mList: "月度听众", load: "载入中...", back: "返回", adm: "管理", edit: "编辑", pPrompt: "需要密码", pPrompt2: "输入密码收听此演示", unlock: "解锁", wPass: "密码错误", lyric: "歌词", nLyric: "暂无歌词", sAuth: "作曲:", lang: "中文" }
 };
 
 interface LangContextType {
@@ -139,13 +139,41 @@ const SpotifyIcon = ({className}: {className?: string}) => (
 
 const LanguageSwitcher = () => {
   const { lang, setLang } = useContext(LanguageContext);
+  const [open, setOpen] = useState(false);
   const langs = ['vi', 'en', 'ko', 'ja', 'th', 'zh'];
+
   return (
-    <div className="absolute top-6 right-6 z-50 flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full px-3 py-1.5 backdrop-blur-md transition-colors group">
-      <Globe className="w-4 h-4 text-white" />
-      <select value={lang} onChange={(e) => setLang(e.target.value)} className="bg-transparent text-white font-medium outline-none appearance-none cursor-pointer pr-2">
-        {langs.map(l => <option key={l} value={l} className="text-black">{translations[l].lang}</option>)}
-      </select>
+    <div className="fixed top-6 right-6 z-50">
+      <div 
+        className="flex items-center gap-2 bg-black/30 hover:bg-black/50 border border-white/20 rounded-full px-4 py-2 backdrop-blur-xl cursor-pointer transition-all shadow-lg hover:pr-5 group"
+        onClick={() => setOpen(!open)}
+      >
+        <Globe className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
+        <span className="text-white font-bold uppercase text-xs tracking-wider">{lang}</span>
+      </div>
+      
+      <AnimatePresence>
+        {open && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute right-0 top-full mt-3 flex flex-col bg-neutral-950/90 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl origin-top-right"
+          >
+            {langs.map(l => (
+              <button 
+                key={l}
+                onClick={() => { setLang(l); setOpen(false); }}
+                className={`px-6 py-3.5 text-sm font-medium transition-colors text-left flex items-center justify-between min-w-[140px] border-b border-white/5 last:border-0 ${lang === l ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-white'}`}
+              >
+                <span>{translations[l].lang}</span>
+                {lang === l && <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(243,24,103,1)]"></div>}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -233,9 +261,7 @@ function Home() {
     >
       {data.homeCoverUrl ? (
         <div className="fixed inset-0 z-[-1] pointer-events-none">
-          <div className="absolute inset-x-0 top-0 h-[80vh] min-h-[500px] bg-cover" style={{ backgroundImage: `url(${data.homeCoverUrl})`, backgroundPosition: 'center 20%' }}></div>
-          <div className="absolute inset-x-0 top-0 h-[80vh] min-h-[500px] bg-gradient-to-b from-transparent via-neutral-950/60 to-neutral-950"></div>
-          <div className="absolute inset-x-0 top-0 h-[80vh] min-h-[500px] bg-gradient-to-t from-neutral-950 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url(${data.homeCoverUrl})`, backgroundPosition: 'center 20%', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%)' }}></div>
         </div>
       ) : (
         <div className="fixed inset-0 z-[-1] pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-900 via-neutral-950 to-neutral-950"></div>
@@ -265,7 +291,7 @@ function Home() {
                   onAnimationComplete={() => setShowArtist(true)}
                   className="text-xl sm:text-2xl text-stone-200 font-medium max-w-3xl mx-auto drop-shadow-lg mb-2"
                 >
-                  {data.artistBio || t.dDesc}
+                  {(data.artistBio === "Thiên đường demo của" || !data.artistBio) ? t.dDesc : data.artistBio}
                 </motion.p>
                 <AnimatePresence>
                   {showArtist && (
@@ -291,7 +317,7 @@ function Home() {
                   onAnimationComplete={() => setShowArtist(true)}
                   className="text-lg text-neutral-400 font-medium mb-4"
                 >
-                  {data.artistBio || t.dDesc}
+                  {(data.artistBio === "Thiên đường demo của" || !data.artistBio) ? t.dDesc : data.artistBio}
                 </motion.p>
                 <AnimatePresence>
                   {showArtist && (
@@ -686,10 +712,10 @@ function LeavesEffect() {
 function FlagEffect() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 flex items-center justify-center">
-       <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[linear-gradient(45deg,transparent,rgba(255,255,255,0.4),transparent)] animate-[pulse_4s_infinite_linear]" style={{ backgroundSize: '150% 150%' }}></div>
+       <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[linear-gradient(45deg,transparent,rgba(255,255,255,0.4),transparent)]" style={{ backgroundSize: '150% 150%' }}></div>
        <div className="fixed inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-60">
          <svg viewBox="0 0 100 100" className="w-[100vw] h-[100vw] max-w-[500px] max-h-[500px] text-yellow-500 drop-shadow-[0_0_80px_rgba(250,204,21,0.6)]" fill="currentColor">
-           <polygon points="50,0 61.23,34.55 97.55,34.55 68.16,55.9 79.39,90.45 50,69.1 20.61,90.45 31.84,55.9 2.45,34.55 38.77,34.55" />
+           <polygon points="50,0 58.82,37.86 97.55,34.55 64.69,54.70 79.39,90.45 50,65 20.61,90.45 35.31,54.70 2.45,34.55 41.18,37.86" />
          </svg>
        </div>
     </div>
@@ -857,7 +883,7 @@ function DemoPlayer() {
             </p>
           )}
           
-          <p className="text-center mb-6 text-sm font-semibold opacity-70">Nhập mật khẩu để nghe demo này</p>
+          <p className="text-center mb-6 text-sm font-semibold opacity-70">{t.pPrompt2}</p>
           
           <form onSubmit={handleUnlock} className="space-y-4">
             <input 
@@ -945,6 +971,7 @@ function DemoPlayer() {
             className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto backdrop-blur-xl`}
           >
             <div className={`absolute inset-0 ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'bg-black/40' : (isLight ? 'bg-white/50' : 'bg-black/50')}`}></div>
+            <div className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${isLight ? 'from-white/40' : 'from-white/10'} to-transparent opacity-60`}></div>
             {demo.coverUrl && (
               <div 
                 className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay saturate-150"
@@ -1016,7 +1043,8 @@ function AdminDashboard() {
         faviconUrl: payload.faviconUrl,
         ogImageUrl: payload.ogImageUrl,
         youtubePlaylistUrl: payload.youtubePlaylistUrl,
-        spotifyUrl: payload.spotifyUrl
+        spotifyUrl: payload.spotifyUrl,
+        globalPassword: payload.globalPassword
       }),
     });
     
