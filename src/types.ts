@@ -11,6 +11,7 @@ export interface DemoSong {
   author: string;
   audioUrl: string;
   coverUrl?: string;
+  globalCoverUrl?: string;
   lyrics: string;
   template: '1' | '2' | '3' | '4'; // 1: Vui vẻ, 2: Sôi động, 3: Buồn, 4: Thư giãn
   status: 'public' | 'hidden';

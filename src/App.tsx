@@ -381,7 +381,7 @@ function Home() {
                     >
                       {spotifyInfo && (
                         <div className="flex items-center gap-4 px-2">
-                           <img src={spotifyInfo.image} className="w-16 h-16 rounded-full shadow-lg border border-white/20 object-cover" alt="Spotify" />
+                           <img src={spotifyInfo.image} crossOrigin="anonymous" className="w-16 h-16 rounded-full shadow-lg border border-white/20 object-cover" alt="Spotify" />
                            <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-white text-lg">{data.artistName}</span>
@@ -851,6 +851,7 @@ function DemoPlayer() {
             },
             pixelRatio: 1,
             backgroundColor: null,
+            useCORS: true,
             style: {
               transform: 'scale(1)',
               transformOrigin: 'top left'
@@ -930,6 +931,7 @@ function DemoPlayer() {
   // Templates
   const templateType = demo.template || '1';
   const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7';
+  const displayCoverUrl = demo.coverUrl || demo.globalCoverUrl || '';
   let themeClasses = "";
   let accentClass = "";
 
@@ -961,7 +963,7 @@ function DemoPlayer() {
     themeClasses = "bg-sky-200 text-white drop-shadow-md bg-[linear-gradient(135deg,_var(--tw-gradient-stops))] from-sky-300 via-purple-200 to-pink-300";
     accentClass = "bg-white/80 backdrop-blur text-purple-700 shadow-xl shadow-purple-200/50";
   } else if (templateType === '10') {
-    themeClasses = "bg-neutral-900/80 bg-[url('https://images.unsplash.com/photo-1518382485542-a72bb3c8b4fb?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
+    themeClasses = "bg-neutral-900/80 bg-[url('/hiphop-bg.png')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
     accentClass = "bg-yellow-400 text-black font-black uppercase shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wide transform hover:scale-105 hover:-rotate-2 transition-transform";
   }
 
@@ -983,10 +985,10 @@ function DemoPlayer() {
         {templateType === '9' && <RainEffect />}
         {templateType === '10' && <StreetLightEffect />}
         
-        {demo.coverUrl && (
+        {displayCoverUrl && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl scale-110"
-            style={{ backgroundImage: `url(${demo.coverUrl})` }}
+            style={{ backgroundImage: `url(${displayCoverUrl})` }}
           ></div>
         )}
 
@@ -995,9 +997,9 @@ function DemoPlayer() {
         </Link>
 
         <div className={`relative z-10 w-full max-w-md ${isLight ? 'bg-white/40' : 'bg-black/40'} backdrop-blur-xl border ${isLight ? 'border-white/40' : 'border-white/10'} p-8 rounded-[2rem] shadow-2xl`}>
-          {demo.coverUrl ? (
+          {displayCoverUrl ? (
             <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white/20 shadow-xl relative animate-[spin_8s_linear_infinite]">
-              <img src={demo.coverUrl} className="w-full h-full object-cover" alt="Cover" />
+              <img src={displayCoverUrl} crossOrigin="anonymous" className="w-full h-full object-cover" alt="Cover" />
               <div className="absolute inset-0 flex items-center justify-center">
                  <div className={`w-6 h-6 rounded-full ${isLight ? 'bg-white/80' : 'bg-black/60'} border border-white/30 backdrop-blur-sm shadow-inner`}></div>
               </div>
@@ -1115,13 +1117,14 @@ function DemoPlayer() {
         className="max-w-4xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
       >
         {/* Left: Player */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="flex-1 w-full max-w-sm flex flex-col items-center md:sticky md:top-24 self-start"
-        >
-          <div className={`w-full max-w-[240px] md:max-w-[280px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
+        <div className="flex-1 w-full max-w-sm block md:flex text-center md:text-left flex-col items-center md:sticky md:top-24 self-start">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="w-full flex flex-col items-center"
+          >
+            <div className={`w-full max-w-[240px] md:max-w-[280px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
             templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
             templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
             templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
@@ -1133,8 +1136,8 @@ function DemoPlayer() {
             templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
             templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 'shadow-2xl rounded-3xl border-4'
           }`}>
-            {demo.coverUrl ? (
-              <img src={demo.coverUrl} alt="Cover" className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`} />
+            {displayCoverUrl ? (
+              <img src={displayCoverUrl} crossOrigin="anonymous" alt="Cover" className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`} />
             ) : (
               <div className="w-full h-full bg-black/30 flex flex-col justify-center items-center">
                 <Music className="w-24 h-24 opacity-20" />
@@ -1154,9 +1157,10 @@ function DemoPlayer() {
           {(demo.singer || demo.author) && <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">{formatText(demo.singer || demo.author)}</p>}
           {demo.composer && <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">{t.sAuth} {formatText(demo.composer)}</p>}
           {!demo.singer && !demo.author && !demo.composer && <div className="mb-0 md:mb-6"></div>}
+          </motion.div>
           
           <div 
-            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto`}
+            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto animate-fade-in`}
           >
             {/* Background with blur and mask */}
             <div 
@@ -1164,10 +1168,10 @@ function DemoPlayer() {
               style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 25%, black 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 25%, black 100%)' }}
             >
               <div className={`absolute inset-0 bg-gradient-to-t ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'from-black/70 via-black/30' : (isLight ? 'from-white/90 via-white/50' : 'from-black/90 via-black/50')} to-transparent`}></div>
-              {demo.coverUrl && (
+              {displayCoverUrl && (
                 <div 
                   className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay saturate-150"
-                  style={{ backgroundImage: `url(${demo.coverUrl})` }}
+                  style={{ backgroundImage: `url(${displayCoverUrl})` }}
                 ></div>
               )}
             </div>
@@ -1175,7 +1179,7 @@ function DemoPlayer() {
                <CustomAudioPlayer src={demo.audioUrl} template={templateType} />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Right: Lyrics */}
         <motion.div 
@@ -1563,7 +1567,7 @@ function AdminCreateDemo() {
     formData.delete('cover');
     
     formData.set('audioUrl', uploadedAudioUrl);
-    if (uploadedCoverUrl) formData.set('coverUrl', uploadedCoverUrl);
+    formData.set('coverUrl', uploadedCoverUrl);
     
     if (!formData.get('slug')) {
         formData.set('slug', slug);
@@ -1816,7 +1820,7 @@ function AdminEditDemo() {
     formData.delete('cover');
     
     if (uploadedAudioUrl) formData.set('audioUrl', uploadedAudioUrl);
-    if (uploadedCoverUrl) formData.set('coverUrl', uploadedCoverUrl);
+    formData.set('coverUrl', uploadedCoverUrl);
 
     if (!formData.get('slug')) {
         formData.set('slug', slug);

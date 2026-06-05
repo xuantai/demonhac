@@ -358,10 +358,11 @@ async function startServer() {
               composer: demo.composer,
               template: demo.template,
               coverUrl: demo.coverUrl,
+              globalCoverUrl: data.homeCoverUrl,
               requiresPassword: true 
           });
       }
-      res.json(demo);
+      res.json({ ...demo, globalCoverUrl: data.homeCoverUrl });
   });
 
   // Serve static files from public/uploads
