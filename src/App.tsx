@@ -202,6 +202,7 @@ function Home() {
   const [showArtist, setShowArtist] = useState(false);
   const [spotifyLoaded, setSpotifyLoaded] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [toast, setToast] = useState('');
   const observer = useRef<IntersectionObserver>();
 
   useEffect(() => {
@@ -344,18 +345,22 @@ function Home() {
           </div>
 
           <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/20 flex flex-col z-10 cursor-default" onClick={e => e.stopPropagation()}>
-            <div className="p-3 bg-neutral-900 border-b border-white/10 flex items-center justify-end text-xs sm:text-sm text-neutral-300 relative z-10">
-              <div className="flex items-center gap-3">
+            <div className="p-3 bg-neutral-900 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 text-xs sm:text-sm text-neutral-300 relative z-10">
+              <span className="text-amber-500 font-medium flex items-center gap-1.5 leading-snug">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+                <span>Do YouTube hạn chế nhạc trên các tên miền tiếng Việt (<b>tài.com</b>) gây ra <b>Lỗi 153</b>, nếu bị lỗi hãy bấm nút đỏ bên cạnh để nghe trực tiếp!</span>
+              </span>
+              <div className="flex items-center gap-3 justify-end shrink-0">
                 <a 
                   href={`https://www.youtube.com/watch?v=${playingVideo}`} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-colors shadow-md text-xs"
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-colors shadow-md text-xs shrink-0"
                 >
                   Xem trực tiếp trên YouTube ↗
                 </a>
                 <button 
-                  className="text-neutral-400 hover:text-white px-2 py-1 font-bold transition-colors text-sm"
+                  className="text-neutral-400 hover:text-white px-2 py-1 font-bold transition-colors text-sm shrink-0"
                   onClick={() => setPlayingVideo(null)}
                 >
                   Đóng ✕
@@ -556,12 +561,13 @@ function Home() {
                           url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
                         }
                         navigator.clipboard.writeText(url);
-                        alert('Đã copy link bài hát!');
+                        setToast('Đã copy link bài hát!');
+                        setTimeout(() => setToast(''), 3000);
                       }}
-                      className="absolute bottom-3 right-3 z-20 bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-full border border-emerald-400/30 shadow-md transform hover:scale-110 active:scale-95 transition-all"
+                      className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
                       title="Chia sẻ bài hát"
                     >
-                      <Share2 className="w-3.5 h-3.5 text-white" />
+                      <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
                     </button>
                   </>
                 ) : (
@@ -617,6 +623,13 @@ function Home() {
           from XT Production
         </a>
       </footer>
+
+      {toast && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-md text-white border border-white/20 px-5 py-3 rounded-2xl shadow-2xl z-[100] flex items-center gap-2 font-mono text-xs animate-bounce">
+           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+           {toast}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -1557,26 +1570,28 @@ function DemoPlayer() {
                 </motion.div>
 
                 {/* THE ROTATING VINYL DISC */}
-                <div className="w-full h-full relative border-[12px] md:border-[16px] border-[#131313] bg-[#0c0c0c] rounded-full shadow-2xl animate-[spin_12s_linear_infinite] flex items-center justify-center ring-2 ring-black">
-                  {/* Vinyl grooves */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle,_transparent_35%,_rgba(255,255,255,0.04)_36%,_transparent_38%,_rgba(255,255,255,0.03)_48%,_transparent_50%,_rgba(255,255,255,0.04)_64%,_transparent_66%,_rgba(0,0,0,0.5)_100%)] rounded-full z-[15] pointer-events-none"></div>
-                  
-                  {/* Spindle hole */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-[#222] border border-stone-700 rounded-full z-20 shadow-inner"></div>
-
+                <div className="w-[190px] h-[190px] sm:w-[224px] sm:h-[224px] md:w-[260px] md:h-[260px] relative rounded-full shadow-[0_12px_30px_rgba(0,0,0,0.6)] animate-[spin_12s_linear_infinite] flex items-center justify-center border-[8px] md:border-[12px] border-[#0c0c0c] bg-[#0c0c0c] ring-1 ring-black/40 overflow-hidden flex-shrink-0">
                   {/* Artwork label center */}
                   {displayCoverUrl ? (
                     <img 
                       src={displayCoverUrl} 
                       crossOrigin="anonymous" 
                       alt="Cover" 
-                      className="w-[52%] h-[52%] rounded-full border-2 border-[#161616] z-10 object-cover" 
+                      className="w-full h-full rounded-full object-cover z-10" 
                     />
                   ) : (
-                    <div className="w-[52%] h-[52%] bg-stone-900 border-2 border-stone-800 rounded-full flex items-center justify-center z-10 text-stone-600">
-                      <Music className="w-6 h-6" />
+                    <div className="w-full h-full bg-stone-900 rounded-full flex items-center justify-center z-10 text-stone-600">
+                      <Music className="w-8 h-8" />
                     </div>
                   )}
+
+                  {/* Glossy vinyl light shine overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 rounded-full z-[15] pointer-events-none"></div>
+                  
+                  {/* Spindle hole & metallic center rim */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#0c0c0c] border border-stone-800 rounded-full z-20 shadow-lg flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-[#4e342e] rounded-full"></div>
+                  </div>
                 </div>
               </div>
             ) : (
