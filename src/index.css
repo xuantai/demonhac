@@ -1,4 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-serif: "Lora", Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(15deg) scale(1); }
+  50% { transform: rotate(11deg) scale(1.04); }
+}
+
+.animate-released-wiggle {
+  animation: wiggle 2.5s ease-in-out infinite;
+}
 
 @layer utilities {
   .animate-pulse-wave {
@@ -135,3 +149,9 @@
   background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(0, 0, 0, 0.05) 31px, rgba(0, 0, 0, 0.05) 32px);
   background-size: 100% 32px;
 }
+
+@keyframes wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+

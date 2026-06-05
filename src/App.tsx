@@ -317,10 +317,59 @@ function Home() {
       )}
       <LanguageSwitcher />
       {playingVideo && (
-        <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-xl" onClick={() => setPlayingVideo(null)}>
-          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/20" onClick={e => e.stopPropagation()}>
-            <button className="absolute -top-12 right-0 text-white/70 hover:text-white z-10 transition-colors font-bold text-xl drop-shadow-md" onClick={() => setPlayingVideo(null)}>Đóng ✕</button>
-            <iframe src={`https://www.youtube.com/embed/${playingVideo}?autoplay=1`} className="w-full h-full border-0" allow="autoplay; encrypted-media" allowFullScreen></iframe>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 cursor-pointer" onClick={() => setPlayingVideo(null)}>
+          {/* Slideshow background behind main overlay player */}
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            {data.slideshowImages && data.slideshowImages.length > 0 ? (
+              <div 
+                className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+                style={{ 
+                  backgroundImage: `url(${data.slideshowImages[currentSlide]})`,
+                  backgroundPosition: 'center 20%'
+                }}
+              />
+            ) : data.homeCoverUrl ? (
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ 
+                  backgroundImage: `url(${data.homeCoverUrl})`,
+                  backgroundPosition: 'center 20%'
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-t from-rose-950/50 to-neutral-950/80" />
+            )}
+            {/* Soft dimming and minimal blurring of the background slideshow */}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+          </div>
+
+          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/20 flex flex-col z-10 cursor-default" onClick={e => e.stopPropagation()}>
+            <div className="p-3 bg-neutral-900 border-b border-white/10 flex items-center justify-end text-xs sm:text-sm text-neutral-300 relative z-10">
+              <div className="flex items-center gap-3">
+                <a 
+                  href={`https://www.youtube.com/watch?v=${playingVideo}`} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-colors shadow-md text-xs"
+                >
+                  Xem trực tiếp trên YouTube ↗
+                </a>
+                <button 
+                  className="text-neutral-400 hover:text-white px-2 py-1 font-bold transition-colors text-sm"
+                  onClick={() => setPlayingVideo(null)}
+                >
+                  Đóng ✕
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 w-full h-full relative bg-neutral-950">
+              <iframe 
+                src={`https://www.youtube.com/embed/${playingVideo}?autoplay=1&origin=${encodeURIComponent(window.location.origin)}`} 
+                className="w-full h-full border-0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen
+              ></iframe>
+            </div>
           </div>
         </div>
       )}
@@ -494,7 +543,7 @@ function Home() {
                   </h3>
                 </div>
                 {demo.isReleased ? (
-                  <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20">
+                  <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
                     {t.lReleasedMark || 'RELEASED'}
                   </span>
                 ) : (
@@ -503,22 +552,27 @@ function Home() {
                   </span>
                 )}
                 {demo.password && !demo.isReleased && (
-                  <div className="absolute bottom-3 right-3 z-20 opacity-50">
-                     <Lock className="w-4 h-4 text-yellow-500" />
+                  <div className="absolute top-8 right-2 z-20 bg-black/60 p-1 rounded-full border border-white/10 shadow-sm">
+                     <Lock className="w-3.5 h-3.5 text-yellow-500" />
                   </div>
                 )}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
-                    navigator.clipboard.writeText(url);
-                    alert('Đã copy link!');
-                  }}
-                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
-                >
-                  <Share2 className="w-4 h-4 text-white" />
-                </button>
+                {demo.isReleased && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      let url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
+                      if (url.includes('xn--ti-jia.com')) {
+                        url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                      }
+                      navigator.clipboard.writeText(url);
+                      alert('Đã copy link!');
+                    }}
+                    className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+                  >
+                    <Share2 className="w-4 h-4 text-white" />
+                  </button>
+                )}
               </Link>
             ))}
             {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
@@ -643,6 +697,11 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
   if (template === '7') waveColor = "bg-stone-800";
   if (template === '8') waveColor = "bg-yellow-400";
   if (template === '9') waveColor = "bg-white";
+  if (template === '10') waveColor = "bg-yellow-400";
+  if (template === '11') waveColor = "bg-[#d4af37]";
+  if (template === '12') waveColor = "bg-[#d97706]";
+  if (template === '13') waveColor = "bg-[#f43f5e]";
+  if (template === '14') waveColor = "bg-[#38bdf8]";
 
   return (
     <div className={`flex flex-col w-full gap-2 md:gap-4 ${isLight ? 'text-stone-900 font-extrabold drop-shadow-sm' : 'text-white font-extrabold drop-shadow-md'}`}>
@@ -1001,6 +1060,131 @@ function MysteriousEffect() {
   );
 }
 
+function RetroNotesEffect() {
+  const notes = ['🎵', '🎶', '♩', '♪', '♫', '♬'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-40">
+      {Array.from({ length: 25 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute text-xl sm:text-2xl animate-snow drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] text-[#a16207]"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 10 + 6}s`,
+            animationDelay: `${Math.random() * -12}s`
+          }}
+        >
+          {notes[i % notes.length]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SunsetSunEffect() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Sunset gold sunset glow */}
+      <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[35vw] h-[35vw] min-w-[250px] min-h-[250px] rounded-full bg-gradient-to-t from-[#f97316] to-[#eab308] opacity-70 blur-[20px] shadow-[0_0_120px_rgba(249,115,22,0.8),0_0_240px_rgba(234,179,8,0.4)] animate-[pulse_5s_ease-in-out_infinite]"></div>
+      
+      {/* Foggy warm layer */}
+      <div className="absolute bottom-0 inset-x-0 h-[45vh] bg-gradient-to-t from-[#7c2d12]/30 via-[#7c2d12]/10 to-transparent blur-lg"></div>
+    </div>
+  );
+}
+
+function SunsetLeavesEffect() {
+  const colors = ['bg-orange-500/40', 'bg-amber-500/50', 'bg-yellow-500/40', 'bg-red-500/30', 'bg-rose-500/30'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {Array.from({ length: 30 }).map((_, i) => (
+        <div 
+          key={i} 
+          className={`absolute ${colors[i % colors.length]} animate-snow`}
+          style={{
+            left: `${Math.random() * 100}%`,
+            width: `${Math.random() * 14 + 10}px`,
+            height: `${Math.random() * 9 + 5}px`,
+            animationDuration: `${Math.random() * 11 + 5}s`,
+            animationDelay: `${Math.random() * -12}s`,
+            borderRadius: '60% 10% 60% 10%',
+            transform: `rotate(${Math.random() * 360}deg)`
+          }}
+        ></div>
+      ))}
+    </div>
+  );
+}
+
+function OceanWavesEffect() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Wave layered background */}
+      <div className="absolute bottom-0 inset-x-0 h-[120px] bg-gradient-to-t from-sky-450 via-sky-350 to-transparent opacity-30 animate-[pulse_6s_ease-in-out_infinite]"></div>
+      {/* Ambient sky/sea radial lighting */}
+      <div className="absolute top-[40%] left-1/4 w-[50vw] h-[50vw] bg-sky-500/10 blur-[130px] rounded-full"></div>
+      <div className="absolute bottom-[10%] right-1/4 w-[40vw] h-[40vw] bg-cyan-700/10 blur-[100px] rounded-full animate-pulse" style={{ animationDuration: '8s' }}></div>
+      
+      {/* Waves animations dập dồn at the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden opacity-25">
+        <svg className="absolute bottom-0 w-[200%] h-full translate-x-0 animate-[wave_10s_linear_infinite]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M0,60 C150,100 350,20 500,60 C650,100 850,20 1000,60 C1150,100 1350,20 1500,60 L1500,120 L0,120 Z" fill="#0ea5e9" />
+        </svg>
+        <svg className="absolute bottom-0 w-[200%] h-full translate-x-0 animate-[wave_15s_linear_infinite]" style={{ animationDirection: 'reverse', opacity: 0.7 }} viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M0,50 C180,90 280,10 480,50 C680,90 780,10 980,50 C1180,90 1280,10 1480,50 L1480,120 L0,120 Z" fill="#38bdf8" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function OceanShellsEffect() {
+  const elements = ['🐚', '🐚', '🐚', '🐡', '🐟', '🌊', '🐚'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-45">
+      {Array.from({ length: 25 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute text-lg sm:text-2xl animate-snow drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-sky-200"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 10 + 6}s`,
+            animationDelay: `${Math.random() * -12}s`
+          }}
+        >
+          {elements[i % elements.length]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EightBitGameEffect() {
+  const elements = ['🎮', '👾', '👾', '⭐', '🍒', '🍄', '⚡', '🦖', '🎈', '💖'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-55">
+      {/* Scanline pattern for CRT/arcade experience */}
+      <div className="absolute inset-0 bg-[#000]/10 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,_rgba(0,0,0,0.15)_50%)] bg-[size:100%_4px]" />
+      <div className="absolute top-[20%] left-1/4 w-[50vw] h-[50vw] bg-pink-500/10 blur-[120px] rounded-full"></div>
+      <div className="absolute bottom-[20%] right-1/4 w-[40vw] h-[40vw] bg-emerald-500/10 blur-[100px] rounded-full animate-pulse" style={{ animationDuration: '6s' }}></div>
+      
+      {Array.from({ length: 28 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute text-xl sm:text-3xl animate-snow drop-shadow-[0_3px_6px_rgba(236,72,153,0.6)] font-mono select-none"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 8 + 5}s`,
+            animationDelay: `${Math.random() * -12}s`
+          }}
+        >
+          {elements[i % elements.length]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DemoPlayer() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
@@ -1012,6 +1196,7 @@ function DemoPlayer() {
   const [error, setError] = useState('');
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
     fetch(`/api/demos/${id}${isAdmin ? '?admin=1' : ''}`)
@@ -1121,6 +1306,18 @@ function DemoPlayer() {
   } else if (templateType === '11') {
     themeClasses = "bg-black text-amber-100 font-serif";
     accentClass = "bg-[#d4af37] text-black font-bold uppercase shadow-[0_0_20px_rgba(212,175,55,0.4)]";
+  } else if (templateType === '12') {
+    themeClasses = "bg-gradient-to-br from-[#3E2723] via-[#1A0C06] to-[#0A0402] text-[#EFEBE9] font-serif";
+    accentClass = "bg-[#8D6E63] text-[#EFEBE9] hover:bg-[#A1887F] font-bold uppercase tracking-wider rounded-lg shadow-[0_0_15px_rgba(141,110,99,0.3)]";
+  } else if (templateType === '13') {
+    themeClasses = "bg-gradient-to-b from-[#1E1B4B] via-[#4C1D95] via-[#9D174D] via-[#E11D48] to-[#FBBF24] text-[#FFFBEB] font-sans";
+    accentClass = "bg-[#f43f5e] hover:bg-[#e11d48] text-[#FFFBEB] shadow-[0_0_20px_rgba(244,63,94,0.6)] font-bold uppercase rounded-xl";
+  } else if (templateType === '14') {
+    themeClasses = "bg-gradient-to-b from-[#0B2545] via-[#134074] via-[#001D3D] to-[#003566] text-white font-sans";
+    accentClass = "bg-[#003566] hover:bg-[#001D3D] text-sky-200 border border-sky-400/30 shadow-[0_0_25px_rgba(14,165,233,0.4)] font-bold uppercase rounded-xl";
+  } else if (templateType === '15') {
+    themeClasses = "bg-[#090615] text-emerald-400 font-mono tracking-tight";
+    accentClass = "bg-[#ec4899] hover:bg-[#db2777] text-white border-2 border-[#10b981] shadow-[4px_4px_0_rgba(16,185,129,0.7)] font-extrabold uppercase rounded-none tracking-widest";
   }
 
   if (!unlocked) {
@@ -1144,6 +1341,10 @@ function DemoPlayer() {
         {templateType === '9' && <RainEffect />}
         {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
         {templateType === '11' && <MysteriousEffect />}
+        {templateType === '12' && <RetroNotesEffect />}
+        {templateType === '13' && <><SunsetSunEffect /><SunsetLeavesEffect /></>}
+        {templateType === '14' && <><OceanWavesEffect /><OceanShellsEffect /></>}
+        {templateType === '15' && <EightBitGameEffect />}
         
         {pageBgUrl && (
           <div 
@@ -1226,6 +1427,10 @@ function DemoPlayer() {
       {templateType === '9' && <RainEffect />}
       {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
       {templateType === '11' && <MysteriousEffect />}
+      {templateType === '12' && <RetroNotesEffect />}
+      {templateType === '13' && <><SunsetSunEffect /><SunsetLeavesEffect /></>}
+      {templateType === '14' && <><OceanWavesEffect /><OceanShellsEffect /></>}
+      {templateType === '15' && <EightBitGameEffect />}
       
       {pageBgUrl && (
         <div 
@@ -1241,9 +1446,26 @@ function DemoPlayer() {
         className={`fixed top-0 inset-x-0 h-16 bg-gradient-to-b ${isLight ? 'from-[#faf9f6]/50' : 'from-black/40'} to-transparent pointer-events-none z-40`}
       />
 
-      <Link to="/" className="fixed top-6 left-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-50 transition-opacity font-medium drop-shadow-md">
-        <ArrowLeft className="w-5 h-5" /> {t.back}
-      </Link>
+      <div className="fixed top-6 left-6 flex items-center gap-3 z-50">
+        <Link to="/" className="opacity-60 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium drop-shadow-md">
+          <ArrowLeft className="w-5 h-5" /> {t.back}
+        </Link>
+        <button
+          onClick={() => {
+            let url = window.location.origin + '/demo/' + (demo.slug || demo.id);
+            if (url.includes('xn--ti-jia.com')) {
+              url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+            }
+            navigator.clipboard.writeText(url);
+            setToast('Đã copy link!');
+            setTimeout(() => setToast(''), 3000);
+          }}
+          className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
+          title="Chia sẻ link"
+        >
+          <Share2 className="w-4.5 h-4.5" />
+        </button>
+      </div>
 
       {isAdmin && demo && (
         <div id="admin-controls-ui" className="fixed top-6 right-6 flex items-center gap-2 z-50">
@@ -1264,34 +1486,115 @@ function DemoPlayer() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="w-full flex flex-col items-center"
           >
-            <div className={`w-full max-w-[260px] md:max-w-[320px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
-            templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
-            templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
-            templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
-            templateType === '4' ? 'shadow-2xl rounded-full border-8 animate-[spin_20s_linear_infinite]' : 
-            templateType === '5' ? 'shadow-xl rounded-full border-4 animate-[bounce_2s_infinite] shadow-red-900/50' : 
-            templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
-            templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
-            templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400' :
-            templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
-            templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 'shadow-2xl rounded-3xl border-4'
-          }`}>
-            {templateType === '9' && (
-              <>
-                <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-10 drop-shadow-md">☁️</div>
-                <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-10 drop-shadow-md" style={{animationDelay: '1s'}}>☁️</div>
-              </>
-            )}
-            {displayCoverUrl ? (
-              <img src={displayCoverUrl} crossOrigin="anonymous" alt="Cover" className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`} />
+            {templateType === '12' ? (
+              /* WOODEN TURNTABLE CASE WITH REVOLVING VINYL AND DYNAMIC TONEARM */
+              <div id="retro-turntable" className="relative w-full max-w-[280px] md:max-w-[340px] aspect-square p-6 md:p-8 bg-gradient-to-br from-[#4e342e] to-[#2d1a15] rounded-3xl border-8 border-[#3e2723] shadow-[inset_0_4px_10px_rgba(0,0,0,0.6),0_15px_30px_rgba(0,0,0,0.8)] flex items-center justify-center mb-4">
+                {/* Pivot brass accent on the wooden frame */}
+                <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 border border-amber-900 shadow-md z-20 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-neutral-800" />
+                </div>
+                
+                {/* Dynamic Tonearm */}
+                <motion.div 
+                  initial={{ rotate: -55 }}
+                  animate={{ rotate: -15 }}
+                  transition={{ type: 'spring', stiffness: 45, damping: 15, delay: 1 }}
+                  className="absolute top-2 right-2 w-28 h-44 z-30 pointer-events-none origin-[80%_15.6%]"
+                >
+                  <svg width="112" height="176" viewBox="0 0 100 160" fill="none" className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
+                    {/* Base pivot center circle */}
+                    <circle cx="80" cy="25" r="14" fill="url(#pivotGrad)" stroke="#1a0c06" strokeWidth="1.5" />
+                    <circle cx="80" cy="25" r="6" fill="#111" />
+                    
+                    {/* Metallic arm pole (silver stainless-steel rod) curves to the cartridge */}
+                    <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="url(#rodGrad)" strokeWidth="4" strokeLinecap="round" />
+                    
+                    {/* Cartridge headshell */}
+                    <g transform="translate(15, 126) rotate(35)">
+                      <rect x="0" y="0" width="12" height="20" rx="2" fill="#222" stroke="#d4af37" strokeWidth="1" />
+                      <rect x="2" y="2" width="8" height="6" fill="#8D6E63" />
+                      <circle cx="6" cy="15" r="2" fill="#d4af37" />
+                    </g>
+                    
+                    <defs>
+                      <radialGradient id="pivotGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#fff" />
+                        <stop offset="30%" stopColor="#b0bec5" />
+                        <stop offset="70%" stopColor="#37474f" />
+                        <stop offset="100%" stopColor="#1a0c06" />
+                      </radialGradient>
+                      <linearGradient id="rodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#cfd8dc" />
+                        <stop offset="50%" stopColor="#90a4ae" />
+                        <stop offset="100%" stopColor="#37474f" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </motion.div>
+
+                {/* THE ROTATING VINYL DISC */}
+                <div className="w-full h-full relative border-[12px] md:border-[16px] border-[#131313] bg-[#0c0c0c] rounded-full shadow-2xl animate-[spin_12s_linear_infinite] flex items-center justify-center ring-2 ring-black">
+                  {/* Vinyl grooves */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle,_transparent_35%,_rgba(255,255,255,0.04)_36%,_transparent_38%,_rgba(255,255,255,0.03)_48%,_transparent_50%,_rgba(255,255,255,0.04)_64%,_transparent_66%,_rgba(0,0,0,0.5)_100%)] rounded-full z-[15] pointer-events-none"></div>
+                  
+                  {/* Spindle hole */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-[#222] border border-stone-700 rounded-full z-20 shadow-inner"></div>
+
+                  {/* Artwork label center */}
+                  {displayCoverUrl ? (
+                    <img 
+                      src={displayCoverUrl} 
+                      crossOrigin="anonymous" 
+                      alt="Cover" 
+                      className="w-[38%] h-[38%] rounded-full border-2 border-[#161616] z-10 object-cover" 
+                    />
+                  ) : (
+                    <div className="w-[38%] h-[38%] bg-stone-900 border-2 border-stone-800 rounded-full flex items-center justify-center z-10 text-stone-600">
+                      <Music className="w-6 h-6" />
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : (
-              <div className="w-full h-full bg-black/30 flex flex-col justify-center items-center">
-                <Music className="w-24 h-24 opacity-20" />
+              /* ALL OTHER TEMPLATES */
+              <div className={`w-full max-w-[260px] md:max-w-[320px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
+                templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
+                templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
+                templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
+                templateType === '4' ? 'shadow-2xl rounded-full border-8 animate-[spin_20s_linear_infinite]' : 
+                templateType === '5' ? 'shadow-xl rounded-full border-4 animate-[bounce_2s_infinite] shadow-red-900/50' : 
+                templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
+                templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
+                templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400' :
+                templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
+                templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 
+                templateType === '11' ? 'shadow-[0_0_30px_rgba(212,175,55,0.2)] rounded-2xl border-2 border-stone-800' :
+                templateType === '13' ? 'shadow-[0_0_40px_rgba(244,63,94,0.3)] bg-black/40 border border-[#f43f5e]/20 rounded-[2.5rem] hover:scale-105 transition-transform duration-500' : 
+                templateType === '14' ? 'shadow-[0_0_50px_rgba(14,165,233,0.35)] bg-gradient-to-b from-[#134074] to-[#0B2545] border-4 border-sky-400/50 rounded-[2rem] hover:scale-102 transition-transform duration-500' : 
+                templateType === '15' ? 'border-[6px] border-[#ec4899] rounded-none shadow-[6px_6px_0_#10b981] bg-black hover:scale-105 transition-transform duration-300' : 'shadow-2xl rounded-3xl border-4'
+              }`}>
+                {templateType === '9' && (
+                  <>
+                    <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-10 drop-shadow-md">☁️</div>
+                    <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-10 drop-shadow-md" style={{animationDelay: '1s'}}>☁️</div>
+                  </>
+                )}
+                {displayCoverUrl ? (
+                  <img 
+                    src={displayCoverUrl} 
+                    crossOrigin="anonymous" 
+                    alt="Cover" 
+                    className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-black/30 flex flex-col justify-center items-center">
+                    <Music className="w-24 h-24 opacity-20" />
+                  </div>
+                )}
+                <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '5' || templateType === '8' ? 'rounded-full' : ''} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
               </div>
             )}
-            <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
-            <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '5' || templateType === '8' ? 'rounded-full' : ''} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
-          </div>
           <h1 className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
             <span className="relative inline-block pr-10">
               {formatText(demo.title)}
@@ -1354,6 +1657,12 @@ function DemoPlayer() {
           </div>
         </motion.div>
       </div>
+      {toast && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-md text-white border border-white/20 px-5 py-3 rounded-2xl shadow-2xl z-[100] flex items-center gap-2 font-mono text-xs animate-bounce">
+           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+           {toast}
+        </div>
+      )}
     </div>
   );
 }
@@ -1412,7 +1721,10 @@ function AdminDashboard() {
   };
 
   const handleShare = (slugOrId: string) => {
-    const url = window.location.origin + '/demo/' + slugOrId;
+    let url = window.location.origin + '/demo/' + slugOrId;
+    if (url.includes('xn--ti-jia.com')) {
+      url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+    }
     navigator.clipboard.writeText(url);
     setToast('Đã copy link!');
     setTimeout(() => setToast(''), 3000);
@@ -1515,7 +1827,13 @@ function AdminDashboard() {
                                demo.template === '6' ? 'Hạnh phúc' : 
                                demo.template === '7' ? 'Học đường' : 
                                demo.template === '8' ? 'Tổ quốc' : 
-                               demo.template === '9' ? 'Bầu trời xanh' : 'Mặc định'}
+                               demo.template === '9' ? 'Bầu trời xanh' : 
+                               demo.template === '10' ? 'Hip Hop' : 
+                               demo.template === '11' ? 'Kỳ bí' : 
+                               demo.template === '12' ? 'Cổ điển' : 
+                               demo.template === '13' ? 'Hoàng hôn' : 
+                               demo.template === '14' ? 'Đại dương' : 
+                               demo.template === '15' ? 'Retro 8-Bit' : 'Mặc định'}
                             </span>
                             {demo.password && (
                               <span className="bg-stone-100 px-2 py-0.5 rounded font-medium border border-stone-200 flex items-center gap-1 text-stone-800">
@@ -1931,17 +2249,21 @@ function AdminCreateDemo() {
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
                 <select name="template" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
-                  <option value="1">Mẫu 1: Vui vẻ (Ấm áp)</option>
-                  <option value="2">Mẫu 2: Căng Cực (Sôi động)</option>
-                  <option value="3">Mẫu 3: Buồn (Sâu lắng)</option>
-                  <option value="4">Mẫu 4: Thư giãn (Nhẹ nhàng)</option>
-                  <option value="5">Mẫu 5: Đáng yêu (Đỏ, Nhảy múa)</option>
-                  <option value="6">Mẫu 6: Hạnh Phúc (Hồng, Hoa rơi)</option>
-                  <option value="7">Mẫu 7: Học Đường (Trắng, Lá vàng rơi)</option>
-                  <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
-                  <option value="9">Mẫu 9: Bầu trời xanh (Mây trắng)</option>
-                  <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
-                  <option value="11">Mẫu 11: Kỳ bí (Đen vàng, Trăng khói mưa)</option>
+                  <option value="1">Vui vẻ (Ấm áp)</option>
+                  <option value="2">Căng Cực (Sôi động)</option>
+                  <option value="3">Buồn (Sâu lắng)</option>
+                  <option value="4">Thư giãn (Nhẹ nhàng)</option>
+                  <option value="5">Đáng yêu (Đỏ, Nhảy múa)</option>
+                  <option value="6">Hạnh Phúc (Hồng, Hoa rơi)</option>
+                  <option value="7">Học Đường (Trắng, Lá vàng rơi)</option>
+                  <option value="8">Tổ Quốc (Đỏ, Cờ phấp phới)</option>
+                  <option value="9">Bầu trời xanh (Mây trắng)</option>
+                  <option value="10">Hip Hop (Đường phố)</option>
+                  <option value="11">Kỳ bí (Đen vàng, Trăng khói mưa)</option>
+                  <option value="12">Cổ điển (Nâu, retro đĩa than quay)</option>
+                  <option value="13">Hoàng hôn (Cam đỏ trời chiều, lá rụng)</option>
+                  <option value="14">Đại Dương (Sóng biển dập dồn, vỏ sò rơi)</option>
+                  <option value="15">Retro 8-Bit (Game Nhật Bản, tay cầm rơi)</option>
                 </select>
               </div>
 
@@ -2221,17 +2543,21 @@ function AdminEditDemo() {
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
                 <select name="template" defaultValue={demo.template} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
-                  <option value="1">Mẫu 1: Vui vẻ (Ấm áp)</option>
-                  <option value="2">Mẫu 2: Căng Cực (Sôi động)</option>
-                  <option value="3">Mẫu 3: Buồn (Sâu lắng)</option>
-                  <option value="4">Mẫu 4: Thư giãn (Nhẹ nhàng)</option>
-                  <option value="5">Mẫu 5: Đáng yêu (Đỏ, Nhảy múa)</option>
-                  <option value="6">Mẫu 6: Hạnh Phúc (Hồng, Hoa rơi)</option>
-                  <option value="7">Mẫu 7: Học Đường (Trắng, Lá vàng rơi)</option>
-                  <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
-                  <option value="9">Mẫu 9: Bầu trời xanh (Mây trắng)</option>
-                  <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
-                  <option value="11">Mẫu 11: Kỳ bí (Đen vàng, Trăng khói mưa)</option>
+                  <option value="1">Vui vẻ (Ấm áp)</option>
+                  <option value="2">Căng Cực (Sôi động)</option>
+                  <option value="3">Buồn (Sâu lắng)</option>
+                  <option value="4">Thư giãn (Nhẹ nhàng)</option>
+                  <option value="5">Đáng yêu (Đỏ, Nhảy múa)</option>
+                  <option value="6">Hạnh Phúc (Hồng, Hoa rơi)</option>
+                  <option value="7">Học Đường (Trắng, Lá vàng rơi)</option>
+                  <option value="8">Tổ Quốc (Đỏ, Cờ phấp phới)</option>
+                  <option value="9">Bầu trời xanh (Mây trắng)</option>
+                  <option value="10">Hip Hop (Đường phố)</option>
+                  <option value="11">Kỳ bí (Đen vàng, Trăng khói mưa)</option>
+                  <option value="12">Cổ điển (Nâu, retro đĩa than quay)</option>
+                  <option value="13">Hoàng hôn (Cam đỏ trời chiều, lá rụng)</option>
+                  <option value="14">Đại Dương (Sóng biển dập dồn, vỏ sò rơi)</option>
+                  <option value="15">Retro 8-Bit (Game Nhật Bản, tay cầm rơi)</option>
                 </select>
               </div>
 
