@@ -79,7 +79,9 @@ async function loadData() {
 
 async function saveData(data: any) {
   try {
-    await setDoc(DOC_REF, data);
+    // Remove undefined fields to prevent Firestore errors
+    const cleanedData = JSON.parse(JSON.stringify(data));
+    await setDoc(DOC_REF, cleanedData);
   } catch (error) {
     console.error("Firebase save error:", error);
   }
@@ -115,8 +117,40 @@ async function startServer() {
       });
   };
 
+  const formatUrl = (url: string | undefined, baseUrl: string | undefined) => {
+    if (!url) return url;
+    if (url.startsWith('/') && baseUrl) {
+      return baseUrl.replace(/\/$/, '') + url;
+    }
+    return url;
+  };
+
+  const applyBaseUrl = (data: any) => {
+    if (!data.globalBaseUrl) return data;
+    const cloned = { ...data };
+    
+    cloned.homeCoverUrl = formatUrl(cloned.homeCoverUrl, cloned.globalBaseUrl);
+    cloned.faviconUrl = formatUrl(cloned.faviconUrl, cloned.globalBaseUrl);
+    cloned.ogImageUrl = formatUrl(cloned.ogImageUrl, cloned.globalBaseUrl);
+    
+    if (cloned.slideshowImages) {
+       cloned.slideshowImages = cloned.slideshowImages.map((s: string) => formatUrl(s, cloned.globalBaseUrl));
+    }
+    
+    if (cloned.demos) {
+      cloned.demos = cloned.demos.map((d: any) => ({
+        ...d,
+        audioUrl: formatUrl(d.audioUrl, cloned.globalBaseUrl),
+        coverUrl: formatUrl(d.coverUrl, cloned.globalBaseUrl),
+        backgroundUrl: formatUrl(d.backgroundUrl, cloned.globalBaseUrl)
+      }));
+    }
+    return cloned;
+  };
+
   app.get('/api/data', async (req, res) => {
-    const data = await loadData();
+    let data = await loadData();
+    data = applyBaseUrl(data);
     // Do not leak passwords
     let publicDemos = data.demos.map((d: any) => ({ ...d, password: !!(d.password || data.globalPassword) })); 
     publicDemos = injectCoverUrl(publicDemos, data.slideshowImages);
@@ -145,6 +179,7 @@ async function startServer() {
     data.youtubePlaylistUrl = req.body.youtubePlaylistUrl ?? data.youtubePlaylistUrl;
     data.spotifyUrl = req.body.spotifyUrl ?? data.spotifyUrl;
     data.globalPassword = req.body.globalPassword ?? data.globalPassword;
+    data.globalBaseUrl = req.body.globalBaseUrl !== undefined ? req.body.globalBaseUrl : data.globalBaseUrl;
     if (req.body.slideshowImages) data.slideshowImages = req.body.slideshowImages;
     await saveData(data);
     res.json(data);
@@ -360,10 +395,16 @@ async function startServer() {
     const data = await loadData();
     const demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
     if (!demo) return res.status(404).json({ error: 'Not found' });
-    const expectedPassword = demo.password || data.globalPassword;
+    const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
     if (expectedPassword && expectedPassword === req.body.password) {
       // Send back the audio template securely, or just success
-      res.json({ success: true, demo });
+      const formattedDemo = {
+        ...demo,
+        audioUrl: formatUrl(demo.audioUrl, data.globalBaseUrl),
+        coverUrl: formatUrl(demo.coverUrl, data.globalBaseUrl),
+        backgroundUrl: formatUrl(demo.backgroundUrl, data.globalBaseUrl)
+      };
+      res.json({ success: true, demo: formattedDemo });
     } else {
       res.status(401).json({ error: 'Sai mật khẩu' });
     }
@@ -380,8 +421,15 @@ async function startServer() {
           const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
           demo = { ...demo, coverUrl: data.slideshowImages[hash % data.slideshowImages.length] };
       }
+      
+      demo = {
+        ...demo,
+        audioUrl: formatUrl(demo.audioUrl, data.globalBaseUrl),
+        coverUrl: formatUrl(demo.coverUrl, data.globalBaseUrl),
+        backgroundUrl: formatUrl(demo.backgroundUrl, data.globalBaseUrl)
+      };
 
-      const expectedPassword = demo.password || data.globalPassword;
+      const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
       // If it requires password, only return basic metadata without audio/lyrics
       if (expectedPassword && expectedPassword !== req.query.pwd && req.query.admin !== '1') {
           return res.json({ 
@@ -393,11 +441,11 @@ async function startServer() {
               template: demo.template,
               coverUrl: demo.coverUrl,
               backgroundUrl: demo.backgroundUrl,
-              globalCoverUrl: data.homeCoverUrl,
+              globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl),
               requiresPassword: true 
           });
       }
-      res.json({ ...demo, globalCoverUrl: data.homeCoverUrl });
+      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl) });
   });
 
   // Serve static files from public/uploads

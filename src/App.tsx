@@ -6,19 +6,28 @@ import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 
 function formatText(text: string | null | undefined) {
-  const parts = text.split(/(A\.C Xuân Tài|AC Xuân Tài)/gi);
+  if (!text) return null;
+  const lines = text.replace(/\s+\(/g, '\n(').split('\n');
   return (
     <>
-      {parts.map((part, i) => {
-        const lower = part.toLowerCase();
-        if (lower === 'a.c xuân tài' || lower === 'ac xuân tài') {
-          return (
-             <a key={i} href="https://acxuantai.com" target="_blank" rel="noreferrer" className="transition-colors hover:opacity-80">
-               {part}
-             </a>
-          );
-        }
-        return <span key={i}>{part}</span>;
+      {lines.map((line, lineIdx) => {
+        const parts = line.split(/(A\.C Xuân Tài|AC Xuân Tài)/gi);
+        return (
+          <React.Fragment key={lineIdx}>
+            {lineIdx > 0 && <br />}
+            {parts.map((part, i) => {
+              const lower = part.toLowerCase();
+              if (lower === 'a.c xuân tài' || lower === 'ac xuân tài') {
+                return (
+                  <a key={`${lineIdx}-${i}`} href="https://acxuantai.com" target="_blank" rel="noreferrer" className="transition-colors hover:opacity-80">
+                    {part}
+                  </a>
+                );
+              }
+              return <span key={`${lineIdx}-${i}`}>{part}</span>;
+            })}
+          </React.Fragment>
+        );
       })}
     </>
   );
@@ -28,7 +37,7 @@ function formatText(text: string | null | undefined) {
 // Global styles added in index.css
 
 const translations: Record<string, Record<string, string>> = {
-  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Demo Chưa Phát Hành", lReleased: "Nhạc Đã Phát Hành", lDemoMark: "DEMO", lReleasedMark: "ĐÃ PHÁT HÀNH", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt" },
+  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Demo Chưa Phát Hành", lReleased: "Nhạc Đã Phát Hành", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt", lDemosMobile: "Đề mô", lReleasedMobile: "Ra Rồi" },
   en: { dDesc: "Demo paradise of", btnSpot: "Listen on Spotify", lDemos: "Unreleased Demos", lReleased: "Released Music", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
   ko: { dDesc: "데모 파라다이스", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", lReleased: "발매된 음악", lDemoMark: "데모", lReleasedMark: "발매됨", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", pPrompt2: "이 데모를 들으려면 비밀번호를 입력하세요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
   ja: { dDesc: "デモパラダイス", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", lReleased: "リリースされた音楽", lDemoMark: "デモ", lReleasedMark: "リリース済", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", pPrompt2: "このデモを聴くにはパスワードを入力してください", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
@@ -449,55 +458,57 @@ function Home() {
         {/* Demos Section */}
         <section>
           <div className="flex flex-wrap items-center gap-2 mb-8 bg-neutral-900/50 p-1.5 rounded-2xl border border-white/5 w-fit">
-             <button onClick={() => setActiveListTab('released')} className={`flex items-center gap-2 px-6 py-3 rounded-xl text-lg md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                <Music className={`w-5 h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} /> {t.lReleased || 'Nhạc Đã Phát Hành'}
+             <button onClick={() => setActiveListTab('released')} className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Music className={`w-4 h-4 md:w-5 md:h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} />
+                <span className="hidden sm:inline">{t.lReleased || 'Nhạc Đã Phát Hành'}</span>
+                <span className="sm:hidden">{t.lReleasedMobile || 'Ra Rồi'}</span>
              </button>
-             <button onClick={() => setActiveListTab('demos')} className={`flex items-center gap-2 px-6 py-3 rounded-xl text-lg md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                <Disc3 className={`w-5 h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} /> {t.lDemos}
+             <button onClick={() => setActiveListTab('demos')} className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Disc3 className={`w-4 h-4 md:w-5 md:h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} />
+                <span className="hidden sm:inline">{t.lDemos}</span>
+                <span className="sm:hidden">{t.lDemosMobile || 'Đề mô'}</span>
              </button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
-              <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-4">
+              <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
-                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
                   {demo.coverUrl ? (
                      <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
                   ) : (
                      <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
-                       <Disc3 className="w-8 h-8" />
+                       <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
                      </div>
                   )}
-                </div>
-                <div className="flex items-start justify-between relative z-10 flex-1">
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-rose-400 transition-colors flex items-center">
-                      <span className="relative inline-block pr-8">
-                        {formatText(demo.title)}
-                        {demo.isReleased ? (
-                          <span className="absolute -top-3 -right-6 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none">
-                            {t.lReleasedMark || 'RELEASED'}
-                          </span>
-                        ) : (
-                          <span className="absolute -top-3 -right-4 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
-                            {t.lDemoMark || 'DEMO'}
-                          </span>
-                        )}
-                      </span>
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 mt-3">
-                      {demo.password ? (
-                        <span className="flex items-center gap-1 text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-full"><Lock className="w-3 h-3" /> {t.pReq}</span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full"><Play className="w-3 h-3" /> {t.pNow}</span>
-                      )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
+                      <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
                     </div>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 shadow-lg shrink-0 mt-3">
-                    <Play className="w-4 h-4 ml-1" />
-                  </div>
                 </div>
+                <div className="flex-1 min-w-0 relative z-10 pr-12">
+                  <h3 className="text-base sm:text-lg font-bold group-hover:text-rose-400 transition-colors">
+                    <div className="w-full break-words">
+                      {formatText(demo.title)}
+                    </div>
+                  </h3>
+                </div>
+                {demo.isReleased ? (
+                  <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20">
+                    {t.lReleasedMark || 'RELEASED'}
+                  </span>
+                ) : (
+                  <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
+                    {t.lDemoMark || 'DEMO'}
+                  </span>
+                )}
+                {demo.password && !demo.isReleased && (
+                  <div className="absolute bottom-3 right-3 z-20 opacity-50">
+                     <Lock className="w-4 h-4 text-yellow-500" />
+                  </div>
+                )}
               </Link>
             ))}
             {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
@@ -551,6 +562,20 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.warn("Autoplay was prevented by browser", error);
+          setIsPlaying(false);
+        });
+      }
+    }
+  }, [src]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -614,7 +639,6 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
       <audio 
         ref={audioRef} 
         src={src} 
-        autoPlay 
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
@@ -1186,17 +1210,17 @@ function DemoPlayer() {
       )}
 
       <div 
-        className="max-w-4xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
+        className="max-w-5xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
       >
         {/* Left: Player */}
-        <div className="flex-1 w-full max-w-sm block md:flex text-center md:text-left flex-col items-center md:sticky md:top-24 self-start">
+        <div className="flex-1 w-full max-w-md block md:flex text-center md:text-left flex-col items-center md:sticky md:top-24 self-start">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="w-full flex flex-col items-center"
           >
-            <div className={`w-full max-w-[240px] md:max-w-[280px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
+            <div className={`w-full max-w-[260px] md:max-w-[320px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
             templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
             templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
             templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
@@ -1224,7 +1248,7 @@ function DemoPlayer() {
             <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '5' || templateType === '8' ? 'rounded-full' : ''} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
+          <h1 className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
             <span className="relative inline-block pr-10">
               {formatText(demo.title)}
               {demo.isReleased ? (
@@ -1623,6 +1647,11 @@ function AdminDashboard() {
                   <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu chung cho các Demo</label>
                   <input name="globalPassword" defaultValue={data.globalPassword} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono" placeholder="Để trống nếu không muốn dùng mật khẩu chung" />
                   <p className="text-sm text-stone-500 mt-2">Tất cả các link ở trang chủ nếu chưa đặt mật khẩu riêng thì sẽ được bảo vệ bởi mật khẩu chung này.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">URL Gốc cho Tài nguyên (Tùy chọn)</label>
+                  <input name="globalBaseUrl" defaultValue={data.globalBaseUrl} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono" placeholder="Ví dụ: https://files.yourdomain.com" />
+                  <p className="text-sm text-stone-500 mt-2">Dùng để đồng bộ nếu host file ở server khác. Nếu link nhạc/ảnh là đường dẫn tương đối (bắt đầu bằng /), hệ thống sẽ thêm URL Gốc này vào trước (nếu có).</p>
                 </div>
                 <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
                     <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
