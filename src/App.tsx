@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -40,6 +41,36 @@ interface LangContextType {
   setLang: (l: string) => void;
 }
 const LanguageContext = createContext<LangContextType>({ lang: 'vi', setLang: () => {} });
+
+const capturePCThumbnail = async (demoIdOrSlug: string, demoIdToMatch: string) => {
+    return new Promise<void>((resolve) => {
+         const iframe = document.createElement('iframe');
+         iframe.src = `/demo/${demoIdOrSlug}?admin=1&captureOnly=1`;
+         iframe.style.width = '1280px';
+         iframe.style.height = '720px';
+         iframe.style.position = 'absolute';
+         iframe.style.left = '-9999px';
+         iframe.style.top = '-9999px';
+         
+         const messageHandler = (event: MessageEvent) => {
+             if (event.data?.type === 'THUMBNAIL_CAPTURED' && event.data?.demoId === demoIdToMatch) {
+                 window.removeEventListener('message', messageHandler);
+                 if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                 resolve();
+             }
+         };
+         window.addEventListener('message', messageHandler);
+         
+         iframe.onload = () => {
+             setTimeout(() => {
+                 window.removeEventListener('message', messageHandler);
+                 if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                 resolve();
+             }, 8000); 
+         };
+         document.body.appendChild(iframe);
+    });
+};
 
 // ---- ADMIN LOGIN & REQUIRE ADMIN ----
 function AdminLogin() {
@@ -563,7 +594,9 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
       />
       
       {/* Wave visualizer */}
-      <div className="flex items-end justify-between h-5 md:h-6 w-full mb-0">
+      <div 
+        className="flex items-end justify-between h-4 md:h-5 w-full mb-0"
+      >
         {waves.map((_, i) => {
           const randDur = 0.5 + Math.random() * 0.8;
           return (
@@ -743,6 +776,16 @@ function RainEffect() {
 }
 
 // ---- DEMO PLAYER PAGE ----
+function StreetLightEffect() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+       <div className="absolute top-0 inset-x-0 h-[60vh] bg-gradient-to-b from-yellow-500/20 via-yellow-500/5 to-transparent mix-blend-overlay animate-flicker"></div>
+       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-400/10 blur-[100px] rounded-full animate-flicker" style={{ animationDelay: '0.2s' }}></div>
+       <div className="absolute top-[-5%] right-[-10%] w-[50%] h-[50%] bg-orange-500/10 blur-[120px] rounded-full animate-flicker" style={{ animationDelay: '0.5s' }}></div>
+    </div>
+  );
+}
+
 function DemoPlayer() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
@@ -755,19 +798,17 @@ function DemoPlayer() {
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [thumbnailResult, setThumbnailResult] = useState<string | null>(null);
+
   useEffect(() => {
-    fetch(`/api/demos/${id}`)
+    fetch(`/api/demos/${id}${isAdmin ? '?admin=1' : ''}`)
       .then(res => res.json())
       .then(data => {
         setDemo(data);
-        if (!data.requiresPassword) setUnlocked(true);
+        if (!data.requiresPassword || isAdmin) setUnlocked(true);
         setLoading(false);
-        if (data && data.title) {
-          const suffix = data.singer || data.author || 'Demo Nhạc Mới';
-          document.title = `${data.title} - ${suffix}`;
-        }
       });
-  }, [id]);
+  }, [id, isAdmin]);
 
   useEffect(() => {
     if (unlocked && window.innerWidth < 768) {
@@ -794,6 +835,94 @@ function DemoPlayer() {
       setError(data.error || t.wPass);
     }
   };
+
+  const autoCapture = searchParams.get('autoCapture') === '1';
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const captureThumbnail = async () => {
+    if (!demo || isCapturing) return;
+    setIsCapturing(true);
+    try {
+        const imageBase64 = await toPng(document.body, {
+            filter: (node) => {
+              if (node.id === 'admin-controls-ui' || node.id === 'thumbnail-modal') return false;
+              if (node.tagName && node.tagName.toLowerCase() === 'iframe') return false;
+              return true;
+            },
+            pixelRatio: 1,
+            backgroundColor: null,
+            style: {
+              transform: 'scale(1)',
+              transformOrigin: 'top left'
+            }
+        });
+        
+        const uploadRes = await fetch('/api/upload-base64', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageBase64, name: demo.id })
+        });
+        
+        if (uploadRes.ok) {
+            const uploaded = await uploadRes.json();
+            const updateRes = await fetch(`/api/demos/${id}/thumbnail`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ogImageUrl: uploaded.url })
+            });
+            if (updateRes.ok) {
+                setDemo({ ...demo, ogImageUrl: uploaded.url });
+                // Remove auto pop-up modal, just log or silent
+                console.log('Thumbnail auto-captured and saved.', uploaded.url);
+            }
+        }
+    } catch(err) {
+        console.error(err);
+    }
+    setIsCapturing(false);
+  };
+
+  useEffect(() => {
+    if (demo && (unlocked || !demo.requiresPassword || isAdmin)) {
+        if (searchParams.get('captureOnly') === '1') {
+             setTimeout(() => {
+                 captureThumbnail().then(() => {
+                     window.parent.postMessage({ type: 'THUMBNAIL_CAPTURED', demoId: demo.id }, '*');
+                 });
+             }, 3000);
+        } else if (autoCapture) {
+             setTimeout(() => {
+                 captureThumbnail();
+             }, 3000);
+        }
+    }
+  }, [demo, unlocked, autoCapture, isAdmin, searchParams]);
+
+  useEffect(() => {
+     if (demo) {
+        const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
+        const pageTitle = `${demo.title} - ${titleSuffix} ( demo )`;
+        document.title = pageTitle;
+        
+        let metaTitle = document.querySelector('meta[property="og:title"]');
+        if (!metaTitle) {
+          metaTitle = document.createElement('meta');
+          metaTitle.setAttribute('property', 'og:title');
+          document.head.appendChild(metaTitle);
+        }
+        metaTitle.setAttribute('content', pageTitle);
+
+        if (demo.ogImageUrl) {
+          let metaImage = document.querySelector('meta[property="og:image"]');
+          if (!metaImage) {
+            metaImage = document.createElement('meta');
+            metaImage.setAttribute('property', 'og:image');
+            document.head.appendChild(metaImage);
+          }
+          metaImage.setAttribute('content', window.location.origin + demo.ogImageUrl);
+        }
+     }
+  }, [demo]);
 
   if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t.load}</div>;
   if (!demo) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Không tìm thấy demo</div>;
@@ -831,6 +960,9 @@ function DemoPlayer() {
   } else if (templateType === '9') {
     themeClasses = "bg-sky-200 text-white drop-shadow-md bg-[linear-gradient(135deg,_var(--tw-gradient-stops))] from-sky-300 via-purple-200 to-pink-300";
     accentClass = "bg-white/80 backdrop-blur text-purple-700 shadow-xl shadow-purple-200/50";
+  } else if (templateType === '10') {
+    themeClasses = "bg-zinc-900 border-zinc-900 bg-[url('https://images.unsplash.com/photo-1518382485542-a72bb3c8b4fb?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center bg-fixed text-white bg-blend-overlay";
+    accentClass = "bg-yellow-400 text-black font-black shadow-[4px_4px_0_rgba(0,0,0,1)] uppercase tracking-[0.2em] transform hover:scale-105 hover:-rotate-2 transition-transform";
   }
 
   if (!unlocked) {
@@ -849,6 +981,7 @@ function DemoPlayer() {
         {templateType === '7' && <LeavesEffect />}
         {templateType === '8' && <FlagEffect />}
         {templateType === '9' && <RainEffect />}
+        {templateType === '10' && <StreetLightEffect />}
         
         {demo.coverUrl && (
           <div 
@@ -926,13 +1059,12 @@ function DemoPlayer() {
       {templateType === '7' && <LeavesEffect />}
       {templateType === '8' && <FlagEffect />}
       {templateType === '9' && <RainEffect />}
-      {/* Top blur overlay */}
+      {templateType === '10' && <StreetLightEffect />}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 0.3 }}
-        className="fixed top-0 inset-x-0 h-32 z-40 pointer-events-none backdrop-blur-[20px]"
-        style={{ maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)' }}
+        className={`fixed top-0 inset-x-0 h-16 bg-gradient-to-b ${isLight ? 'from-[#faf9f6]/50' : 'from-black/40'} to-transparent pointer-events-none z-40`}
       />
 
       <Link to="/" className="fixed top-6 left-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-50 transition-opacity font-medium drop-shadow-md">
@@ -940,9 +1072,43 @@ function DemoPlayer() {
       </Link>
 
       {isAdmin && demo && (
-        <Link to={`/admin/edit/${demo.id}`} className="fixed top-6 right-6 opacity-80 hover:opacity-100 flex items-center gap-2 z-50 transition-opacity font-medium bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl">
-          <Edit3 className="w-4 h-4" /> {t.edit}
-        </Link>
+        <div id="admin-controls-ui" className="fixed top-6 right-6 flex items-center gap-2 z-50">
+          <button 
+            onClick={() => setThumbnailResult(demo.ogImageUrl || 'none')}
+            disabled={isCapturing}
+            className="opacity-80 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium bg-emerald-600/80 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl cursor-pointer disabled:opacity-50"
+          >
+            <Camera className="w-4 h-4" /> {isCapturing ? 'Đang cap tự động...' : 'Xem Thumbnail'}
+          </button>
+          <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl">
+            <Edit3 className="w-4 h-4" /> {t.edit}
+          </Link>
+        </div>
+      )}
+
+      {thumbnailResult && (
+        <div id="thumbnail-modal" className="fixed inset-0 z-[200] bg-black/80 flex flex-col items-center justify-center p-4 backdrop-blur-md text-white">
+           <div className="bg-neutral-900 border border-white/10 p-6 rounded-2xl max-w-2xl w-full shadow-2xl relative">
+              <button 
+                onClick={() => setThumbnailResult(null)}
+                className="absolute -top-4 -right-4 w-10 h-10 bg-white text-black rounded-full shadow-lg font-bold hover:scale-105 transition-transform"
+              >
+                X
+              </button>
+              <h3 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">Thông tin chia sẻ (OG Tags)</h3>
+              <p className="text-sm text-neutral-300 mb-2 truncate"><strong>og:title:</strong> {`${demo.title} - ${demo.singer || demo.author || demo.composer || 'Unknown'} ( demo )`}</p>
+              <p className="text-sm text-neutral-300 mb-3 truncate"><strong>og:image:</strong> {thumbnailResult === 'none' ? 'Chưa có' : thumbnailResult}</p>
+              
+              <div className="w-full aspect-video rounded-lg overflow-hidden border border-white/10 mb-4 bg-black flex items-center justify-center">
+                 {thumbnailResult === 'none' ? (
+                     <span className="text-neutral-500 italic">Chưa có ảnh chụp thumbnail (hãy load lại trang với tham số ?admin=1&autoCapture=1)</span>
+                 ) : (
+                     <img src={thumbnailResult} alt="Thumbnail preview" className="w-full h-full object-contain" />
+                 )}
+              </div>
+              <p className="text-xs text-emerald-400">Ảnh này sẽ được dùng khi share link nhạc lên Facebook/Zalo.</p>
+           </div>
+        </div>
       )}
       
       <motion.div 
@@ -962,7 +1128,8 @@ function DemoPlayer() {
             templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
             templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
             templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400' :
-            templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 'shadow-2xl rounded-3xl border-4'
+            templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
+            templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 'shadow-2xl rounded-3xl border-4'
           }`}>
             {demo.coverUrl ? (
               <img src={demo.coverUrl} alt="Cover" className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`} />
@@ -987,17 +1154,22 @@ function DemoPlayer() {
           {!demo.singer && !demo.author && !demo.composer && <div className="mb-0 md:mb-6"></div>}
           
           <div 
-            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto backdrop-blur-xl`}
+            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto`}
           >
-            <div className={`absolute inset-0 bg-gradient-to-t ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'from-black/70 via-black/30' : (isLight ? 'from-white/80 via-white/40' : 'from-black/80 via-black/40')} to-transparent`}></div>
-            <div className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${isLight ? 'from-white/40' : 'from-white/10'} to-transparent opacity-60`}></div>
-            {demo.coverUrl && (
-              <div 
-                className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay saturate-150"
-                style={{ backgroundImage: `url(${demo.coverUrl})` }}
-              ></div>
-            )}
-            <div className="relative z-10 px-4 py-3 md:p-5">
+            {/* Background with blur and mask */}
+            <div 
+              className="absolute inset-0 backdrop-blur-xl"
+              style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 25%, black 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 25%, black 100%)' }}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-t ${(templateType === '2' || templateType === '5' || templateType === '8') ? 'from-black/70 via-black/30' : (isLight ? 'from-white/90 via-white/50' : 'from-black/90 via-black/50')} to-transparent`}></div>
+              {demo.coverUrl && (
+                <div 
+                  className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay saturate-150"
+                  style={{ backgroundImage: `url(${demo.coverUrl})` }}
+                ></div>
+              )}
+            </div>
+            <div className="relative z-10 px-4 pt-2 pb-3 md:px-5 md:pt-3 md:pb-4">
                <CustomAudioPlayer src={demo.audioUrl} template={templateType} />
             </div>
           </div>
@@ -1008,7 +1180,7 @@ function DemoPlayer() {
           <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 md:mt-0 mt-0">{t.lyric}</h3>
           <div className="pr-4">
             {demo.lyrics ? (
-              <pre className="whitespace-pre-wrap font-sans text-lg/relaxed sm:text-xl/loose font-medium opacity-80 pb-20 pl-4 border-l border-white/10">
+              <pre className={`whitespace-pre-wrap font-sans text-lg/relaxed sm:text-xl/loose font-semibold opacity-100 pb-20 pl-4 border-l ${isLight ? 'border-black/20 text-black/90' : 'border-white/20 text-white/95'} drop-shadow-md`}>
                 {demo.lyrics}
               </pre>
             ) : (
@@ -1045,6 +1217,21 @@ function AdminDashboard() {
     if(!confirm('Bạn có chắc muốn xóa demo này?')) return;
     await fetch(`/api/demos/${id}/delete`, { method: 'POST' });
     loadData();
+  };
+
+  const [isBatchCapturing, setIsBatchCapturing] = useState(false);
+
+  const batchUpdateThumbnails = async () => {
+    if (!data || !data.demos || data.demos.length === 0) return;
+    if (!confirm("Quá trình này sẽ tải TỪNG TRANG demo ngầm để chụp ảnh màn hình và cập nhật thumbnail facebook. Bạn có muốn tiếp tục chạy?")) return;
+    setIsBatchCapturing(true);
+    for (const demo of data.demos) {
+        setToast(`Đang chụp: ${demo.title}...`);
+        await capturePCThumbnail(demo.slug || demo.id, demo.id);
+    }
+    setToast('Đã chụp xong toàn bộ site!');
+    setTimeout(() => setToast(''), 3000);
+    setIsBatchCapturing(false);
   };
 
   const handleProfileSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -1262,7 +1449,12 @@ function AdminDashboard() {
                   <input name="globalPassword" defaultValue={data.globalPassword} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono" placeholder="Để trống nếu không muốn dùng mật khẩu chung" />
                   <p className="text-sm text-stone-500 mt-2">Tất cả các link ở trang chủ nếu chưa đặt mật khẩu riêng thì sẽ được bảo vệ bởi mật khẩu chung này.</p>
                 </div>
-                <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
+                <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
+                    <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
+                    <button type="button" disabled={isBatchCapturing} onClick={batchUpdateThumbnails} className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                       {isBatchCapturing ? 'Đang cập nhật auto...' : 'Cập nhật lại thumbnail và tiêu đề toàn site'}
+                    </button>
+                </div>
               </form>
             </div>
           )}
@@ -1376,6 +1568,8 @@ function AdminCreateDemo() {
             body: formData
         });
         if (res.ok) {
+            const result = await res.json();
+            await capturePCThumbnail(result.slug || result.id, result.id);
             alert('Đăng demo thành công!');
             navigate('/admin');
         } else alert('Lỗi đăng bài!');
@@ -1479,6 +1673,7 @@ function AdminCreateDemo() {
                   <option value="7">Mẫu 7: Học Đường (Trắng, Lá vàng rơi)</option>
                   <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
                   <option value="9">Mẫu 9: Anime (Bầu trời, Mưa rơi)</option>
+                  <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
                 </select>
               </div>
 
@@ -1626,6 +1821,9 @@ function AdminEditDemo() {
             body: formData
         });
         if (res.ok) {
+            const result = await res.json();
+            const demoIdOrSlug = result.slug || result.id || id || '';
+            await capturePCThumbnail(demoIdOrSlug, result.id || id || '');
             alert('Cập nhật thành công!');
             navigate('/admin');
         } else alert('Lỗi cập nhật. Thử tải lại trang và làm lại!');
@@ -1730,6 +1928,7 @@ function AdminEditDemo() {
                   <option value="7">Mẫu 7: Học Đường (Trắng, Lá vàng rơi)</option>
                   <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
                   <option value="9">Mẫu 9: Anime (Bầu trời, Mưa rơi)</option>
+                  <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
                 </select>
               </div>
 

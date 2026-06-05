@@ -348,7 +348,7 @@ async function startServer() {
       
       const expectedPassword = demo.password || data.globalPassword;
       // If it requires password, only return basic metadata without audio/lyrics
-      if (expectedPassword && expectedPassword !== req.query.pwd) {
+      if (expectedPassword && expectedPassword !== req.query.pwd && req.query.admin !== '1') {
           return res.json({ 
               id: demo.id, 
               title: demo.title,
@@ -372,6 +372,36 @@ async function startServer() {
     } else {
       res.status(400).json({ error: 'Upload failed' });
     }
+  });
+
+  app.post('/api/upload-base64', express.json({limit: '50mb'}), async (req, res) => {
+    try {
+      const { image, name } = req.body;
+      if (!image) return res.status(400).json({ error: 'No image provided' });
+      
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      const filename = `thumb-${Date.now()}.png`;
+      const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
+      
+      await fs.writeFile(filepath, buffer);
+      res.json({ url: `/uploads/${filename}` });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Failed to upload image' });
+    }
+  });
+
+  app.post('/api/demos/:id/thumbnail', express.json(), async (req, res) => {
+    const data = await loadData();
+    const idx = data.demos.findIndex((d: any) => d.id === req.params.id || d.slug === req.params.id);
+    if (idx >= 0) {
+       data.demos[idx].ogImageUrl = req.body.ogImageUrl;
+       await saveData(data);
+       return res.json({ success: true });
+    }
+    res.status(404).json({ error: 'Not found' });
   });
 
   // Vite middleware for development
