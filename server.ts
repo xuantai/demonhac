@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { createServer as createViteServer } from 'vite';
 import multer from 'multer';
+import sharp from 'sharp';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -102,10 +103,23 @@ async function startServer() {
   app.use(express.json());
 
   // API Routes
+  const injectCoverUrl = (demos: any[], slideshowImages?: string[]) => {
+      if (!slideshowImages || slideshowImages.length === 0) return demos;
+      return demos.map(d => {
+         if (!d.coverUrl) {
+            const idStr = String(d.id || '');
+            const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+            return { ...d, coverUrl: slideshowImages[hash % slideshowImages.length] };
+         }
+         return d;
+      });
+  };
+
   app.get('/api/data', async (req, res) => {
     const data = await loadData();
     // Do not leak passwords
-    const publicDemos = data.demos.map((d: any) => ({ ...d, password: !!(d.password || data.globalPassword) })); 
+    let publicDemos = data.demos.map((d: any) => ({ ...d, password: !!(d.password || data.globalPassword) })); 
+    publicDemos = injectCoverUrl(publicDemos, data.slideshowImages);
     // We send back both for simplicity, but let's just make it simple
     res.json({ ...data, demos: publicDemos });
   });
@@ -113,6 +127,10 @@ async function startServer() {
   // Admin access to real data (including passwords for editing)
   app.get('/api/admin/data', async (req, res) => {
     const data = await loadData();
+    // For admin, we don't strictly inject it because we want them to see if it's missing.
+    // However if they edit, they shouldn't accidentally save it. Let's send a separate field or just not inject.
+    // Wait, let's inject it as 'displayCoverUrl' maybe? No, UI handles random too?
+    // Actually we only need it for the public view.
     res.json(data);
   });
 
@@ -127,6 +145,7 @@ async function startServer() {
     data.youtubePlaylistUrl = req.body.youtubePlaylistUrl ?? data.youtubePlaylistUrl;
     data.spotifyUrl = req.body.spotifyUrl ?? data.spotifyUrl;
     data.globalPassword = req.body.globalPassword ?? data.globalPassword;
+    if (req.body.slideshowImages) data.slideshowImages = req.body.slideshowImages;
     await saveData(data);
     res.json(data);
   });
@@ -280,6 +299,7 @@ async function startServer() {
       author: req.body.author || '',
       audioUrl: audioFile ? `/uploads/${audioFile.filename}` : (req.body.audioUrl || ''),
       coverUrl: coverFile ? `/uploads/${coverFile.filename}` : processDriveLink(req.body.coverUrl || ''),
+      backgroundUrl: processDriveLink(req.body.backgroundUrl || ''),
       lyrics: req.body.lyrics || '',
       template: req.body.template || '1',
       status: req.body.status || 'public',
@@ -307,6 +327,9 @@ async function startServer() {
             updatedData.coverUrl = `/uploads/${coverFile.filename}`;
         } else if (req.body.coverUrl !== undefined) {
             updatedData.coverUrl = processDriveLink(req.body.coverUrl);
+        }
+        if (req.body.backgroundUrl !== undefined) {
+            updatedData.backgroundUrl = processDriveLink(req.body.backgroundUrl);
         }
         
         if (updatedData.composer === '') updatedData.composer = 'A.C Xuân Tài';
@@ -344,9 +367,16 @@ async function startServer() {
 
   app.get('/api/demos/:id', async (req, res) => {
       const data = await loadData();
-      const demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
+      let demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
       if (!demo) return res.status(404).json({ error: 'Not found' });
       
+      // Inject random cover if missing
+      if (!demo.coverUrl && data.slideshowImages && data.slideshowImages.length > 0) {
+          const idStr = String(demo.id || '');
+          const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+          demo = { ...demo, coverUrl: data.slideshowImages[hash % data.slideshowImages.length] };
+      }
+
       const expectedPassword = demo.password || data.globalPassword;
       // If it requires password, only return basic metadata without audio/lyrics
       if (expectedPassword && expectedPassword !== req.query.pwd && req.query.admin !== '1') {
@@ -358,6 +388,7 @@ async function startServer() {
               composer: demo.composer,
               template: demo.template,
               coverUrl: demo.coverUrl,
+              backgroundUrl: demo.backgroundUrl,
               globalCoverUrl: data.homeCoverUrl,
               requiresPassword: true 
           });
@@ -368,9 +399,28 @@ async function startServer() {
   // Serve static files from public/uploads
   app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
-  app.post('/api/upload', upload.single('file'), (req, res) => {
+  app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (req.file) {
-      res.json({ url: `/uploads/${req.file.filename}` });
+      if (req.file.mimetype.startsWith('image/')) {
+        try {
+           const optimizedFilename = `${req.file.filename.split('.')[0]}-${Date.now()}.webp`;
+           const optimizedPath = path.join(process.cwd(), 'public', 'uploads', optimizedFilename);
+           
+           await sharp(req.file.path)
+            .webp({ quality: 80 })
+            .resize({ width: 1920, withoutEnlargement: true })
+            .toFile(optimizedPath);
+           
+           // Xóa file gốc
+           await fs.unlink(req.file.path);
+           res.json({ url: `/uploads/${optimizedFilename}` });
+        } catch (error) {
+           console.error("Lỗi nén ảnh:", error);
+           res.json({ url: `/uploads/${req.file.filename}` });
+        }
+      } else {
+        res.json({ url: `/uploads/${req.file.filename}` });
+      }
     } else {
       res.status(400).json({ error: 'Upload failed' });
     }
@@ -438,7 +488,8 @@ async function startServer() {
       }
 
       let ogTitle = data.pageTitle || 'My Demos';
-      let ogImage = data.ogImageUrl || data.homeCoverUrl || '';
+      let ogImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : '');
+      let ogDesc = data.artistBio || '';
 
       const match = url.match(/^\/demo\/([^\/?]+)/);
       if (match) {
@@ -446,13 +497,22 @@ async function startServer() {
         const demo = data.demos.find((d: any) => d.id === slug || d.slug === slug);
         if (demo) {
           ogTitle = `${demo.title} - ${demo.singer || demo.author || demo.composer || 'Unknown'} ( demo )`;
-          ogImage = demo.ogImageUrl || demo.coverUrl || data.homeCoverUrl || data.ogImageUrl || '';
+          
+          let coverToUse = demo.coverUrl;
+          if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
+              const idStr = String(demo.id || '');
+              const hash = Array.from(idStr).reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+              coverToUse = data.slideshowImages[hash % data.slideshowImages.length];
+          }
+          
+          ogImage = demo.ogImageUrl || coverToUse || data.homeCoverUrl || data.ogImageUrl || '';
+          ogDesc = demo.author || demo.composer || data.artistBio || '';
         }
       }
 
       if (ogImage && ogImage.startsWith('/')) {
          ogImage = `https://${req.get('host')}${ogImage}`;
-      } else if (!ogImage.startsWith('http')) {
+      } else if (ogImage && !ogImage.startsWith('http')) {
          // ensure it's a full URL if it doesn't have http
          ogImage = `https://${req.get('host')}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
       }
@@ -462,10 +522,12 @@ async function startServer() {
       
       const metaTags = `
         <meta property="og:title" content="${ogTitle}" />
+        <meta property="og:description" content="${ogDesc.replace(/"/g, '&quot;')}" />
         <meta property="og:image" content="${ogImage}" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${ogTitle}" />
+        <meta name="twitter:description" content="${ogDesc.replace(/"/g, '&quot;')}" />
         <meta name="twitter:image" content="${ogImage}" />
       `;
       html = html.replace('</head>', `${metaTags}</head>`);

@@ -42,35 +42,7 @@ interface LangContextType {
 }
 const LanguageContext = createContext<LangContextType>({ lang: 'vi', setLang: () => {} });
 
-const capturePCThumbnail = async (demoIdOrSlug: string, demoIdToMatch: string) => {
-    return new Promise<void>((resolve) => {
-         const iframe = document.createElement('iframe');
-         iframe.src = `/demo/${demoIdOrSlug}?admin=1&captureOnly=1`;
-         iframe.style.width = '1280px';
-         iframe.style.height = '720px';
-         iframe.style.position = 'absolute';
-         iframe.style.left = '-9999px';
-         iframe.style.top = '-9999px';
-         
-         const messageHandler = (event: MessageEvent) => {
-             if (event.data?.type === 'THUMBNAIL_CAPTURED' && event.data?.demoId === demoIdToMatch) {
-                 window.removeEventListener('message', messageHandler);
-                 if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                 resolve();
-             }
-         };
-         window.addEventListener('message', messageHandler);
-         
-         iframe.onload = () => {
-             setTimeout(() => {
-                 window.removeEventListener('message', messageHandler);
-                 if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                 resolve();
-             }, 8000); 
-         };
-         document.body.appendChild(iframe);
-    });
-};
+// Thumbnail fallback handled server-side now
 
 // ---- ADMIN LOGIN & REQUIRE ADMIN ----
 function AdminLogin() {
@@ -219,7 +191,17 @@ function Home() {
   const [visibleMVs, setVisibleMVs] = useState(4);
   const [showArtist, setShowArtist] = useState(false);
   const [spotifyLoaded, setSpotifyLoaded] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const observer = useRef<IntersectionObserver>();
+
+  // For slideshow
+  useEffect(() => {
+    if (!data?.slideshowImages?.length) return;
+    const int = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % data.slideshowImages!.length);
+    }, 4000); // 4 seconds
+    return () => clearInterval(int);
+  }, [data?.slideshowImages]);
 
   const lastMvElementRef = useCallback((node: HTMLButtonElement) => {
     if (observer.current) observer.current.disconnect();
@@ -290,8 +272,27 @@ function Home() {
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-rose-500 selection:text-white relative z-0"
     >
-      {data.homeCoverUrl ? (
-        <div className="fixed inset-0 z-[-1] pointer-events-none">
+      {data.slideshowImages && data.slideshowImages.length > 0 ? (
+        <div className="fixed inset-0 z-[-1] pointer-events-none bg-neutral-950">
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 0.8, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ 
+                 backgroundImage: `url(${data.slideshowImages[currentSlide]})`, 
+                 backgroundPosition: 'center 20%', 
+                 maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%)', 
+                 WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%)' 
+              }}
+            />
+          </AnimatePresence>
+        </div>
+      ) : data.homeCoverUrl ? (
+        <div className="fixed inset-0 z-[-1] pointer-events-none relative_mask bg-neutral-950">
           <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url(${data.homeCoverUrl})`, backgroundPosition: 'center 20%', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 90%)' }}></div>
         </div>
       ) : (
@@ -446,9 +447,18 @@ function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.demos.filter(d => d.status === 'public').map(demo => (
-              <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden">
+              <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
-                <div className="flex items-start justify-between relative z-10">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
+                  {demo.coverUrl ? (
+                     <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
+                  ) : (
+                     <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
+                       <Disc3 className="w-8 h-8" />
+                     </div>
+                  )}
+                </div>
+                <div className="flex items-start justify-between relative z-10 flex-1">
                   <div>
                     <h3 className="text-xl font-bold mb-2 group-hover:text-rose-400 transition-colors flex items-center">
                       <span className="relative inline-block">
@@ -466,8 +476,8 @@ function Home() {
                       )}
                     </div>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                    <Play className="w-5 h-5 ml-1" />
+                  <div className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 shadow-lg shrink-0 mt-3">
+                    <Play className="w-4 h-4 ml-1" />
                   </div>
                 </div>
               </Link>
@@ -798,8 +808,6 @@ function DemoPlayer() {
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [thumbnailResult, setThumbnailResult] = useState<string | null>(null);
-
   useEffect(() => {
     fetch(`/api/demos/${id}${isAdmin ? '?admin=1' : ''}`)
       .then(res => res.json())
@@ -836,69 +844,6 @@ function DemoPlayer() {
     }
   };
 
-  const autoCapture = searchParams.get('autoCapture') === '1';
-  const [isCapturing, setIsCapturing] = useState(false);
-
-  const captureThumbnail = async () => {
-    if (!demo || isCapturing) return;
-    setIsCapturing(true);
-    try {
-        const imageBase64 = await toPng(document.body, {
-            filter: (node) => {
-              if (node.id === 'admin-controls-ui' || node.id === 'thumbnail-modal') return false;
-              if (node.tagName && node.tagName.toLowerCase() === 'iframe') return false;
-              return true;
-            },
-            pixelRatio: 1,
-            backgroundColor: null,
-            useCORS: true,
-            style: {
-              transform: 'scale(1)',
-              transformOrigin: 'top left'
-            }
-        });
-        
-        const uploadRes = await fetch('/api/upload-base64', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: imageBase64, name: demo.id })
-        });
-        
-        if (uploadRes.ok) {
-            const uploaded = await uploadRes.json();
-            const updateRes = await fetch(`/api/demos/${id}/thumbnail`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ogImageUrl: uploaded.url })
-            });
-            if (updateRes.ok) {
-                setDemo({ ...demo, ogImageUrl: uploaded.url });
-                // Remove auto pop-up modal, just log or silent
-                console.log('Thumbnail auto-captured and saved.', uploaded.url);
-            }
-        }
-    } catch(err) {
-        console.error(err);
-    }
-    setIsCapturing(false);
-  };
-
-  useEffect(() => {
-    if (demo && (unlocked || !demo.requiresPassword || isAdmin)) {
-        if (searchParams.get('captureOnly') === '1') {
-             setTimeout(() => {
-                 captureThumbnail().then(() => {
-                     window.parent.postMessage({ type: 'THUMBNAIL_CAPTURED', demoId: demo.id }, '*');
-                 });
-             }, 3000);
-        } else if (autoCapture) {
-             setTimeout(() => {
-                 captureThumbnail();
-             }, 3000);
-        }
-    }
-  }, [demo, unlocked, autoCapture, isAdmin, searchParams]);
-
   useEffect(() => {
      if (demo) {
         const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
@@ -932,6 +877,7 @@ function DemoPlayer() {
   const templateType = demo.template || '1';
   const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7';
   const displayCoverUrl = demo.coverUrl || demo.globalCoverUrl || '';
+  const pageBgUrl = demo.backgroundUrl || displayCoverUrl;
   let themeClasses = "";
   let accentClass = "";
 
@@ -985,10 +931,10 @@ function DemoPlayer() {
         {templateType === '9' && <RainEffect />}
         {templateType === '10' && <StreetLightEffect />}
         
-        {displayCoverUrl && (
+        {pageBgUrl && (
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl scale-110"
-            style={{ backgroundImage: `url(${displayCoverUrl})` }}
+            className="absolute inset-0 bg-cover bg-center opacity-50 blur-md scale-105"
+            style={{ backgroundImage: `url(${pageBgUrl})` }}
           ></div>
         )}
 
@@ -1062,6 +1008,14 @@ function DemoPlayer() {
       {templateType === '8' && <FlagEffect />}
       {templateType === '9' && <RainEffect />}
       {templateType === '10' && <StreetLightEffect />}
+      
+      {pageBgUrl && (
+        <div 
+          className="fixed inset-0 bg-cover bg-center opacity-50 blur-md scale-105 pointer-events-none z-0"
+          style={{ backgroundImage: `url(${pageBgUrl})` }}
+        ></div>
+      )}
+
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -1075,44 +1029,12 @@ function DemoPlayer() {
 
       {isAdmin && demo && (
         <div id="admin-controls-ui" className="fixed top-6 right-6 flex items-center gap-2 z-50">
-          <button 
-            onClick={() => setThumbnailResult(demo.ogImageUrl || 'none')}
-            disabled={isCapturing}
-            className="opacity-80 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium bg-emerald-600/80 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl cursor-pointer disabled:opacity-50"
-          >
-            <Camera className="w-4 h-4" /> {isCapturing ? 'Đang cap tự động...' : 'Xem Thumbnail'}
-          </button>
           <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl">
             <Edit3 className="w-4 h-4" /> {t.edit}
           </Link>
         </div>
       )}
 
-      {thumbnailResult && (
-        <div id="thumbnail-modal" className="fixed inset-0 z-[200] bg-black/80 flex flex-col items-center justify-center p-4 backdrop-blur-md text-white">
-           <div className="bg-neutral-900 border border-white/10 p-6 rounded-2xl max-w-2xl w-full shadow-2xl relative">
-              <button 
-                onClick={() => setThumbnailResult(null)}
-                className="absolute -top-4 -right-4 w-10 h-10 bg-white text-black rounded-full shadow-lg font-bold hover:scale-105 transition-transform"
-              >
-                X
-              </button>
-              <h3 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">Thông tin chia sẻ (OG Tags)</h3>
-              <p className="text-sm text-neutral-300 mb-2 truncate"><strong>og:title:</strong> {`${demo.title} - ${demo.singer || demo.author || demo.composer || 'Unknown'} ( demo )`}</p>
-              <p className="text-sm text-neutral-300 mb-3 truncate"><strong>og:image:</strong> {thumbnailResult === 'none' ? 'Chưa có' : thumbnailResult}</p>
-              
-              <div className="w-full aspect-video rounded-lg overflow-hidden border border-white/10 mb-4 bg-black flex items-center justify-center">
-                 {thumbnailResult === 'none' ? (
-                     <span className="text-neutral-500 italic">Chưa có ảnh chụp thumbnail (hãy load lại trang với tham số ?admin=1&autoCapture=1)</span>
-                 ) : (
-                     <img src={thumbnailResult} alt="Thumbnail preview" className="w-full h-full object-contain" />
-                 )}
-              </div>
-              <p className="text-xs text-emerald-400">Ảnh này sẽ được dùng khi share link nhạc lên Facebook/Zalo.</p>
-           </div>
-        </div>
-      )}
-      
       <div 
         className="max-w-4xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
       >
@@ -1211,9 +1133,15 @@ function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
   const [activeTab, setActiveTab] = useState<'demos'|'profile'>('demos');
   const [toast, setToast] = useState('');
+  const [slideshowImages, setSlideshowImages] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  const loadData = () => fetch('/api/admin/data').then(res => res.json()).then(setData);
+  const loadData = () => fetch('/api/admin/data').then(res => res.json()).then(resData => {
+    setData(resData);
+    if (resData.slideshowImages) {
+      setSlideshowImages(resData.slideshowImages);
+    }
+  });
 
   useEffect(() => { loadData(); }, []);
 
@@ -1228,21 +1156,6 @@ function AdminDashboard() {
     if(!confirm('Bạn có chắc muốn xóa demo này?')) return;
     await fetch(`/api/demos/${id}/delete`, { method: 'POST' });
     loadData();
-  };
-
-  const [isBatchCapturing, setIsBatchCapturing] = useState(false);
-
-  const batchUpdateThumbnails = async () => {
-    if (!data || !data.demos || data.demos.length === 0) return;
-    if (!confirm("Quá trình này sẽ tải TỪNG TRANG demo ngầm để chụp ảnh màn hình và cập nhật thumbnail facebook. Bạn có muốn tiếp tục chạy?")) return;
-    setIsBatchCapturing(true);
-    for (const demo of data.demos) {
-        setToast(`Đang chụp: ${demo.title}...`);
-        await capturePCThumbnail(demo.slug || demo.id, demo.id);
-    }
-    setToast('Đã chụp xong toàn bộ site!');
-    setTimeout(() => setToast(''), 3000);
-    setIsBatchCapturing(false);
   };
 
   const handleProfileSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -1262,7 +1175,8 @@ function AdminDashboard() {
         ogImageUrl: payload.ogImageUrl,
         youtubePlaylistUrl: payload.youtubePlaylistUrl,
         spotifyUrl: payload.spotifyUrl,
-        globalPassword: payload.globalPassword
+        globalPassword: payload.globalPassword,
+        slideshowImages: slideshowImages
       }),
     });
     
@@ -1402,6 +1316,40 @@ function AdminDashboard() {
                   <p className="text-xs text-stone-500 mt-2">Dùng để tạo hiệu ứng nền cho trang chủ, nên dùng ảnh ngang chất lượng cao.</p>
                 </div>
                 <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Slideshow Trang chủ (Tự động thay đổi, bấm xóa để gỡ ảnh)</label>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-wrap gap-3">
+                       {slideshowImages.map((src, i) => (
+                          <div key={i} className="relative w-24 h-24 bg-stone-200 rounded-xl overflow-hidden border border-stone-300 group">
+                             <img src={src} className="w-full h-full object-cover" />
+                             <button type="button" onClick={() => setSlideshowImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold text-sm">Xóa</button>
+                          </div>
+                       ))}
+                       <button type="button" className="w-24 h-24 rounded-xl border-2 border-dashed border-stone-300 text-stone-400 hover:border-stone-500 hover:text-stone-600 flex flex-col items-center justify-center gap-1 transition-colors" onClick={() => document.getElementById('slideUpload')?.click()}>
+                          <div className="text-2xl">+</div>
+                          <div className="text-xs font-semibold">Thêm ảnh</div>
+                       </button>
+                    </div>
+                    <input type="file" id="slideUpload" className="hidden" accept="image/*" multiple onChange={async (e) => {
+                      if (!e.target.files?.length) return;
+                      const newUploads = [];
+                      for (let i = 0; i < e.target.files.length; i++) {
+                         const formData = new FormData();
+                         formData.append('file', e.target.files[i]);
+                         try {
+                           const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                           const json = await res.json();
+                           if (json.url) newUploads.push(json.url);
+                         } catch (err) {
+                           console.error(err);
+                         }
+                      }
+                      if (newUploads.length) setSlideshowImages(prev => [...prev, ...newUploads]);
+                      e.target.value = '';
+                    }} />
+                  </div>
+                </div>
+                <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Favicon (Icon tab trình duyệt)</label>
                   <div className="flex gap-2">
                     <input name="faviconUrl" id="faviconUrlInput" defaultValue={data.faviconUrl} placeholder="Web URL hoặc Upload..." className="flex-1 w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" />
@@ -1462,9 +1410,6 @@ function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
                     <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
-                    <button type="button" disabled={isBatchCapturing} onClick={batchUpdateThumbnails} className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50">
-                       {isBatchCapturing ? 'Đang cập nhật auto...' : 'Cập nhật lại thumbnail và tiêu đề toàn site'}
-                    </button>
                 </div>
               </form>
             </div>
@@ -1487,6 +1432,8 @@ function AdminCreateDemo() {
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState('');
   const [coverUploadProgress, setCoverUploadProgress] = useState(0);
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState('');
+  const [bgUploadProgress, setBgUploadProgress] = useState(0);
+  const [uploadedBgUrl, setUploadedBgUrl] = useState('');
 
   const generateSlug = (text: string) => {
     return text.toString()
@@ -1504,7 +1451,7 @@ function AdminCreateDemo() {
     }
   }, [title, isSlugEdited]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover' | 'background') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -1525,7 +1472,8 @@ function AdminCreateDemo() {
             let percent = Math.round((event.loaded / event.total) * 100);
             if (percent === 100) percent = 99; // Giữ 99% cho đến khi xử lý xong
             if (type === 'audio') setAudioUploadProgress(percent);
-            else setCoverUploadProgress(percent);
+            else if (type === 'cover') setCoverUploadProgress(percent);
+            else setBgUploadProgress(percent);
         }
     };
 
@@ -1535,21 +1483,26 @@ function AdminCreateDemo() {
             if (type === 'audio') {
                 setUploadedAudioUrl(res.url);
                 setAudioUploadProgress(100);
-            } else {
+            } else if (type === 'cover') {
                 setUploadedCoverUrl(res.url);
                 setCoverUploadProgress(100);
+            } else {
+                setUploadedBgUrl(res.url);
+                setBgUploadProgress(100);
             }
         } else {
             alert(xhr.status === 413 ? 'Hệ thống báo lỗi file quá lớn (Tối đa 30MB). Vui lòng dùng MP3.' : 'Lỗi tải file. Vui lòng thử lại.');
             if (type === 'audio') setAudioUploadProgress(0);
-            else setCoverUploadProgress(0);
+            else if (type === 'cover') setCoverUploadProgress(0);
+            else setBgUploadProgress(0);
         }
     };
     
     xhr.onerror = () => {
         alert('Lỗi kết nối. Có thể mạng yếu hoặc file quá khổng lồ.');
         if (type === 'audio') setAudioUploadProgress(0);
-        else setCoverUploadProgress(0);
+        else if (type === 'cover') setCoverUploadProgress(0);
+        else setBgUploadProgress(0);
     };
 
     xhr.send(formData);
@@ -1560,14 +1513,17 @@ function AdminCreateDemo() {
     if (!uploadedAudioUrl) return alert("Vui lòng tải lên file nhạc!");
     if (audioUploadProgress > 0 && audioUploadProgress < 100) return alert("Vui lòng đợi file nhạc tải lên xong!");
     if (coverUploadProgress > 0 && coverUploadProgress < 100) return alert("Vui lòng đợi ảnh bìa tải lên xong!");
+    if (bgUploadProgress > 0 && bgUploadProgress < 100) return alert("Vui lòng đợi ảnh nền tải lên xong!");
 
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     formData.delete('audio'); // remove raw files from submit
     formData.delete('cover');
+    formData.delete('background');
     
     formData.set('audioUrl', uploadedAudioUrl);
     formData.set('coverUrl', uploadedCoverUrl);
+    formData.set('backgroundUrl', uploadedBgUrl);
     
     if (!formData.get('slug')) {
         formData.set('slug', slug);
@@ -1579,8 +1535,6 @@ function AdminCreateDemo() {
             body: formData
         });
         if (res.ok) {
-            const result = await res.json();
-            await capturePCThumbnail(result.slug || result.id, result.id);
             alert('Đăng demo thành công!');
             navigate('/admin');
         } else alert('Lỗi đăng bài!');
@@ -1658,6 +1612,23 @@ function AdminCreateDemo() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền (Tùy chọn tải lên hoặc nhập link)</label>
+                <div className={`border-2 border-dashed ${bgUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
+                  {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${bgUploadProgress}%` }}></div>}
+                  <input type="file" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                   <div className="relative z-0">
+                       <Upload className={`w-8 h-8 mx-auto mb-2 ${bgUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
+                       <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
+                           {bgUploadProgress > 0 && bgUploadProgress < 100 ? `Đang tải ảnh trực tiếp ${bgUploadProgress}%` : (bgUploadProgress === 100 ? 'Đã tải ảnh nền xong!' : 'Tải ảnh nền lên')}
+                       </span>
+                   </div>
+                </div>
+                <input name="backgroundUrl" type="text" value={uploadedBgUrl} onChange={e => setUploadedBgUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
               <textarea name="lyrics" rows={6} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
@@ -1722,6 +1693,8 @@ function AdminEditDemo() {
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState('');
   const [coverUploadProgress, setCoverUploadProgress] = useState(0);
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState('');
+  const [bgUploadProgress, setBgUploadProgress] = useState(0);
+  const [uploadedBgUrl, setUploadedBgUrl] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/data')
@@ -1734,6 +1707,7 @@ function AdminEditDemo() {
           setSlug(found.slug || '');
           setIsSlugEdited(!!found.slug);
           setUploadedCoverUrl(found.coverUrl || '');
+          setUploadedBgUrl(found.backgroundUrl || '');
         }
       });
   }, [id]);
@@ -1754,7 +1728,7 @@ function AdminEditDemo() {
     }
   }, [title, isSlugEdited, demo]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover' | 'background') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -1775,7 +1749,8 @@ function AdminEditDemo() {
             let percent = Math.round((event.loaded / event.total) * 100);
             if (percent === 100) percent = 99; // Giữ 99% cho đến khi xử lý xong
             if (type === 'audio') setAudioUploadProgress(percent);
-            else setCoverUploadProgress(percent);
+            else if (type === 'cover') setCoverUploadProgress(percent);
+            else setBgUploadProgress(percent);
         }
     };
 
@@ -1785,21 +1760,26 @@ function AdminEditDemo() {
             if (type === 'audio') {
                 setUploadedAudioUrl(res.url);
                 setAudioUploadProgress(100);
-            } else {
+            } else if (type === 'cover') {
                 setUploadedCoverUrl(res.url);
                 setCoverUploadProgress(100);
+            } else {
+                setUploadedBgUrl(res.url);
+                setBgUploadProgress(100);
             }
         } else {
             alert(xhr.status === 413 ? 'Hệ thống báo lỗi file quá lớn (Tối đa 30MB). Vui lòng dùng MP3.' : 'Lỗi tải file. Vui lòng thử lại.');
             if (type === 'audio') setAudioUploadProgress(0);
-            else setCoverUploadProgress(0);
+            else if (type === 'cover') setCoverUploadProgress(0);
+            else setBgUploadProgress(0);
         }
     };
     
     xhr.onerror = () => {
         alert('Lỗi kết nối. Có thể mạng yếu hoặc file quá khổng lồ.');
         if (type === 'audio') setAudioUploadProgress(0);
-        else setCoverUploadProgress(0);
+        else if (type === 'cover') setCoverUploadProgress(0);
+        else setBgUploadProgress(0);
     };
 
     xhr.send(formData);
@@ -1813,14 +1793,19 @@ function AdminEditDemo() {
     if (coverUploadProgress > 0 && coverUploadProgress < 100) {
         return alert("Vui lòng đợi ảnh bìa tải lên xong!");
     }
+    if (bgUploadProgress > 0 && bgUploadProgress < 100) {
+        return alert("Vui lòng đợi ảnh nền tải lên xong!");
+    }
     
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     formData.delete('audio'); // not sending file binary in this request
     formData.delete('cover');
+    formData.delete('background');
     
     if (uploadedAudioUrl) formData.set('audioUrl', uploadedAudioUrl);
     formData.set('coverUrl', uploadedCoverUrl);
+    formData.set('backgroundUrl', uploadedBgUrl);
 
     if (!formData.get('slug')) {
         formData.set('slug', slug);
@@ -1832,9 +1817,6 @@ function AdminEditDemo() {
             body: formData
         });
         if (res.ok) {
-            const result = await res.json();
-            const demoIdOrSlug = result.slug || result.id || id || '';
-            await capturePCThumbnail(demoIdOrSlug, result.id || id || '');
             alert('Cập nhật thành công!');
             navigate('/admin');
         } else alert('Lỗi cập nhật. Thử tải lại trang và làm lại!');
@@ -1910,6 +1892,23 @@ function AdminEditDemo() {
                 </div>
                 <input name="coverUrl" type="text" value={uploadedCoverUrl} onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
                 <p className="text-xs text-stone-500 mt-2">Hỗ trợ link trực tiếp hoặc link Google Drive.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền (Tùy chọn tải lên bài mới hoặc nhập link)</label>
+                <div className={`border-2 border-dashed ${bgUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
+                  {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${bgUploadProgress}%` }}></div>}
+                  <input type="file" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                   <div className="relative z-0">
+                       <Upload className={`w-8 h-8 mx-auto mb-2 ${bgUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
+                       <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
+                           {bgUploadProgress > 0 && bgUploadProgress < 100 ? `Đang tải ảnh trực tiếp ${bgUploadProgress}%` : (bgUploadProgress === 100 ? 'Đã tải ảnh nền xong!' : 'Tải ảnh nền mới lên')}
+                       </span>
+                   </div>
+                </div>
+                <input name="backgroundUrl" type="text" value={uploadedBgUrl} onChange={e => setUploadedBgUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 
