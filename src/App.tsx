@@ -317,67 +317,96 @@ function Home() {
         <div className="fixed inset-0 z-[-1] pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-900 via-neutral-950 to-neutral-950"></div>
       )}
       <LanguageSwitcher />
-      {playingVideo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 cursor-pointer" onClick={() => setPlayingVideo(null)}>
-          {/* Slideshow background behind main overlay player */}
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            {data.slideshowImages && data.slideshowImages.length > 0 ? (
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
-                style={{ 
-                  backgroundImage: `url(${data.slideshowImages[currentSlide]})`,
-                  backgroundPosition: 'center 20%'
-                }}
-              />
-            ) : data.homeCoverUrl ? (
-              <div 
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ 
-                  backgroundImage: `url(${data.homeCoverUrl})`,
-                  backgroundPosition: 'center 20%'
-                }}
-              />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-t from-rose-950/50 to-neutral-950/80" />
-            )}
-            {/* Soft dimming and minimal blurring of the background slideshow */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-          </div>
+      {playingVideo && (() => {
+        const activeSong = ytVideos.find(song => song.videoId === playingVideo);
+        const activeTitle = activeSong ? activeSong.title : "MV / Video";
+        const ytLink = `https://www.youtube.com/watch?v=${playingVideo}`;
+        return (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 cursor-pointer" onClick={() => setPlayingVideo(null)}>
+            {/* Slideshow background behind main overlay player */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+              {data && data.slideshowImages && data.slideshowImages.length > 0 ? (
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+                  style={{ 
+                    backgroundImage: `url(${data.slideshowImages[currentSlide]})`,
+                    backgroundPosition: 'center 20%'
+                  }}
+                />
+              ) : data && data.homeCoverUrl ? (
+                <div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ 
+                    backgroundImage: `url(${data.homeCoverUrl})`,
+                    backgroundPosition: 'center 20%'
+                  }}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-t from-rose-950/50 to-neutral-950/80" />
+              )}
+              {/* Soft dimming and minimal blurring of the background slideshow */}
+              <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
+            </div>
 
-          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/20 flex flex-col z-10 cursor-default" onClick={e => e.stopPropagation()}>
-            <div className="p-3 bg-neutral-900 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 text-xs sm:text-sm text-neutral-300 relative z-10">
-              <span className="text-amber-500 font-medium flex items-center gap-1.5 leading-snug">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
-                <span>Do YouTube hạn chế nhạc trên các tên miền tiếng Việt (<b>tài.com</b>) gây ra <b>Lỗi 153</b>, nếu bị lỗi hãy bấm nút đỏ bên cạnh để nghe trực tiếp!</span>
-              </span>
-              <div className="flex items-center gap-3 justify-end shrink-0">
-                <a 
-                  href={`https://www.youtube.com/watch?v=${playingVideo}`} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-colors shadow-md text-xs shrink-0"
-                >
-                  Xem trực tiếp trên YouTube ↗
-                </a>
-                <button 
-                  className="text-neutral-400 hover:text-white px-2 py-1 font-bold transition-colors text-sm shrink-0"
-                  onClick={() => setPlayingVideo(null)}
-                >
-                  Đóng ✕
-                </button>
+            <div className="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/20 flex flex-col z-10 cursor-default" onClick={e => e.stopPropagation()}>
+              <div className="p-3 bg-neutral-900 border-b border-white/10 flex items-center justify-between gap-3 text-xs sm:text-sm text-neutral-350 relative z-10">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+                  <span className="font-bold text-white text-[11px] sm:text-sm tracking-tight break-words line-clamp-2 sm:line-clamp-none leading-normal">
+                    {activeTitle}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 justify-end shrink-0">
+                  <button 
+                    className="text-neutral-400 hover:text-white px-2.5 py-0.5 font-bold transition-colors text-base sm:text-lg shrink-0"
+                    onClick={() => setPlayingVideo(null)}
+                    title={lang === 'vi' ? 'Đóng' : 'Close'}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="flex-1 w-full h-full relative bg-neutral-950">
-              <iframe 
-                src={`https://www.youtube-nocookie.com/embed/${playingVideo}?autoplay=1`} 
-                className="w-full h-full border-0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen
-              ></iframe>
+
+              {/* Clicking this thumbnail direct into the Youtube link in a new tab */}
+              <a 
+                href={ytLink} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="flex-1 w-full h-full relative bg-neutral-950 group overflow-hidden block"
+                title="Bấm để phát trên YouTube ở tab mới"
+              >
+                {/* Image with fallback urls in standard CSS support structure */}
+                <img 
+                  src={`https://img.youtube.com/vi/${playingVideo}/maxresdefault.jpg`} 
+                  onError={(e) => {
+                    // Fallback to hqdefault in case maxresdefault doesn't exist (can happen for older uploads)
+                    e.currentTarget.src = `https://img.youtube.com/vi/${playingVideo}/hqdefault.jpg`;
+                  }}
+                  alt={activeTitle} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                
+                {/* Vignette Overlay shadow */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30 group-hover:via-black/20 transition-all duration-300" />
+                
+                {/* Glow ring Play button in middle */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center select-none z-10 gap-3 sm:gap-4">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-650 rounded-full flex items-center justify-center text-white shadow-[0_0_30px_rgba(239,68,68,0.6)] transition-all duration-350 sm:group-hover:scale-110 sm:group-active:scale-95 border border-white/20 relative">
+                    <span className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping opacity-35"></span>
+                    <Play className="w-8 h-8 sm:w-9 sm:h-9 text-white fill-white translate-x-0.5" />
+                  </div>
+                  
+                  <div className="flex flex-col gap-1 sm:gap-2">
+                    <h4 className="text-sm sm:text-lg font-black text-white tracking-widest uppercase drop-shadow-md sm:group-hover:text-red-400 transition-colors">
+                      {lang === 'vi' ? 'Bấm để phát trên YouTube' : 'Click to Play on YouTube'}
+                    </h4>
+                  </div>
+                </div>
+              </a>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Hero Section */}
       <section className="relative pt-32 md:pt-48 pb-20 px-6 sm:px-12 flex flex-col items-center justify-center text-center min-h-[500px]">
@@ -1570,27 +1599,27 @@ function DemoPlayer() {
                 </motion.div>
 
                 {/* THE ROTATING VINYL DISC */}
-                <div className="w-[190px] h-[190px] sm:w-[224px] sm:h-[224px] md:w-[260px] md:h-[260px] relative rounded-full shadow-[0_12px_30px_rgba(0,0,0,0.6)] animate-[spin_12s_linear_infinite] flex items-center justify-center border-[8px] md:border-[12px] border-[#0c0c0c] bg-[#0c0c0c] ring-1 ring-black/40 overflow-hidden flex-shrink-0">
+                <div className="w-[190px] h-[190px] sm:w-[224px] sm:h-[224px] md:w-[260px] md:h-[260px] aspect-square relative rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.7)] animate-[spin_12s_linear_infinite] flex items-center justify-center border-4 border-stone-800 bg-[#0c0c0c] overflow-hidden flex-shrink-0 z-10">
                   {/* Artwork label center */}
                   {displayCoverUrl ? (
                     <img 
                       src={displayCoverUrl} 
                       crossOrigin="anonymous" 
                       alt="Cover" 
-                      className="w-full h-full rounded-full object-cover z-10" 
+                      className="w-full h-full rounded-full object-cover aspect-square z-10" 
                     />
                   ) : (
-                    <div className="w-full h-full bg-stone-900 rounded-full flex items-center justify-center z-10 text-stone-600">
+                    <div className="w-full h-full bg-stone-900 rounded-full flex items-center justify-center z-10 text-stone-600 aspect-square">
                       <Music className="w-8 h-8" />
                     </div>
                   )}
 
                   {/* Glossy vinyl light shine overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 rounded-full z-[15] pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/15 rounded-full z-[15] pointer-events-none"></div>
                   
-                  {/* Spindle hole & metallic center rim */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#0c0c0c] border border-stone-800 rounded-full z-20 shadow-lg flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-[#4e342e] rounded-full"></div>
+                  {/* Spindle hole & metallic center rim to keep visual charm */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#0c0c0c]/90 border border-stone-700 rounded-full z-20 shadow-lg flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></div>
                   </div>
                 </div>
               </div>
