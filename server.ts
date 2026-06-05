@@ -92,6 +92,7 @@ async function saveData(data: any) {
 async function startServer() {
   await ensureUploadsDir();
   const app = express();
+  app.set('trust proxy', 1);
   
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
   // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=3333
@@ -404,20 +405,76 @@ async function startServer() {
     res.status(404).json({ error: 'Not found' });
   });
 
+  // Serve runtime uploads folder
+  const uploadsPath = path.join(process.cwd(), 'public', 'uploads');
+  app.use('/uploads', express.static(uploadsPath));
+
+  let vite: any;
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+    vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: "spa",
+      appType: "custom",
     });
     app.use(vite.middlewares);
   } else {
+    // Serve static files but DON'T serve index.html by default
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+    app.use(express.static(distPath, { index: false }));
   }
+
+  app.get('*', async (req, res, next) => {
+    try {
+      const url = req.originalUrl;
+      const data = await loadData();
+      
+      let html = '';
+      if (process.env.NODE_ENV !== 'production') {
+        html = await fs.readFile(path.join(process.cwd(), 'index.html'), 'utf-8');
+        html = await vite.transformIndexHtml(url, html);
+      } else {
+        html = await fs.readFile(path.join(process.cwd(), 'dist', 'index.html'), 'utf-8');
+      }
+
+      let ogTitle = data.pageTitle || 'My Demos';
+      let ogImage = data.ogImageUrl || '';
+
+      const match = url.match(/^\/demo\/([^\/?]+)/);
+      if (match) {
+        const slug = match[1];
+        const demo = data.demos.find((d: any) => d.id === slug || d.slug === slug);
+        if (demo) {
+          ogTitle = `${demo.title} - ${demo.singer || demo.author || demo.composer || 'Unknown'} ( demo )`;
+          ogImage = demo.ogImageUrl || data.ogImageUrl || '';
+        }
+      }
+
+      if (ogImage && ogImage.startsWith('/')) {
+         ogImage = `https://${req.get('host')}${ogImage}`;
+      }
+
+      // Inject tags
+      html = html.replace(/<title>.*?<\/title>/i, `<title>${ogTitle}</title>`);
+      
+      const metaTags = `
+        <meta property="og:title" content="${ogTitle}" />
+        <meta property="og:image" content="${ogImage}" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${ogTitle}" />
+        <meta name="twitter:image" content="${ogImage}" />
+      `;
+      html = html.replace('</head>', `${metaTags}</head>`);
+
+      res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+    } catch (e: any) {
+      if (process.env.NODE_ENV !== 'production' && vite) {
+          vite.ssrFixStacktrace(e);
+      }
+      console.error(e);
+      res.status(500).end(e.message);
+    }
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);

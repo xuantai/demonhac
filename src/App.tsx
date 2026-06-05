@@ -961,8 +961,8 @@ function DemoPlayer() {
     themeClasses = "bg-sky-200 text-white drop-shadow-md bg-[linear-gradient(135deg,_var(--tw-gradient-stops))] from-sky-300 via-purple-200 to-pink-300";
     accentClass = "bg-white/80 backdrop-blur text-purple-700 shadow-xl shadow-purple-200/50";
   } else if (templateType === '10') {
-    themeClasses = "bg-zinc-900 border-zinc-900 bg-[url('https://images.unsplash.com/photo-1518382485542-a72bb3c8b4fb?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center bg-fixed text-white bg-blend-overlay";
-    accentClass = "bg-yellow-400 text-black font-black shadow-[4px_4px_0_rgba(0,0,0,1)] uppercase tracking-[0.2em] transform hover:scale-105 hover:-rotate-2 transition-transform";
+    themeClasses = "bg-neutral-900/80 bg-[url('https://images.unsplash.com/photo-1518382485542-a72bb3c8b4fb?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
+    accentClass = "bg-yellow-400 text-black font-black uppercase shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wide transform hover:scale-105 hover:-rotate-2 transition-transform";
   }
 
   if (!unlocked) {
@@ -1111,14 +1111,16 @@ function DemoPlayer() {
         </div>
       )}
       
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+      <div 
         className="max-w-4xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
       >
         {/* Left: Player */}
-        <div className="flex-1 w-full max-w-sm flex flex-col items-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="flex-1 w-full max-w-sm flex flex-col items-center md:sticky md:top-24 self-start"
+        >
           <div className={`w-full max-w-[240px] md:max-w-[280px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
             templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
             templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
@@ -1173,10 +1175,15 @@ function DemoPlayer() {
                <CustomAudioPlayer src={demo.audioUrl} template={templateType} />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right: Lyrics */}
-        <div className="flex-1 w-full pb-32 md:pb-0 mt-8 md:mt-0">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="flex-1 w-full pb-32 md:pb-0 mt-8 md:mt-0"
+        >
           <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 md:mt-0 mt-0">{t.lyric}</h3>
           <div className="pr-4">
             {demo.lyrics ? (
@@ -1189,8 +1196,8 @@ function DemoPlayer() {
               </div>
             )}
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
