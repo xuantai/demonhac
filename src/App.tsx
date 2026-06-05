@@ -364,7 +364,7 @@ function Home() {
             </div>
             <div className="flex-1 w-full h-full relative bg-neutral-950">
               <iframe 
-                src={`https://www.youtube.com/embed/${playingVideo}?autoplay=1&origin=${encodeURIComponent(window.location.origin)}`} 
+                src={`https://www.youtube.com/embed/${playingVideo}?autoplay=1`} 
                 className="w-full h-full border-0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowFullScreen
@@ -552,26 +552,9 @@ function Home() {
                   </span>
                 )}
                 {demo.password && !demo.isReleased && (
-                  <div className="absolute top-8 right-2 z-20 bg-black/60 p-1 rounded-full border border-white/10 shadow-sm">
+                  <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
                      <Lock className="w-3.5 h-3.5 text-yellow-500" />
                   </div>
-                )}
-                {demo.isReleased && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      let url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
-                      if (url.includes('xn--ti-jia.com')) {
-                        url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                      }
-                      navigator.clipboard.writeText(url);
-                      alert('Đã copy link!');
-                    }}
-                    className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
-                  >
-                    <Share2 className="w-4 h-4 text-white" />
-                  </button>
                 )}
               </Link>
             ))}
@@ -991,13 +974,31 @@ function LeavesEffect() {
 
 function FlagEffect() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 flex items-center justify-center">
-       <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[linear-gradient(45deg,transparent,rgba(255,255,255,0.4),transparent)]" style={{ backgroundSize: '150% 150%' }}></div>
-       <div className="fixed inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-60">
-         <svg viewBox="0 0 100 100" className="w-[100vw] h-[100vw] max-w-[500px] max-h-[500px] text-yellow-500 drop-shadow-[0_0_80px_rgba(250,204,21,0.6)]" fill="currentColor">
-           <polygon points="50,0 58.82,37.86 97.55,34.55 64.69,54.70 79.39,90.45 50,65 20.61,90.45 35.31,54.70 2.45,34.55 41.18,37.86" />
-         </svg>
-       </div>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Flag Red base color with shifting shadows for wavy folds */}
+      <div 
+        className="absolute inset-0 bg-[#da251d]" 
+        style={{
+          backgroundImage: 'linear-gradient(105deg, rgba(0,0,0,0.2) 0%, rgba(255,255,255,0.12) 20%, rgba(0,0,0,0.3) 40%, rgba(255,255,255,0.15) 60%, rgba(0,0,0,0.3) 80%, rgba(255,255,255,0.08) 100%)',
+          backgroundSize: '200% 200%',
+          animation: 'flag-shadow 8s ease-in-out infinite'
+        }}
+      />
+      {/* Wavy lines layers to add depth of flowing silk */}
+      <div className="absolute inset-0 opacity-15 mix-blend-overlay animate-pulse" style={{ animationDuration: '4s' }}>
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 100 Q 250 50, 500 100 T 1000 100 T 1500 100 L 1500 1000 L 0 1000 Z" fill="rgba(255,255,255,0.2)" />
+        </svg>
+      </div>
+
+      {/* Flag Center Waving Star */}
+      <div className="fixed inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-80">
+        <div className="animate-[flag-weave_6s_ease-in-out_infinite] transform-gpu">
+          <svg viewBox="0 0 100 100" className="w-[85vw] h-[85vw] max-w-[420px] max-h-[420px] text-yellow-400 drop-shadow-[0_0_90px_rgba(250,204,21,0.75)]" fill="currentColor">
+            <polygon points="50,0 62.5,35 97.5,35 68.75,56.25 81.25,91.25 50,70 18.75,91.25 31.25,56.25 2.5,35 37.5,35" />
+          </svg>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1138,21 +1139,37 @@ function OceanWavesEffect() {
   );
 }
 
-function OceanShellsEffect() {
-  const elements = ['🐚', '🐚', '🐚', '🐡', '🐟', '🌊', '🐚'];
+function OceanNightSkyEffect() {
+  const clouds = [
+    { top: '10%', scale: 1.0, duration: '40s', delay: '-5s' },
+    { top: '22%', scale: 0.7, duration: '60s', delay: '-25s' },
+    { top: '5%', scale: 0.4, duration: '85s', delay: '-45s' },
+    { top: '35%', scale: 1.2, duration: '45s', delay: '-15s' },
+    { top: '18%', scale: 0.6, duration: '70s', delay: '-30s' },
+    { top: '48%', scale: 0.9, duration: '50s', delay: '-10s' },
+  ];
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-45">
-      {Array.from({ length: 25 }).map((_, i) => (
-        <div 
-          key={i} 
-          className="absolute text-lg sm:text-2xl animate-snow drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-sky-200"
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Crescent Moon */}
+      <div 
+        className="absolute top-12 right-12 md:top-16 md:right-16 text-5xl md:text-6xl drop-shadow-[0_0_25px_rgba(253,224,71,0.55)] select-none z-10 animate-pulse" 
+        style={{ animationDuration: '4s' }}
+      >
+        🌙
+      </div>
+      {/* Drifting Clouds */}
+      {clouds.map((c, i) => (
+        <div
+          key={i}
+          className="absolute text-5xl sm:text-7xl pointer-events-none select-none text-white/12"
           style={{
-            left: `${Math.random() * 100}%`,
-            animationDuration: `${Math.random() * 10 + 6}s`,
-            animationDelay: `${Math.random() * -12}s`
+            top: c.top,
+            animation: `drift ${c.duration} linear infinite`,
+            animationDelay: c.delay,
+            transform: `scale(${c.scale})`,
           }}
         >
-          {elements[i % elements.length]}
+          ☁️
         </div>
       ))}
     </div>
@@ -1343,7 +1360,7 @@ function DemoPlayer() {
         {templateType === '11' && <MysteriousEffect />}
         {templateType === '12' && <RetroNotesEffect />}
         {templateType === '13' && <><SunsetSunEffect /><SunsetLeavesEffect /></>}
-        {templateType === '14' && <><OceanWavesEffect /><OceanShellsEffect /></>}
+        {templateType === '14' && <><OceanWavesEffect /><OceanNightSkyEffect /></>}
         {templateType === '15' && <EightBitGameEffect />}
         
         {pageBgUrl && (
@@ -1429,7 +1446,7 @@ function DemoPlayer() {
       {templateType === '11' && <MysteriousEffect />}
       {templateType === '12' && <RetroNotesEffect />}
       {templateType === '13' && <><SunsetSunEffect /><SunsetLeavesEffect /></>}
-      {templateType === '14' && <><OceanWavesEffect /><OceanShellsEffect /></>}
+      {templateType === '14' && <><OceanWavesEffect /><OceanNightSkyEffect /></>}
       {templateType === '15' && <EightBitGameEffect />}
       
       {pageBgUrl && (
@@ -1561,7 +1578,7 @@ function DemoPlayer() {
                 templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
                 templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
                 templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
-                templateType === '4' ? 'shadow-2xl rounded-full border-8 animate-[spin_20s_linear_infinite]' : 
+                templateType === '4' ? 'shadow-[0_20px_45px_rgba(16,185,129,0.25)] rounded-[2rem] border-[6px] border-emerald-500 hover:scale-105 hover:rotate-1 transition-transform duration-500 bg-emerald-50' : 
                 templateType === '5' ? 'shadow-xl rounded-full border-4 animate-[bounce_2s_infinite] shadow-red-900/50' : 
                 templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
                 templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
@@ -1592,14 +1609,14 @@ function DemoPlayer() {
                   </div>
                 )}
                 <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '5' || templateType === '8' ? 'rounded-full' : ''} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
               </div>
             )}
           <h1 className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
             <span className="relative inline-block pr-10">
               {formatText(demo.title)}
               {demo.isReleased ? (
-               <div className="absolute -top-3 -right-6 origin-bottom-left rotate-[15deg] bg-emerald-600 text-[10px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none">
+               <div className="absolute -top-3 -right-6 origin-bottom-left rotate-[15deg] bg-emerald-600 text-[10px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle">
                  {t.lReleasedMark || 'RELEASED'}
                </div>
               ) : (
