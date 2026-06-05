@@ -438,7 +438,7 @@ async function startServer() {
       }
 
       let ogTitle = data.pageTitle || 'My Demos';
-      let ogImage = data.ogImageUrl || '';
+      let ogImage = data.ogImageUrl || data.homeCoverUrl || '';
 
       const match = url.match(/^\/demo\/([^\/?]+)/);
       if (match) {
@@ -446,12 +446,15 @@ async function startServer() {
         const demo = data.demos.find((d: any) => d.id === slug || d.slug === slug);
         if (demo) {
           ogTitle = `${demo.title} - ${demo.singer || demo.author || demo.composer || 'Unknown'} ( demo )`;
-          ogImage = demo.ogImageUrl || data.ogImageUrl || '';
+          ogImage = demo.ogImageUrl || demo.coverUrl || data.homeCoverUrl || data.ogImageUrl || '';
         }
       }
 
       if (ogImage && ogImage.startsWith('/')) {
          ogImage = `https://${req.get('host')}${ogImage}`;
+      } else if (!ogImage.startsWith('http')) {
+         // ensure it's a full URL if it doesn't have http
+         ogImage = `https://${req.get('host')}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
       }
 
       // Inject tags

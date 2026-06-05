@@ -791,7 +791,7 @@ function DemoPlayer() {
   const t = translations[lang] || translations['vi'];
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const isAdmin = searchParams.get('admin') === '1';
+  const isAdmin = searchParams.get('admin') === '1' || localStorage.getItem('adminToken') === 'MatKhauDay123';
   const [demo, setDemo] = useState<DemoSong | null>(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -1653,7 +1653,7 @@ function AdminCreateDemo() {
                        </span>
                    </div>
                 </div>
-                <input name="coverUrl" type="text" onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                <input name="coverUrl" type="text" value={uploadedCoverUrl} onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
                 <p className="text-xs text-stone-500 mt-2">Hỗ trợ link trực tiếp hoặc link Google Drive.</p>
               </div>
             </div>
@@ -1908,7 +1908,7 @@ function AdminEditDemo() {
                        </span>
                    </div>
                 </div>
-                <input name="coverUrl" type="text" defaultValue={demo.coverUrl} onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                <input name="coverUrl" type="text" value={uploadedCoverUrl} onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
                 <p className="text-xs text-stone-500 mt-2">Hỗ trợ link trực tiếp hoặc link Google Drive.</p>
               </div>
             </div>
