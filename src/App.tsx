@@ -364,7 +364,7 @@ function Home() {
             </div>
             <div className="flex-1 w-full h-full relative bg-neutral-950">
               <iframe 
-                src={`https://www.youtube.com/embed/${playingVideo}?autoplay=1`} 
+                src={`https://www.youtube-nocookie.com/embed/${playingVideo}?autoplay=1`} 
                 className="w-full h-full border-0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowFullScreen
@@ -543,9 +543,27 @@ function Home() {
                   </h3>
                 </div>
                 {demo.isReleased ? (
-                  <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
-                    {t.lReleasedMark || 'RELEASED'}
-                  </span>
+                  <>
+                    <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
+                      {t.lReleasedMark || 'RELEASED'}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        let url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
+                        if (url.includes('xn--ti-jia.com')) {
+                          url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                        }
+                        navigator.clipboard.writeText(url);
+                        alert('Đã copy link bài hát!');
+                      }}
+                      className="absolute bottom-3 right-3 z-20 bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-full border border-emerald-400/30 shadow-md transform hover:scale-110 active:scale-95 transition-all"
+                      title="Chia sẻ bài hát"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-white" />
+                    </button>
+                  </>
                 ) : (
                   <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
                     {t.lDemoMark || 'DEMO'}
@@ -1519,12 +1537,15 @@ function DemoPlayer() {
                   className="absolute top-2 right-2 w-28 h-44 z-30 pointer-events-none origin-[80%_15.6%]"
                 >
                   <svg width="112" height="176" viewBox="0 0 100 160" fill="none" className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
-                    {/* Base pivot center circle */}
-                    <circle cx="80" cy="25" r="14" fill="url(#pivotGrad)" stroke="#1a0c06" strokeWidth="1.5" />
-                    <circle cx="80" cy="25" r="6" fill="#111" />
+                    {/* Base pivot center using concentric circles for solid Safari/iOS support */}
+                    <circle cx="80" cy="25" r="14" fill="#b0bec5" stroke="#1a0c06" strokeWidth="1.5" />
+                    <circle cx="80" cy="25" r="8" fill="#455a64" />
+                    <circle cx="80" cy="25" r="4" fill="#111" />
                     
                     {/* Metallic arm pole (silver stainless-steel rod) curves to the cartridge */}
-                    <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="url(#rodGrad)" strokeWidth="4" strokeLinecap="round" />
+                    {/* Using dual layered solid-stroke paths for a perfect 3D cylindrical metal look visible on iOS Safari */}
+                    <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="#b0bec5" strokeWidth="5.5" strokeLinecap="round" />
+                    <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.8" />
                     
                     {/* Cartridge headshell */}
                     <g transform="translate(15, 126) rotate(35)">
@@ -1532,20 +1553,6 @@ function DemoPlayer() {
                       <rect x="2" y="2" width="8" height="6" fill="#8D6E63" />
                       <circle cx="6" cy="15" r="2" fill="#d4af37" />
                     </g>
-                    
-                    <defs>
-                      <radialGradient id="pivotGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#fff" />
-                        <stop offset="30%" stopColor="#b0bec5" />
-                        <stop offset="70%" stopColor="#37474f" />
-                        <stop offset="100%" stopColor="#1a0c06" />
-                      </radialGradient>
-                      <linearGradient id="rodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#cfd8dc" />
-                        <stop offset="50%" stopColor="#90a4ae" />
-                        <stop offset="100%" stopColor="#37474f" />
-                      </linearGradient>
-                    </defs>
                   </svg>
                 </motion.div>
 
@@ -1563,10 +1570,10 @@ function DemoPlayer() {
                       src={displayCoverUrl} 
                       crossOrigin="anonymous" 
                       alt="Cover" 
-                      className="w-[38%] h-[38%] rounded-full border-2 border-[#161616] z-10 object-cover" 
+                      className="w-[52%] h-[52%] rounded-full border-2 border-[#161616] z-10 object-cover" 
                     />
                   ) : (
-                    <div className="w-[38%] h-[38%] bg-stone-900 border-2 border-stone-800 rounded-full flex items-center justify-center z-10 text-stone-600">
+                    <div className="w-[52%] h-[52%] bg-stone-900 border-2 border-stone-800 rounded-full flex items-center justify-center z-10 text-stone-600">
                       <Music className="w-6 h-6" />
                     </div>
                   )}
