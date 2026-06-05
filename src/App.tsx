@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -37,7 +37,7 @@ function formatText(text: string | null | undefined) {
 // Global styles added in index.css
 
 const translations: Record<string, Record<string, string>> = {
-  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Demo Chưa Phát Hành", lReleased: "Nhạc Đã Phát Hành", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt", lDemosMobile: "Đề mô", lReleasedMobile: "Ra Rồi" },
+  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Đề Mô", lReleased: "Ra Rồi", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt", lDemosMobile: "Đề mô", lReleasedMobile: "Ra Rồi" },
   en: { dDesc: "Demo paradise of", btnSpot: "Listen on Spotify", lDemos: "Unreleased Demos", lReleased: "Released Music", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
   ko: { dDesc: "데모 파라다이스", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", lReleased: "발매된 음악", lDemoMark: "데모", lReleasedMark: "발매됨", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", pPrompt2: "이 데모를 들으려면 비밀번호를 입력하세요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
   ja: { dDesc: "デモパラダイス", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", lReleased: "リリースされた音楽", lDemoMark: "デモ", lReleasedMark: "リリース済", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", pPrompt2: "このデモを聴くにはパスワードを入力してください", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
@@ -460,13 +460,11 @@ function Home() {
           <div className="flex flex-wrap items-center gap-2 mb-8 bg-neutral-900/50 p-1.5 rounded-2xl border border-white/5 w-fit">
              <button onClick={() => setActiveListTab('released')} className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
                 <Music className={`w-4 h-4 md:w-5 md:h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} />
-                <span className="hidden sm:inline">{t.lReleased || 'Nhạc Đã Phát Hành'}</span>
-                <span className="sm:hidden">{t.lReleasedMobile || 'Ra Rồi'}</span>
+                <span>{t.lReleased}</span>
              </button>
              <button onClick={() => setActiveListTab('demos')} className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
                 <Disc3 className={`w-4 h-4 md:w-5 md:h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} />
-                <span className="hidden sm:inline">{t.lDemos}</span>
-                <span className="sm:hidden">{t.lDemosMobile || 'Đề mô'}</span>
+                <span>{t.lDemos}</span>
              </button>
           </div>
           
@@ -509,6 +507,18 @@ function Home() {
                      <Lock className="w-4 h-4 text-yellow-500" />
                   </div>
                 )}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
+                    navigator.clipboard.writeText(url);
+                    alert('Đã copy link!');
+                  }}
+                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+                >
+                  <Share2 className="w-4 h-4 text-white" />
+                </button>
               </Link>
             ))}
             {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
@@ -964,6 +974,33 @@ function StreetLightEffect() {
   );
 }
 
+function MysteriousEffect() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Background stardust */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay animate-flicker"></div>
+      
+      {/* Moon */}
+      <div className="absolute top-[10%] right-[10%] w-[15vw] h-[15vw] min-w-[100px] min-h-[100px] bg-[#fcf5c7] rounded-full shadow-[0_0_120px_rgba(252,245,199,0.5),inset_0_0_40px_rgba(218,165,32,0.8)] opacity-90 mix-blend-screen animate-[pulse_4s_ease-in-out_infinite]">
+         {/* Moon craters */}
+         <div className="absolute top-[20%] left-[30%] w-[15%] h-[15%] bg-black/10 rounded-full blur-[2px]"></div>
+         <div className="absolute top-[50%] left-[20%] w-[25%] h-[20%] bg-black/10 rounded-full blur-[3px]"></div>
+         <div className="absolute top-[40%] right-[20%] w-[20%] h-[25%] bg-black/10 rounded-full blur-[2px]"></div>
+      </div>
+      
+      {/* Gold glow around moon */}
+      <div className="absolute top-[-5%] right-[0%] w-[40vw] h-[40vw] min-w-[200px] min-h-[200px] bg-[#d4af37]/20 blur-[100px] rounded-full mix-blend-screen animate-flicker" style={{ animationDuration: '4s' }}></div>
+      
+      {/* Light smoke */}
+      <div className="absolute bottom-0 inset-x-0 h-[50vh] bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent blur-xl"></div>
+      
+      {/* Rain effect */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjUwIj48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvc3ZnPg==')] animate-rain" style={{ animationDuration: '0.6s' }}></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjgwIj48cmVjdCB4PSIyIiB3aWR0aD0iMSIgaGVpZ2h0PSI3MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA3KSIvPjwvc3ZnPg==')] animate-rain" style={{ animationDuration: '0.8s', animationDelay: '0.2s' }}></div>
+    </div>
+  );
+}
+
 function DemoPlayer() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
@@ -1015,7 +1052,9 @@ function DemoPlayer() {
   useEffect(() => {
      if (demo) {
         const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
-        const pageTitle = `${demo.title} - ${titleSuffix} ( demo )`;
+        const pageTitle = demo.isReleased 
+          ? `${demo.title} - ${titleSuffix}`
+          : `${demo.title} - ${titleSuffix} ( demo )`;
         document.title = pageTitle;
         
         let metaTitle = document.querySelector('meta[property="og:title"]');
@@ -1079,6 +1118,9 @@ function DemoPlayer() {
   } else if (templateType === '10') {
     themeClasses = "bg-neutral-900/80 bg-[url('/hiphop-bg.png')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
     accentClass = "bg-yellow-400 text-black font-black uppercase shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wide transform hover:scale-105 hover:-rotate-2 transition-transform";
+  } else if (templateType === '11') {
+    themeClasses = "bg-black text-amber-100 font-serif";
+    accentClass = "bg-[#d4af37] text-black font-bold uppercase shadow-[0_0_20px_rgba(212,175,55,0.4)]";
   }
 
   if (!unlocked) {
@@ -1101,6 +1143,7 @@ function DemoPlayer() {
         {templateType === '8' && <FlagEffect />}
         {templateType === '9' && <RainEffect />}
         {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
+        {templateType === '11' && <MysteriousEffect />}
         
         {pageBgUrl && (
           <div 
@@ -1182,6 +1225,7 @@ function DemoPlayer() {
       {templateType === '8' && <FlagEffect />}
       {templateType === '9' && <RainEffect />}
       {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
+      {templateType === '11' && <MysteriousEffect />}
       
       {pageBgUrl && (
         <div 
@@ -1430,7 +1474,7 @@ function AdminDashboard() {
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
         <aside className="w-full md:w-64 shrink-0 space-y-1">
           <button onClick={() => setActiveTab('demos')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'demos' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
-            <Disc3 className="w-5 h-5" /> Quản lý Demo
+            <Disc3 className="w-5 h-5" /> Quản lý
           </button>
           <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
             <Settings className="w-5 h-5" /> Hồ sơ & Playlist
@@ -1442,8 +1486,8 @@ function AdminDashboard() {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Danh sách</h2>
-                <Link to="/admin/new" className="bg-stone-900 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 hover:bg-stone-800 transition-colors shadow-sm">
-                  <Plus className="w-5 h-5" /> Demo mới
+                <Link to="/admin/new" className="bg-stone-900 text-white p-2.5 rounded-lg flex items-center justify-center hover:bg-stone-800 transition-colors shadow-sm" title="Tạo mới">
+                  <Plus className="w-5 h-5" />
                 </Link>
               </div>
               
@@ -1897,6 +1941,7 @@ function AdminCreateDemo() {
                   <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
                   <option value="9">Mẫu 9: Bầu trời xanh (Mây trắng)</option>
                   <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
+                  <option value="11">Mẫu 11: Kỳ bí (Đen vàng, Trăng khói mưa)</option>
                 </select>
               </div>
 
@@ -2186,6 +2231,7 @@ function AdminEditDemo() {
                   <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
                   <option value="9">Mẫu 9: Bầu trời xanh (Mây trắng)</option>
                   <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
+                  <option value="11">Mẫu 11: Kỳ bí (Đen vàng, Trăng khói mưa)</option>
                 </select>
               </div>
 

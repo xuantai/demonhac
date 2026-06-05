@@ -119,9 +119,31 @@ async function startServer() {
 
   const formatUrl = (url: string | undefined, baseUrl: string | undefined) => {
     if (!url) return url;
-    if (url.startsWith('/') && baseUrl) {
-      return baseUrl.replace(/\/$/, '') + url;
+    
+    // Normalize baseUrl if provided
+    let finalBaseUrl = baseUrl;
+    if (finalBaseUrl) {
+      finalBaseUrl = finalBaseUrl.trim();
+      if (!/^https?:\/\//i.test(finalBaseUrl)) {
+        finalBaseUrl = 'https://' + finalBaseUrl;
+      }
+      finalBaseUrl = finalBaseUrl.replace(/\/$/, '');
     }
+
+    // Replace any absolute ais-dev or ais-pre URLs with the global base URL if set
+    if (finalBaseUrl && url.includes('run.app')) {
+       url = url.replace(/https?:\/\/[a-zA-Z0-9-]+\.run\.app/g, finalBaseUrl);
+    }
+    
+    // Also replace absolute xtpro domains just in case
+    if (finalBaseUrl && url.includes('xtpro.vn')) {
+        url = url.replace(/https?:\/\/[a-zA-Z0-9-]+\.xtpro\.vn/g, finalBaseUrl);
+    }
+
+    if (url.startsWith('/') && finalBaseUrl) {
+      return finalBaseUrl + url;
+    }
+    
     return url;
   };
 
@@ -548,7 +570,10 @@ async function startServer() {
         const slug = match[1];
         const demo = data.demos.find((d: any) => d.id === slug || d.slug === slug);
         if (demo) {
-          ogTitle = `${demo.title} - ${demo.singer || demo.author || demo.composer || 'Unknown'} ( demo )`;
+          const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
+          ogTitle = demo.isReleased 
+            ? `${demo.title} - ${titleSuffix}`
+            : `${demo.title} - ${titleSuffix} ( demo )`;
           
           let coverToUse = demo.coverUrl;
           if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
