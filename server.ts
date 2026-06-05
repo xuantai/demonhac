@@ -306,7 +306,8 @@ async function startServer() {
       password: req.body.password || '',
       createdAt: Date.now(),
       composer: req.body.composer || 'A.C Xuân Tài',
-      singer: req.body.singer || 'A.C Xuân Tài'
+      singer: req.body.singer || 'A.C Xuân Tài',
+      isReleased: req.body.isReleased === 'true'
     };
     data.demos.push(newDemo);
     await saveData(data);
@@ -336,6 +337,9 @@ async function startServer() {
         if (updatedData.singer === '') updatedData.singer = 'A.C Xuân Tài';
         if (!updatedData.composer && !data.demos[idx].composer) updatedData.composer = 'A.C Xuân Tài';
         if (!updatedData.singer && !data.demos[idx].singer) updatedData.singer = 'A.C Xuân Tài';
+        if (req.body.isReleased !== undefined) {
+             updatedData.isReleased = req.body.isReleased === 'true';
+        }
 
         data.demos[idx] = { ...data.demos[idx], ...updatedData };
         await saveData(data);
@@ -487,7 +491,7 @@ async function startServer() {
         html = await fs.readFile(path.join(process.cwd(), 'dist', 'index.html'), 'utf-8');
       }
 
-      let ogTitle = data.pageTitle || 'My Demos';
+      let ogTitle = data.pageTitle || `Thiên đường demo của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : '');
       let ogDesc = data.artistBio || '';
 
@@ -510,11 +514,12 @@ async function startServer() {
         }
       }
 
+      const host = req.get('x-forwarded-host') || req.get('host');
       if (ogImage && ogImage.startsWith('/')) {
-         ogImage = `https://${req.get('host')}${ogImage}`;
+         ogImage = `https://${host}${ogImage}`;
       } else if (ogImage && !ogImage.startsWith('http')) {
          // ensure it's a full URL if it doesn't have http
-         ogImage = `https://${req.get('host')}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
+         ogImage = `https://${host}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
       }
 
       // Inject tags

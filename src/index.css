@@ -125,3 +125,13 @@
 .animate-flicker {
   animation: flicker 4s infinite linear;
 }
+
+.bg-notebook-dark {
+  background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(255, 255, 255, 0.05) 31px, rgba(255, 255, 255, 0.05) 32px);
+  background-size: 100% 32px;
+}
+
+.bg-notebook-light {
+  background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(0, 0, 0, 0.05) 31px, rgba(0, 0, 0, 0.05) 32px);
+  background-size: 100% 32px;
+}

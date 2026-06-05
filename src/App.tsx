@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -28,12 +28,12 @@ function formatText(text: string | null | undefined) {
 // Global styles added in index.css
 
 const translations: Record<string, Record<string, string>> = {
-  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Demo Mới Nhất", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt" },
-  en: { dDesc: "Demo paradise of", btnSpot: "Listen on Spotify", lDemos: "Latest Demos", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
-  ko: { dDesc: "데모 파라다이스", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", pPrompt2: "이 데모를 들으려면 비밀번호를 입력하세요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
-  ja: { dDesc: "デモパラダイス", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", pPrompt2: "このデモを聴くにはパスワードを入力してください", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
-  th: { dDesc: "สวรรค์แห่งเพลงเดโม่ของ", btnSpot: "ฟังบน Spotify", lDemos: "ตัวอย่างล่าสุด", pReq: "รหัสผ่าน", pNow: "ฟังเลย", nDemo: "ไม่มีตัวอย่าง", rMv: "มิวสิควิดีโอ", nMv: "ไม่มี MV", lMore: "โหลดเพิ่ม", mList: "ผู้ฟังรายเดือน", load: "กำลังโหลด...", back: "กลับ", adm: "แอดมิน", edit: "แก้ไข", pPrompt: "ต้องใช้รหัสผ่าน", pPrompt2: "ใส่รหัสผ่านเพื่อฟังเดโม่นี้", unlock: "ปลดล็อค", wPass: "รหัสผ่านผิด", lyric: "เนื้อเพลง", nLyric: "ไม่มีเนื้อเพลง", sAuth: "แต่งโดย:", lang: "ไทย" },
-  zh: { dDesc: "的演示天堂", btnSpot: "在Spotify收听", lDemos: "最新演示", pReq: "需要密码", pNow: "立即收听", nDemo: "暂无演示", rMv: "已发行的视频", nMv: "暂无视频", lMore: "加载更多", mList: "月度听众", load: "载入中...", back: "返回", adm: "管理", edit: "编辑", pPrompt: "需要密码", pPrompt2: "输入密码收听此演示", unlock: "解锁", wPass: "密码错误", lyric: "歌词", nLyric: "暂无歌词", sAuth: "作曲:", lang: "中文" }
+  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Demo Chưa Phát Hành", lReleased: "Nhạc Đã Phát Hành", lDemoMark: "DEMO", lReleasedMark: "ĐÃ PHÁT HÀNH", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt" },
+  en: { dDesc: "Demo paradise of", btnSpot: "Listen on Spotify", lDemos: "Unreleased Demos", lReleased: "Released Music", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
+  ko: { dDesc: "데모 파라다이스", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", lReleased: "발매된 음악", lDemoMark: "데모", lReleasedMark: "발매됨", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", pPrompt2: "이 데모를 들으려면 비밀번호를 입력하세요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
+  ja: { dDesc: "デモパラダイス", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", lReleased: "リリースされた音楽", lDemoMark: "デモ", lReleasedMark: "リリース済", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", pPrompt2: "このデモを聴くにはパスワードを入力してください", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
+  th: { dDesc: "สวรรค์แห่งเพลงเดโม่ของ", btnSpot: "ฟังบน Spotify", lDemos: "ตัวอย่างล่าสุด", lReleased: "เพลงที่ปล่อยแล้ว", lDemoMark: "เดโม่", lReleasedMark: "ปล่อยแล้ว", pReq: "รหัสผ่าน", pNow: "ฟังเลย", nDemo: "ไม่มีตัวอย่าง", rMv: "มิวสิควิดีโอ", nMv: "ไม่มี MV", lMore: "โหลดเพิ่ม", mList: "ผู้ฟังรายเดือน", load: "กำลังโหลด...", back: "กลับ", adm: "แอดมิน", edit: "แก้ไข", pPrompt: "ต้องใช้รหัสผ่าน", pPrompt2: "ใส่รหัสผ่านเพื่อฟังเดโม่นี้", unlock: "ปลดล็อค", wPass: "รหัสผ่านผิด", lyric: "เนื้อเพลง", nLyric: "ไม่มีเนื้อเพลง", sAuth: "แต่งโดย:", lang: "ไทย" },
+  zh: { dDesc: "的演示天堂", btnSpot: "在Spotify收听", lDemos: "最新演示", lReleased: "已发行的音乐", lDemoMark: "演示", lReleasedMark: "已发行", pReq: "需要密码", pNow: "立即收听", nDemo: "暂无演示", rMv: "已发行的视频", nMv: "暂无视频", lMore: "加载更多", mList: "月度听众", load: "载入中...", back: "返回", adm: "管理", edit: "编辑", pPrompt: "需要密码", pPrompt2: "输入密码收听此演示", unlock: "解锁", wPass: "密码错误", lyric: "歌词", nLyric: "暂无歌词", sAuth: "作曲:", lang: "中文" }
 };
 
 interface LangContextType {
@@ -189,10 +189,18 @@ function Home() {
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [spotifyInfo, setSpotifyInfo] = useState<any>(null);
   const [visibleMVs, setVisibleMVs] = useState(4);
+  const [activeListTab, setActiveListTab] = useState<'demos'|'released'>('released');
   const [showArtist, setShowArtist] = useState(false);
   const [spotifyLoaded, setSpotifyLoaded] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const observer = useRef<IntersectionObserver>();
+
+  useEffect(() => {
+    const tabInterval = setInterval(() => {
+      setActiveListTab(prev => prev === 'demos' ? 'released' : 'demos');
+    }, 20000);
+    return () => clearInterval(tabInterval);
+  }, []);
 
   // For slideshow
   useEffect(() => {
@@ -270,7 +278,7 @@ function Home() {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-rose-500 selection:text-white relative z-0"
+      className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-rose-500 selection:text-white relative z-0 bg-notebook-dark"
     >
       {data.slideshowImages && data.slideshowImages.length > 0 ? (
         <div className="fixed inset-0 z-[-1] pointer-events-none bg-neutral-950">
@@ -440,13 +448,17 @@ function Home() {
         
         {/* Demos Section */}
         <section>
-          <div className="flex items-center gap-3 mb-8 px-4 border-b border-white/10 pb-4">
-            <Disc3 className="w-6 h-6 text-rose-500" />
-            <h2 className="text-2xl font-bold tracking-tight">{t.lDemos}</h2>
+          <div className="flex flex-wrap items-center gap-2 mb-8 bg-neutral-900/50 p-1.5 rounded-2xl border border-white/5 w-fit">
+             <button onClick={() => setActiveListTab('released')} className={`flex items-center gap-2 px-6 py-3 rounded-xl text-lg md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Music className={`w-5 h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} /> {t.lReleased || 'Nhạc Đã Phát Hành'}
+             </button>
+             <button onClick={() => setActiveListTab('demos')} className={`flex items-center gap-2 px-6 py-3 rounded-xl text-lg md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Disc3 className={`w-5 h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} /> {t.lDemos}
+             </button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.demos.filter(d => d.status === 'public').map(demo => (
+            {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
               <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
                 <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
@@ -461,11 +473,17 @@ function Home() {
                 <div className="flex items-start justify-between relative z-10 flex-1">
                   <div>
                     <h3 className="text-xl font-bold mb-2 group-hover:text-rose-400 transition-colors flex items-center">
-                      <span className="relative inline-block">
+                      <span className="relative inline-block pr-8">
                         {formatText(demo.title)}
-                        <span className="absolute -top-3 -right-8 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
-                          DEMO
-                        </span>
+                        {demo.isReleased ? (
+                          <span className="absolute -top-3 -right-6 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none">
+                            {t.lReleasedMark || 'RELEASED'}
+                          </span>
+                        ) : (
+                          <span className="absolute -top-3 -right-4 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
+                            {t.lDemoMark || 'DEMO'}
+                          </span>
+                        )}
                       </span>
                     </h3>
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 mt-3">
@@ -482,9 +500,9 @@ function Home() {
                 </div>
               </Link>
             ))}
-            {data.demos.filter(d => d.status === 'public').length === 0 && (
+            {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
               <div className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl">
-                {t.nDemo}
+                {activeListTab === 'demos' ? t.nDemo : 'Chưa có bài hát phát hành nào.'}
               </div>
             )}
           </div>
@@ -664,6 +682,132 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
 
         <div className="w-20 md:w-24 flex justify-end"></div>
       </div>
+    </div>
+  );
+}
+
+function ButterflyEffect() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-60">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute animate-float-shape"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 8 + 6}s`,
+            animationDelay: `${Math.random() * -10}s`
+          }}
+        >
+          <div className="text-xl md:text-3xl animate-[spin_4s_linear_infinite]" style={{ animationDirection: i % 2 === 0 ? 'normal' : 'reverse' }}>🦋</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CandyEffect() {
+  const candies = ['🍬', '🍭', '🍫', '🍡'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-80">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute text-xl md:text-2xl animate-snow"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 10 + 5}s`,
+            animationDelay: `${Math.random() * -15}s`
+          }}
+        >
+          {candies[Math.floor(Math.random() * candies.length)]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ElectricEffect() {
+  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-cyan-500'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-80">
+      {Array.from({ length: 15 }).map((_, i) => (
+        <div 
+          key={i} 
+          className={`absolute w-1 rounded-full animate-snow shadow-[0_0_10px_currentColor] ${colors[i % colors.length]}`}
+          style={{
+            left: `${Math.random() * 100}%`,
+            height: `${Math.random() * 100 + 50}px`,
+            animationDuration: `${Math.random() * 5 + 3}s`,
+            animationDelay: `${Math.random() * -5}s`,
+            color: 'inherit'
+          }}
+        ></div>
+      ))}
+    </div>
+  );
+}
+
+function ChainEffect() {
+  const chains = ['⛓️', '💎', '💰', '👑'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-70">
+      {Array.from({ length: 25 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute text-2xl md:text-3xl animate-snow drop-shadow-md"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 8 + 4}s`,
+            animationDelay: `${Math.random() * -10}s`,
+            transform: `rotate(${Math.random() * 360}deg)`
+          }}
+        >
+          {chains[Math.floor(Math.random() * chains.length)]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function NoteEffect() {
+  const notes = ['🎵', '🎼', '🎶', '♩', '♪', '♫', '♬'];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-40">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute text-2xl md:text-4xl animate-snow drop-shadow-sm text-stone-100"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 12 + 6}s`,
+            animationDelay: `${Math.random() * -15}s`
+          }}
+        >
+          {notes[Math.floor(Math.random() * notes.length)]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EightBitEffect() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-30">
+      {Array.from({ length: 30 }).map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute w-4 h-4 bg-white animate-snow"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${Math.random() * 10 + 2}s`,
+            animationDelay: `${Math.random() * -10}s`,
+            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+            boxShadow: '4px 4px 0px rgba(0,0,0,0.5)'
+          }}
+        ></div>
+      ))}
     </div>
   );
 }
@@ -891,8 +1035,8 @@ function DemoPlayer() {
     themeClasses = "bg-slate-900 text-slate-300 bg-[linear-gradient(to_bottom,_var(--tw-gradient-stops))] from-slate-900 to-slate-950";
     accentClass = "bg-slate-700 text-white";
   } else if (templateType === '4') {
-    themeClasses = "bg-teal-50 text-teal-900 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-teal-100 to-teal-50";
-    accentClass = "bg-teal-600 text-white";
+    themeClasses = "bg-emerald-50 text-emerald-900 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]";
+    accentClass = "bg-emerald-600 text-emerald-50 shadow-lg shadow-emerald-200";
   } else if (templateType === '5') {
     themeClasses = "bg-red-500 text-white bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-rose-400 to-red-600";
     accentClass = "bg-white text-red-500";
@@ -900,14 +1044,14 @@ function DemoPlayer() {
     themeClasses = "bg-pink-50 text-pink-900 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-fuchsia-100 to-pink-50";
     accentClass = "bg-pink-500 text-white shadow-lg shadow-pink-200";
   } else if (templateType === '7') {
-    themeClasses = "bg-[#faf9f6] text-stone-800 bg-[url('https://www.transparenttextures.com/patterns/notebook.png')]";
+    themeClasses = "bg-[#faf9f6] text-stone-800 bg-notebook-light";
     accentClass = "bg-stone-800 text-[#faf9f6]";
   } else if (templateType === '8') {
     themeClasses = "bg-red-600 text-yellow-50 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-500 to-red-700 [text-shadow:0_2px_4px_rgba(153,27,27,0.8)]";
     accentClass = "bg-yellow-400 text-red-900 font-bold shadow-[0_0_15px_rgba(250,204,21,0.5)]";
   } else if (templateType === '9') {
-    themeClasses = "bg-sky-200 text-white drop-shadow-md bg-[linear-gradient(135deg,_var(--tw-gradient-stops))] from-sky-300 via-purple-200 to-pink-300";
-    accentClass = "bg-white/80 backdrop-blur text-purple-700 shadow-xl shadow-purple-200/50";
+    themeClasses = "bg-sky-100 text-sky-900 drop-shadow-sm bg-[linear-gradient(to_bottom,_var(--tw-gradient-stops))] from-sky-400 via-sky-200 to-white";
+    accentClass = "bg-white/80 backdrop-blur text-sky-700 shadow-xl shadow-sky-200/50 outline outline-2 outline-white";
   } else if (templateType === '10') {
     themeClasses = "bg-neutral-900/80 bg-[url('/hiphop-bg.png')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
     accentClass = "bg-yellow-400 text-black font-black uppercase shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wide transform hover:scale-105 hover:-rotate-2 transition-transform";
@@ -923,17 +1067,20 @@ function DemoPlayer() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} 
           className="fixed inset-0 z-[9999] bg-black origin-bottom pointer-events-none" 
         />
+        {templateType === '1' && <ButterflyEffect />}
+        {templateType === '2' && <ElectricEffect />}
         {templateType === '3' && <SnowEffect />}
-        {templateType === '5' && <CuteEffect />}
-        {templateType === '6' && <BlossomEffect />}
+        {templateType === '4' && <NoteEffect />}
+        {templateType === '5' && <><CuteEffect /><CandyEffect /></>}
+        {templateType === '6' && <><BlossomEffect /><EightBitEffect /></>}
         {templateType === '7' && <LeavesEffect />}
         {templateType === '8' && <FlagEffect />}
         {templateType === '9' && <RainEffect />}
-        {templateType === '10' && <StreetLightEffect />}
+        {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
         
         {pageBgUrl && (
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-50 blur-md scale-105"
+            className="absolute inset-0 bg-cover bg-center opacity-20 blur-md scale-105"
             style={{ backgroundImage: `url(${pageBgUrl})` }}
           ></div>
         )}
@@ -1001,17 +1148,20 @@ function DemoPlayer() {
         transition={{ duration: 1, delay: 0.3 }}
         className="absolute inset-0 pointer-events-none z-0" 
       />
+      {templateType === '1' && <ButterflyEffect />}
+      {templateType === '2' && <ElectricEffect />}
       {templateType === '3' && <SnowEffect />}
-      {templateType === '5' && <CuteEffect />}
-      {templateType === '6' && <BlossomEffect />}
+      {templateType === '4' && <NoteEffect />}
+      {templateType === '5' && <><CuteEffect /><CandyEffect /></>}
+      {templateType === '6' && <><BlossomEffect /><EightBitEffect /></>}
       {templateType === '7' && <LeavesEffect />}
       {templateType === '8' && <FlagEffect />}
       {templateType === '9' && <RainEffect />}
-      {templateType === '10' && <StreetLightEffect />}
+      {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
       
       {pageBgUrl && (
         <div 
-          className="fixed inset-0 bg-cover bg-center opacity-50 blur-md scale-105 pointer-events-none z-0"
+          className="fixed inset-0 bg-cover bg-center opacity-20 blur-md scale-105 pointer-events-none z-0"
           style={{ backgroundImage: `url(${pageBgUrl})` }}
         ></div>
       )}
@@ -1058,6 +1208,12 @@ function DemoPlayer() {
             templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
             templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 'shadow-2xl rounded-3xl border-4'
           }`}>
+            {templateType === '9' && (
+              <>
+                <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-10 drop-shadow-md">☁️</div>
+                <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-10 drop-shadow-md" style={{animationDelay: '1s'}}>☁️</div>
+              </>
+            )}
             {displayCoverUrl ? (
               <img src={displayCoverUrl} crossOrigin="anonymous" alt="Cover" className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`} />
             ) : (
@@ -1069,11 +1225,17 @@ function DemoPlayer() {
             <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '5' || templateType === '8' ? 'rounded-full' : ''} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
-            <span className="relative inline-block">
+            <span className="relative inline-block pr-10">
               {formatText(demo.title)}
-               <div className="absolute -top-3 -right-10 origin-bottom-left rotate-[15deg] bg-rose-600 text-[10px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
-                 DEMO
+              {demo.isReleased ? (
+               <div className="absolute -top-3 -right-6 origin-bottom-left rotate-[15deg] bg-emerald-600 text-[10px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none">
+                 {t.lReleasedMark || 'RELEASED'}
                </div>
+              ) : (
+               <div className="absolute -top-3 -right-2 origin-bottom-left rotate-[15deg] bg-rose-600 text-[10px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
+                 {t.lDemoMark || 'DEMO'}
+               </div>
+              )}
             </span>
           </h1>
           {(demo.singer || demo.author) && <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">{formatText(demo.singer || demo.author)}</p>}
@@ -1134,6 +1296,16 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'demos'|'profile'>('demos');
   const [toast, setToast] = useState('');
   const [slideshowImages, setSlideshowImages] = useState<string[]>([]);
+  const [homeCoverProgress, setHomeCoverProgress] = useState(0);
+  const [faviconProgress, setFaviconProgress] = useState(0);
+  const [ogImageProgress, setOgImageProgress] = useState(0);
+  const [slideProgress, setSlideProgress] = useState(0);
+  const [draggingSlideIdx, setDraggingSlideIdx] = useState<number | null>(null);
+  
+  const [homeCoverUrlPreview, setHomeCoverUrlPreview] = useState('');
+  const [faviconUrlPreview, setFaviconUrlPreview] = useState('');
+  const [ogImageUrlPreview, setOgImageUrlPreview] = useState('');
+  
   const navigate = useNavigate();
 
   const loadData = () => fetch('/api/admin/data').then(res => res.json()).then(resData => {
@@ -1141,9 +1313,35 @@ function AdminDashboard() {
     if (resData.slideshowImages) {
       setSlideshowImages(resData.slideshowImages);
     }
+    if (resData.homeCoverUrl) setHomeCoverUrlPreview(resData.homeCoverUrl);
+    if (resData.faviconUrl) setFaviconUrlPreview(resData.faviconUrl);
+    if (resData.ogImageUrl) setOgImageUrlPreview(resData.ogImageUrl);
   });
 
   useEffect(() => { loadData(); }, []);
+
+  const uploadWithProgress = (file: File, setProgress: (p: number) => void): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload', true);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          setProgress(100);
+          const res = JSON.parse(xhr.responseText);
+          resolve(res.url);
+        } else reject(new Error('Upload failed'));
+      };
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send(formData);
+    });
+  };
 
   const handleShare = (slugOrId: string) => {
     const url = window.location.origin + '/demo/' + slugOrId;
@@ -1249,7 +1447,7 @@ function AdminDashboard() {
                                demo.template === '6' ? 'Hạnh phúc' : 
                                demo.template === '7' ? 'Học đường' : 
                                demo.template === '8' ? 'Tổ quốc' : 
-                               demo.template === '9' ? 'Anime' : 'Mặc định'}
+                               demo.template === '9' ? 'Bầu trời xanh' : 'Mặc định'}
                             </span>
                             {demo.password && (
                               <span className="bg-stone-100 px-2 py-0.5 rounded font-medium border border-stone-200 flex items-center gap-1 text-stone-800">
@@ -1295,98 +1493,116 @@ function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh bìa trang chủ</label>
-                  <div className="flex gap-2">
-                    <input name="homeCoverUrl" id="homeCoverUrlInput" defaultValue={data.homeCoverUrl} placeholder="Web URL hoặc Upload..." className="flex-1 w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" />
-                    <button type="button" className="px-4 py-3 bg-stone-200 text-stone-700 rounded-xl font-bold hover:bg-stone-300 whitespace-nowrap" onClick={() => document.getElementById('homeCoverUpload')?.click()}>Upload Ảnh</button>
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {homeCoverUrlPreview && <img src={homeCoverUrlPreview} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                    <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${homeCoverProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('homeCoverUpload')?.click()}>
+                        {homeCoverProgress > 0 && homeCoverProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${homeCoverProgress}%` }}></div>}
+                        <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {homeCoverProgress > 0 && homeCoverProgress < 100 ? `${homeCoverProgress}%` : ''}</span>
+                    </button>
+                    {homeCoverUrlPreview && <button type="button" onClick={() => { setHomeCoverUrlPreview(''); setHomeCoverProgress(0); (document.getElementById('homeCoverUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                    <input type="hidden" name="homeCoverUrl" value={homeCoverUrlPreview} />
                     <input type="file" id="homeCoverUpload" className="hidden" accept="image/*" onChange={async (e) => {
                       if (!e.target.files?.[0]) return;
-                      const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
                       try {
-                        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                        const json = await res.json();
-                        if (json.url) {
-                          (document.getElementById('homeCoverUrlInput') as HTMLInputElement).value = json.url;
-                        }
+                        const url = await uploadWithProgress(e.target.files[0], setHomeCoverProgress);
+                        setHomeCoverUrlPreview(url);
                       } catch (err) {
                         alert('Lỗi upload');
+                        setHomeCoverProgress(0);
                       }
                     }} />
                   </div>
                   <p className="text-xs text-stone-500 mt-2">Dùng để tạo hiệu ứng nền cho trang chủ, nên dùng ảnh ngang chất lượng cao.</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Slideshow Trang chủ (Tự động thay đổi, bấm xóa để gỡ ảnh)</label>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Slideshow Trang chủ (Tự động thay đổi, kéo thả để sắp xếp, bấm xóa để gỡ ảnh)</label>
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-wrap gap-3">
                        {slideshowImages.map((src, i) => (
-                          <div key={i} className="relative w-24 h-24 bg-stone-200 rounded-xl overflow-hidden border border-stone-300 group">
-                             <img src={src} className="w-full h-full object-cover" />
+                          <div 
+                             key={src + i} 
+                             draggable
+                             onDragStart={() => setDraggingSlideIdx(i)}
+                             onDragEnter={(e) => {
+                               e.preventDefault();
+                               if (draggingSlideIdx === null || draggingSlideIdx === i) return;
+                               const newImages = [...slideshowImages];
+                               const item = newImages.splice(draggingSlideIdx, 1)[0];
+                               newImages.splice(i, 0, item);
+                               setDraggingSlideIdx(i);
+                               setSlideshowImages(newImages);
+                             }}
+                             onDragOver={(e) => e.preventDefault()}
+                             onDragEnd={() => setDraggingSlideIdx(null)}
+                             className={`relative w-24 h-24 bg-stone-200 rounded-xl overflow-hidden border border-stone-300 group cursor-move ${draggingSlideIdx === i ? 'opacity-50' : 'opacity-100'}`}
+                          >
+                             <img src={src} className="w-full h-full object-cover pointer-events-none" />
                              <button type="button" onClick={() => setSlideshowImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold text-sm">Xóa</button>
                           </div>
                        ))}
-                       <button type="button" className="w-24 h-24 rounded-xl border-2 border-dashed border-stone-300 text-stone-400 hover:border-stone-500 hover:text-stone-600 flex flex-col items-center justify-center gap-1 transition-colors" onClick={() => document.getElementById('slideUpload')?.click()}>
-                          <div className="text-2xl">+</div>
-                          <div className="text-xs font-semibold">Thêm ảnh</div>
+                       <button type="button" className="w-24 h-24 rounded-xl border-2 border-dashed border-stone-300 text-stone-400 hover:border-stone-500 hover:text-stone-600 flex flex-col items-center justify-center gap-1 transition-colors relative overflow-hidden" onClick={() => document.getElementById('slideUpload')?.click()}>
+                          {slideProgress > 0 && slideProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-300 pointer-events-none" style={{ width: `${slideProgress}%` }}></div>}
+                          <div className="text-2xl relative z-10">+</div>
+                          <div className="text-xs font-semibold relative z-10 px-1 text-center">{slideProgress > 0 && slideProgress < 100 ? `${slideProgress}%` : 'Thêm ảnh'}</div>
                        </button>
                     </div>
                     <input type="file" id="slideUpload" className="hidden" accept="image/*" multiple onChange={async (e) => {
                       if (!e.target.files?.length) return;
                       const newUploads = [];
                       for (let i = 0; i < e.target.files.length; i++) {
-                         const formData = new FormData();
-                         formData.append('file', e.target.files[i]);
                          try {
-                           const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                           const json = await res.json();
-                           if (json.url) newUploads.push(json.url);
+                           const url = await uploadWithProgress(e.target.files[i], setSlideProgress);
+                           newUploads.push(url);
                          } catch (err) {
                            console.error(err);
                          }
                       }
                       if (newUploads.length) setSlideshowImages(prev => [...prev, ...newUploads]);
+                      setSlideProgress(0);
                       e.target.value = '';
                     }} />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Favicon (Icon tab trình duyệt)</label>
-                  <div className="flex gap-2">
-                    <input name="faviconUrl" id="faviconUrlInput" defaultValue={data.faviconUrl} placeholder="Web URL hoặc Upload..." className="flex-1 w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" />
-                    <button type="button" className="px-4 py-3 bg-stone-200 text-stone-700 rounded-xl font-bold hover:bg-stone-300 whitespace-nowrap" onClick={() => document.getElementById('faviconUpload')?.click()}>Upload Icon</button>
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {faviconUrlPreview && <img src={faviconUrlPreview} className="w-16 h-16 rounded-xl object-contain border border-stone-200 shadow-sm" />}
+                    <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${faviconProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('faviconUpload')?.click()}>
+                        {faviconProgress > 0 && faviconProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${faviconProgress}%` }}></div>}
+                        <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {faviconProgress > 0 && faviconProgress < 100 ? `${faviconProgress}%` : ''}</span>
+                    </button>
+                    {faviconUrlPreview && <button type="button" onClick={() => { setFaviconUrlPreview(''); setFaviconProgress(0); (document.getElementById('faviconUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                    <input type="hidden" name="faviconUrl" value={faviconUrlPreview} />
                     <input type="file" id="faviconUpload" className="hidden" accept="image/*" onChange={async (e) => {
                       if (!e.target.files?.[0]) return;
-                      const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
                       try {
-                        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                        const json = await res.json();
-                        if (json.url) {
-                          (document.getElementById('faviconUrlInput') as HTMLInputElement).value = json.url;
-                        }
+                        const url = await uploadWithProgress(e.target.files[0], setFaviconProgress);
+                        setFaviconUrlPreview(url);
                       } catch (err) {
                         alert('Lỗi upload');
+                        setFaviconProgress(0);
                       }
                     }} />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Thumbnail Website (Ảnh khi share link)</label>
-                  <div className="flex gap-2">
-                    <input name="ogImageUrl" id="ogImageUrlInput" defaultValue={data.ogImageUrl} placeholder="Web URL hoặc Upload..." className="flex-1 w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" />
-                    <button type="button" className="px-4 py-3 bg-stone-200 text-stone-700 rounded-xl font-bold hover:bg-stone-300 whitespace-nowrap" onClick={() => document.getElementById('ogImageUpload')?.click()}>Upload Thumbnail</button>
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {ogImageUrlPreview && <img src={ogImageUrlPreview} className="w-24 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                    <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${ogImageProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('ogImageUpload')?.click()}>
+                        {ogImageProgress > 0 && ogImageProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${ogImageProgress}%` }}></div>}
+                        <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {ogImageProgress > 0 && ogImageProgress < 100 ? `${ogImageProgress}%` : ''}</span>
+                    </button>
+                    {ogImageUrlPreview && <button type="button" onClick={() => { setOgImageUrlPreview(''); setOgImageProgress(0); (document.getElementById('ogImageUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                    <input type="hidden" name="ogImageUrl" value={ogImageUrlPreview} />
                     <input type="file" id="ogImageUpload" className="hidden" accept="image/*" onChange={async (e) => {
                       if (!e.target.files?.[0]) return;
-                      const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
                       try {
-                        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                        const json = await res.json();
-                        if (json.url) {
-                          (document.getElementById('ogImageUrlInput') as HTMLInputElement).value = json.url;
-                        }
+                        const url = await uploadWithProgress(e.target.files[0], setOgImageProgress);
+                        setOgImageUrlPreview(url);
                       } catch (err) {
                         alert('Lỗi upload');
+                        setOgImageProgress(0);
                       }
                     }} />
                   </div>
@@ -1583,49 +1799,45 @@ function AdminCreateDemo() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc (Audio) *</label>
-                <div className={`border-2 border-dashed ${audioUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
-                  {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${audioUploadProgress}%` }}></div>}
-                  <input type="file" name="audio" accept="audio/mp3,audio/wav,audio/*" required={!uploadedAudioUrl} onChange={e => handleFileUpload(e, 'audio')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  <div className="relative z-0">
-                      <Upload className={`w-8 h-8 mx-auto mb-2 ${audioUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
-                      <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
-                          {audioUploadProgress > 0 && audioUploadProgress < 100 ? `Đang tải lên ${audioUploadProgress}%` : (audioUploadProgress === 100 ? 'Đã tải nhạc lên xong!' : 'Chọn file audio')}
-                      </span>
-                  </div>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {(uploadedAudioUrl || audioUploadProgress === 100) && <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-500 shadow-sm"><FileAudio className="w-8 h-8"/></div>}
+                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${audioUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('audioCreateUpload')?.click()}>
+                      {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${audioUploadProgress}%` }}></div>}
+                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {audioUploadProgress > 0 && audioUploadProgress < 100 ? `${audioUploadProgress}%` : ''}</span>
+                  </button>
+                  {(uploadedAudioUrl || audioUploadProgress === 100) && <button type="button" onClick={() => { setUploadedAudioUrl(''); setAudioUploadProgress(0); (document.getElementById('audioCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                  <input type="file" id="audioCreateUpload" name="audio" accept="audio/mp3,audio/wav,audio/*" required={!uploadedAudioUrl} onChange={e => handleFileUpload(e, 'audio')} className="hidden" />
                 </div>
               </div>
 
                <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa (Tùy chọn tải lên hoặc nhập link)</label>
-                <div className={`border-2 border-dashed ${coverUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
-                  {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${coverUploadProgress}%` }}></div>}
-                  <input type="file" name="cover" accept="image/*" onChange={e => handleFileUpload(e, 'cover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                   <div className="relative z-0">
-                       <Upload className={`w-8 h-8 mx-auto mb-2 ${coverUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
-                       <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
-                           {coverUploadProgress > 0 && coverUploadProgress < 100 ? `Đang tải ảnh ${coverUploadProgress}%` : (coverUploadProgress === 100 ? 'Đã tải ảnh lên xong!' : 'Tải ảnh bìa lên')}
-                       </span>
-                   </div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {uploadedCoverUrl && <img src={uploadedCoverUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${coverUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('coverCreateUpload')?.click()}>
+                      {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${coverUploadProgress}%` }}></div>}
+                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {coverUploadProgress > 0 && coverUploadProgress < 100 ? `${coverUploadProgress}%` : ''}</span>
+                  </button>
+                  {uploadedCoverUrl && <button type="button" onClick={() => { setUploadedCoverUrl(''); setCoverUploadProgress(0); (document.getElementById('coverCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                  <input type="hidden" name="coverUrl" value={uploadedCoverUrl} />
+                  <input type="file" id="coverCreateUpload" name="cover" accept="image/*" onChange={e => handleFileUpload(e, 'cover')} className="hidden" />
                 </div>
-                <input name="coverUrl" type="text" value={uploadedCoverUrl} onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
-                <p className="text-xs text-stone-500 mt-2">Hỗ trợ link trực tiếp hoặc link Google Drive.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền (Tùy chọn tải lên hoặc nhập link)</label>
-                <div className={`border-2 border-dashed ${bgUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
-                  {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${bgUploadProgress}%` }}></div>}
-                  <input type="file" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                   <div className="relative z-0">
-                       <Upload className={`w-8 h-8 mx-auto mb-2 ${bgUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
-                       <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
-                           {bgUploadProgress > 0 && bgUploadProgress < 100 ? `Đang tải ảnh trực tiếp ${bgUploadProgress}%` : (bgUploadProgress === 100 ? 'Đã tải ảnh nền xong!' : 'Tải ảnh nền lên')}
-                       </span>
-                   </div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {uploadedBgUrl && <img src={uploadedBgUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgCreateUpload')?.click()}>
+                      {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
+                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
+                  </button>
+                  {uploadedBgUrl && <button type="button" onClick={() => { setUploadedBgUrl(''); setBgUploadProgress(0); (document.getElementById('bgCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                  <input type="hidden" name="backgroundUrl" value={uploadedBgUrl} />
+                  <input type="file" id="bgCreateUpload" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="hidden" />
                 </div>
-                <input name="backgroundUrl" type="text" value={uploadedBgUrl} onChange={e => setUploadedBgUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 
@@ -1654,7 +1866,7 @@ function AdminCreateDemo() {
                   <option value="6">Mẫu 6: Hạnh Phúc (Hồng, Hoa rơi)</option>
                   <option value="7">Mẫu 7: Học Đường (Trắng, Lá vàng rơi)</option>
                   <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
-                  <option value="9">Mẫu 9: Anime (Bầu trời, Mưa rơi)</option>
+                  <option value="9">Mẫu 9: Bầu trời xanh (Mây trắng)</option>
                   <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
                 </select>
               </div>
@@ -1665,6 +1877,16 @@ function AdminCreateDemo() {
                   <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
                   <input name="password" placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
                 </div>
+              </div>
+              
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái bài hát</label>
+                <label className="flex items-center gap-3 cursor-pointer mt-3">
+                  <div className="relative">
+                    <input type="checkbox" name="isReleased" value="true" className="w-6 h-6 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer" />
+                  </div>
+                  <span className="font-medium text-stone-900 border border-stone-300 px-3 py-1 rounded-lg">Đã phát hành</span>
+                </label>
               </div>
             </div>
 
@@ -1865,50 +2087,46 @@ function AdminEditDemo() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc (Nếu muốn thay đổi)</label>
-                <div className={`border-2 border-dashed ${audioUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
-                  {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${audioUploadProgress}%` }}></div>}
-                  <input type="file" name="audio" accept="audio/mp3,audio/wav,audio/*" onChange={e => handleFileUpload(e, 'audio')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  <div className="relative z-0">
-                      <Upload className={`w-8 h-8 mx-auto mb-2 ${audioUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
-                      <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
-                          {audioUploadProgress > 0 && audioUploadProgress < 100 ? `Đang tải lên ${audioUploadProgress}%` : (audioUploadProgress === 100 ? 'Đã tải nhạc lên xong!' : 'Chọn file audio mới')}
-                      </span>
-                  </div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc Mới (Nếu muốn thay đổi)</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {(uploadedAudioUrl || audioUploadProgress === 100) && <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-500 shadow-sm"><FileAudio className="w-8 h-8"/></div>}
+                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${audioUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('audioEditUpload')?.click()}>
+                      {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${audioUploadProgress}%` }}></div>}
+                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {audioUploadProgress > 0 && audioUploadProgress < 100 ? `${audioUploadProgress}%` : ''}</span>
+                  </button>
+                  {(uploadedAudioUrl || audioUploadProgress === 100) && <button type="button" onClick={() => { setUploadedAudioUrl(''); setAudioUploadProgress(0); (document.getElementById('audioEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                  <input type="file" id="audioEditUpload" name="audio" accept="audio/mp3,audio/wav,audio/*" onChange={e => handleFileUpload(e, 'audio')} className="hidden" />
                 </div>
               </div>
 
                <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa (Tùy chọn tải lên bài mới hoặc nhập link)</label>
-                <div className={`border-2 border-dashed ${coverUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
-                  {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${coverUploadProgress}%` }}></div>}
-                  <input type="file" name="cover" accept="image/*" onChange={e => handleFileUpload(e, 'cover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                   <div className="relative z-0">
-                       <Upload className={`w-8 h-8 mx-auto mb-2 ${coverUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
-                       <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
-                           {coverUploadProgress > 0 && coverUploadProgress < 100 ? `Đang tải ảnh ${coverUploadProgress}%` : (coverUploadProgress === 100 ? 'Đã tải ảnh lên xong!' : 'Tải ảnh bìa mới lên')}
-                       </span>
-                   </div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa Mới (Tùy chọn)</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {uploadedCoverUrl && <img src={uploadedCoverUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${coverUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('coverEditUpload')?.click()}>
+                      {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${coverUploadProgress}%` }}></div>}
+                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {coverUploadProgress > 0 && coverUploadProgress < 100 ? `${coverUploadProgress}%` : ''}</span>
+                  </button>
+                  {uploadedCoverUrl && <button type="button" onClick={() => { setUploadedCoverUrl(''); setCoverUploadProgress(0); (document.getElementById('coverEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                  <input type="hidden" name="coverUrl" value={uploadedCoverUrl} />
+                  <input type="file" id="coverEditUpload" name="cover" accept="image/*" onChange={e => handleFileUpload(e, 'cover')} className="hidden" />
                 </div>
-                <input name="coverUrl" type="text" value={uploadedCoverUrl} onChange={e => setUploadedCoverUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
-                <p className="text-xs text-stone-500 mt-2">Hỗ trợ link trực tiếp hoặc link Google Drive.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền (Tùy chọn tải lên bài mới hoặc nhập link)</label>
-                <div className={`border-2 border-dashed ${bgUploadProgress === 100 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-300 hover:bg-stone-50'} rounded-xl p-6 text-center transition-colors relative cursor-pointer overflow-hidden`}>
-                  {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute top-0 left-0 bottom-0 bg-stone-200 transition-all duration-300" style={{ width: `${bgUploadProgress}%` }}></div>}
-                  <input type="file" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                   <div className="relative z-0">
-                       <Upload className={`w-8 h-8 mx-auto mb-2 ${bgUploadProgress === 100 ? 'text-emerald-500' : 'text-stone-400'}`} />
-                       <span className="text-sm font-medium decoration-stone-400 underline underline-offset-2">
-                           {bgUploadProgress > 0 && bgUploadProgress < 100 ? `Đang tải ảnh trực tiếp ${bgUploadProgress}%` : (bgUploadProgress === 100 ? 'Đã tải ảnh nền xong!' : 'Tải ảnh nền mới lên')}
-                       </span>
-                   </div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền Mới (Tùy chọn)</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {uploadedBgUrl && <img src={uploadedBgUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgEditUpload')?.click()}>
+                      {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
+                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
+                  </button>
+                  {uploadedBgUrl && <button type="button" onClick={() => { setUploadedBgUrl(''); setBgUploadProgress(0); (document.getElementById('bgEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                  <input type="hidden" name="backgroundUrl" value={uploadedBgUrl} />
+                  <input type="file" id="bgEditUpload" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="hidden" />
                 </div>
-                <input name="backgroundUrl" type="text" value={uploadedBgUrl} onChange={e => setUploadedBgUrl(e.target.value)} placeholder="Hoặc nhập link ảnh online..." className="w-full mt-3 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 
@@ -1937,7 +2155,7 @@ function AdminEditDemo() {
                   <option value="6">Mẫu 6: Hạnh Phúc (Hồng, Hoa rơi)</option>
                   <option value="7">Mẫu 7: Học Đường (Trắng, Lá vàng rơi)</option>
                   <option value="8">Mẫu 8: Tổ Quốc (Đỏ, Cờ phấp phới)</option>
-                  <option value="9">Mẫu 9: Anime (Bầu trời, Mưa rơi)</option>
+                  <option value="9">Mẫu 9: Bầu trời xanh (Mây trắng)</option>
                   <option value="10">Mẫu 10: Hip Hop (Đường phố)</option>
                 </select>
               </div>
@@ -1948,6 +2166,16 @@ function AdminEditDemo() {
                   <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
                   <input name="password" defaultValue={demo.passwordValue || demo.password as any} placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
                 </div>
+              </div>
+              
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái bài hát</label>
+                <label className="flex items-center gap-3 cursor-pointer mt-3">
+                  <div className="relative">
+                    <input type="checkbox" name="isReleased" value="true" defaultChecked={demo.isReleased} className="w-6 h-6 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer" />
+                  </div>
+                  <span className="font-medium text-stone-900 border border-stone-300 px-3 py-1 rounded-lg">Đã phát hành</span>
+                </label>
               </div>
             </div>
 
