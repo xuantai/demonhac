@@ -3748,6 +3748,8 @@ function AdminPlaylistEdit() {
   const [coverProgress, setCoverProgress] = useState(0);
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
   const [appData, setAppData] = useState<AppData | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedNewSongIds, setSelectedNewSongIds] = useState<string[]>([]);
 
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
@@ -3902,7 +3904,16 @@ function AdminPlaylistEdit() {
           </div>
 
           <div>
-             <h3 className="text-sm font-bold text-stone-700 mb-4">Danh sách bài hát (Kéo thả để sắp xếp)</h3>
+             <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-stone-700">Danh sách bài hát (Kéo thả để sắp xếp)</h3>
+                <button 
+                  type="button"
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-1.5 bg-stone-900 text-white hover:bg-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Thêm bài hát
+                </button>
+             </div>
              {songs.length === 0 ? (
                <div className="text-center py-8 text-stone-400 border-2 border-dashed rounded-xl">Chưa có bài hát nào trong playlist này.</div>
              ) : (
@@ -3929,6 +3940,18 @@ function AdminPlaylistEdit() {
                           <h4 className="font-bold text-stone-800 truncate">{song.title}</h4>
                           <p className="text-xs text-stone-500 truncate">{song.singer || song.author}</p>
                        </div>
+                       <button
+                         type="button"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           e.preventDefault();
+                           setSongs(songs.filter(s => s.id !== song.id));
+                         }}
+                         className="w-8 h-8 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shrink-0"
+                         title="Xóa khỏi playlist"
+                       >
+                         <X className="w-4 h-4" />
+                       </button>
                     </div>
                  ))}
                </div>
@@ -3936,6 +3959,89 @@ function AdminPlaylistEdit() {
           </div>
         </div>
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between border-b pb-4 mb-4 shrink-0">
+              <h3 className="font-bold text-lg text-stone-900">Thêm bài hát vào playlist</h3>
+              <button 
+                type="button"
+                onClick={() => { setShowAddModal(false); setSelectedNewSongIds([]); }} 
+                className="text-stone-400 hover:text-stone-600 p-1 rounded-full hover:bg-stone-100 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {(() => {
+                const currentSongIds = songs.map(s => s.id);
+                const availableSongs = appData?.demos?.filter((d: any) => !currentSongIds.includes(d.id)) || [];
+                if (availableSongs.length === 0) {
+                  return <p className="text-center text-stone-500 py-8">Tất cả bài hát đều đã ở trong playlist này rồi.</p>;
+                }
+                return availableSongs.map((song: any) => {
+                  const isChecked = selectedNewSongIds.includes(song.id);
+                  return (
+                    <label 
+                      key={song.id} 
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${isChecked ? 'bg-stone-50 border-stone-450 font-semibold' : 'hover:bg-stone-50 border-stone-200'}`}
+                    >
+                      <input 
+                        type="checkbox" 
+                        checked={isChecked} 
+                        onChange={() => {
+                          if (isChecked) {
+                            setSelectedNewSongIds(selectedNewSongIds.filter(id => id !== song.id));
+                          } else {
+                            setSelectedNewSongIds([...selectedNewSongIds, song.id]);
+                          }
+                        }}
+                        className="w-5 h-5 rounded text-stone-900 border-stone-300 focus:ring-stone-900" 
+                      />
+                      {song.coverUrl ? (
+                        <img src={getPreviewUrl(song.coverUrl)} className="w-10 h-10 rounded object-cover border shrink-0" alt="" />
+                      ) : (
+                        <div className="w-10 h-10 bg-stone-100 rounded flex items-center justify-center shrink-0 border">
+                          <Disc3 className="w-5 h-5 text-stone-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-stone-800 text-sm truncate">{song.title}</p>
+                        <p className="text-xs text-stone-500 truncate">{song.singer || song.author}</p>
+                      </div>
+                    </label>
+                  );
+                });
+              })()}
+            </div>
+            
+            <div className="flex gap-3 justify-end pt-4 border-t mt-4 shrink-0">
+              <button 
+                type="button"
+                onClick={() => { setShowAddModal(false); setSelectedNewSongIds([]); }} 
+                className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg font-medium transition-colors"
+              >
+                Hủy
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  const addedSongs = (appData?.demos || []).filter((d: any) => selectedNewSongIds.includes(d.id));
+                  setSongs([...songs, ...addedSongs]);
+                  setShowAddModal(false);
+                  setSelectedNewSongIds([]);
+                }}
+                disabled={selectedNewSongIds.length === 0}
+                className="px-4 py-2 bg-stone-900 text-white rounded-lg font-medium hover:bg-stone-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Thêm đã chọn ({selectedNewSongIds.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

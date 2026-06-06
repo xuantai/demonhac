@@ -906,12 +906,21 @@ async function startServer() {
         }
       }
 
-      const host = req.get('x-forwarded-host') || req.get('host');
+      const host = req.get('x-forwarded-host') || req.get('host') || '';
       if (ogImage && ogImage.startsWith('/')) {
          ogImage = `https://${host}${ogImage}`;
       } else if (ogImage && !ogImage.startsWith('http')) {
          // ensure it's a full URL if it doesn't have http
          ogImage = `https://${host}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
+      }
+
+      if (ogImage && ogImage.includes('xn--ti-jia.com')) {
+         ogImage = ogImage.replace(/xn--ti-jia\.com/gi, 'tài.com');
+      }
+
+      let ogUrl = `https://${host}${url}`;
+      if (ogUrl.includes('xn--ti-jia.com')) {
+         ogUrl = ogUrl.replace(/xn--ti-jia\.com/gi, 'tài.com');
       }
 
       // Inject tags
@@ -921,6 +930,8 @@ async function startServer() {
         <meta property="og:title" content="${ogTitle}" />
         <meta property="og:description" content="${ogDesc.replace(/"/g, '&quot;')}" />
         <meta property="og:image" content="${ogImage}" />
+        <meta property="og:url" content="${ogUrl}" />
+        <meta property="og:site_name" content="tài.com" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${ogTitle}" />
