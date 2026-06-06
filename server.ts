@@ -914,12 +914,12 @@ async function startServer() {
          ogImage = `https://${host}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
       }
 
-      if (ogImage && ogImage.includes('xn--ti-jia.com')) {
+      if (false && ogImage && ogImage.includes('xn--ti-jia.com')) {
          ogImage = ogImage.replace(/xn--ti-jia\.com/gi, 'tài.com');
       }
 
       let ogUrl = `https://${host}${url}`;
-      if (ogUrl.includes('xn--ti-jia.com')) {
+      if (false && ogUrl.includes('xn--ti-jia.com')) {
          ogUrl = ogUrl.replace(/xn--ti-jia\.com/gi, 'tài.com');
       }
 
