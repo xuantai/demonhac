@@ -698,7 +698,7 @@ function Home() {
                 const songsInPlaylist = data.demos.filter(d => d.status === 'public' && d.playlistIds && d.playlistIds.includes(playlist.id));
                 if (songsInPlaylist.length === 0) return null;
                 
-                let coverUrl = '';
+                let coverUrl = playlist.coverUrl || '';
                 if (data.slideshowImages && data.slideshowImages.length > 0) {
                    const hash = Array.from(playlist.id as string).reduce((sum: number, char: any) => sum + char.charCodeAt(0), 0);
                    coverUrl = data.slideshowImages[hash % data.slideshowImages.length];

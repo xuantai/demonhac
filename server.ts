@@ -190,8 +190,30 @@ async function startServer() {
     return url;
   };
 
+  const getPlaylistCover = (p: any, data: any, baseUrl: string) => {
+    let pCover = p.coverUrl || '';
+    if (!pCover) {
+       const songsInPlaylist = (data.demos || []).filter((d: any) => d.playlistIds && d.playlistIds.includes(p.id));
+       if (p.songIds && p.songIds.length > 0) {
+          songsInPlaylist.sort((a: any, b: any) => {
+             const indexA = p.songIds.indexOf(a.id);
+             const indexB = p.songIds.indexOf(b.id);
+             if (indexA === -1 && indexB === -1) return 0;
+             if (indexA === -1) return 1;
+             if (indexB === -1) return -1;
+             return indexA - indexB;
+          });
+       }
+       const firstSong = songsInPlaylist[0];
+       if (firstSong && firstSong.coverUrl) {
+          pCover = firstSong.coverUrl;
+       }
+    }
+    return formatUrl(pCover, baseUrl || '');
+  };
+
   const applyBaseUrl = (data: any) => {
-    if (!data.globalBaseUrl) return data;
+
     const cloned = { ...data };
     
     cloned.homeCoverUrl = formatUrl(cloned.homeCoverUrl, cloned.globalBaseUrl);
@@ -205,7 +227,7 @@ async function startServer() {
     if (cloned.playlists) {
        cloned.playlists = cloned.playlists.map((p: any) => ({
          ...p,
-         coverUrl: formatUrl(p.coverUrl, cloned.globalBaseUrl)
+         coverUrl: getPlaylistCover(p, cloned, cloned.globalBaseUrl || '')
        }));
     }
     
@@ -660,7 +682,7 @@ async function startServer() {
 
       const formattedPlaylist = {
          ...playlist,
-         coverUrl: formatUrl(playlist.coverUrl, data.globalBaseUrl)
+         coverUrl: playlist.coverUrl ? formatUrl(playlist.coverUrl, data.globalBaseUrl) : (songs[0]?.coverUrl || '')
       };
 
       res.json({ playlist: formattedPlaylist, songs });
@@ -914,12 +936,8 @@ async function startServer() {
          ogImage = `https://${host}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
       }
 
-      if (false && ogImage && ogImage.includes('xn--ti-jia.com')) {
-         ogImage = ogImage.replace(/xn--ti-jia\.com/gi, 'tài.com');
-      }
-
       let ogUrl = `https://${host}${url}`;
-      if (false && ogUrl.includes('xn--ti-jia.com')) {
+      if (ogUrl.includes('xn--ti-jia.com')) {
          ogUrl = ogUrl.replace(/xn--ti-jia\.com/gi, 'tài.com');
       }
 
