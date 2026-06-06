@@ -202,6 +202,13 @@ async function startServer() {
        cloned.slideshowImages = cloned.slideshowImages.map((s: string) => formatUrl(s, cloned.globalBaseUrl));
     }
     
+    if (cloned.playlists) {
+       cloned.playlists = cloned.playlists.map((p: any) => ({
+         ...p,
+         coverUrl: formatUrl(p.coverUrl, cloned.globalBaseUrl)
+       }));
+    }
+    
     if (cloned.demos) {
       cloned.demos = cloned.demos.map((d: any) => ({
         ...d,
@@ -566,6 +573,7 @@ async function startServer() {
     const idx = data.playlists.findIndex((p: any) => p.id === req.params.id);
     if (idx >= 0) {
        if (req.body.title !== undefined) data.playlists[idx].title = req.body.title;
+       if (req.body.coverUrl !== undefined) data.playlists[idx].coverUrl = req.body.coverUrl;
        if (req.body.songIds !== undefined) data.playlists[idx].songIds = req.body.songIds;
        await saveData(data);
        res.json(data.playlists[idx]);
@@ -650,7 +658,12 @@ async function startServer() {
          requiresPassword: !!(!d.isReleased && (d.password || data.globalPassword))
       }));
 
-      res.json({ playlist, songs });
+      const formattedPlaylist = {
+         ...playlist,
+         coverUrl: formatUrl(playlist.coverUrl, data.globalBaseUrl)
+      };
+
+      res.json({ playlist: formattedPlaylist, songs });
   });
 
   app.get('/api/demos/:id', async (req, res) => {
@@ -852,6 +865,44 @@ async function startServer() {
           
           ogImage = demo.ogImageUrl || coverToUse || data.homeCoverUrl || data.ogImageUrl || '';
           ogDesc = defaultDesc;
+        }
+      }
+
+      const playlistMatch = url.match(/^\/playlist\/([^\/?]+)/);
+      if (playlistMatch) {
+        const playlistId = playlistMatch[1];
+        if (data.playlists) {
+          const playlist = data.playlists.find((p: any) => p.id === playlistId);
+          if (playlist) {
+            ogTitle = playlist.title;
+            
+            let pCover = playlist.coverUrl;
+            if (!pCover) {
+              const pSongs = data.demos.filter((d: any) => d.status === 'public' && d.playlistIds && d.playlistIds.includes(playlist.id));
+              if (playlist.songIds && playlist.songIds.length > 0) {
+                 pSongs.sort((a: any, b: any) => {
+                    const indexA = playlist.songIds.indexOf(a.id);
+                    const indexB = playlist.songIds.indexOf(b.id);
+                    if (indexA === -1 && indexB === -1) return 0;
+                    if (indexA === -1) return 1;
+                    if (indexB === -1) return -1;
+                    return indexA - indexB;
+                 });
+              }
+              if (pSongs.length > 0) {
+                 let firstSong = pSongs[0];
+                 let firstSongCover = firstSong.coverUrl;
+                 if (!firstSongCover && data.slideshowImages && data.slideshowImages.length > 0) {
+                    const idStr = String(firstSong.id || '');
+                    const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+                    firstSongCover = data.slideshowImages[hash % data.slideshowImages.length];
+                 }
+                 pCover = firstSongCover;
+              }
+            }
+            ogImage = pCover || data.homeCoverUrl || data.ogImageUrl || '';
+            ogDesc = defaultDesc;
+          }
         }
       }
 

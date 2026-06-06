@@ -5,7 +5,7 @@ import { toPng } from 'html-to-image';
 import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 
-function formatText(text: string | null | undefined) {
+function formatText(text: string | null | undefined, disableLinks = false) {
   if (!text) return null;
   const lines = text.replace(/\s+\(/g, '\n(').split('\n');
   return (
@@ -40,6 +40,9 @@ function formatText(text: string | null | undefined) {
                   {parts.map((part, i) => {
                     const lower = part.toLowerCase();
                     if (lower === 'a.c xuân tài' || lower === 'ac xuân tài') {
+                      if (disableLinks) {
+                        return <span key={`${lineIdx}-${segIdx}-${i}`}>{part}</span>;
+                      }
                       return (
                         <a key={`${lineIdx}-${segIdx}-${i}`} href="https://acxuantai.com" target="_blank" rel="noreferrer" className="transition-colors hover:opacity-80">
                           {part}
@@ -1714,7 +1717,7 @@ function PlaylistPlayer() {
                             <p className={`text-sm font-bold truncate ${i === currentIndex ? 'text-purple-400' : 'text-white'}`}>
                               <HoverTranslate text={song.title} />
                             </p>
-                            <p className="text-xs text-neutral-400 truncate">{formatText(song.singer || song.composer || 'Đang cập nhật')}</p>
+                            <p className="text-xs text-neutral-400 truncate">{formatText(song.singer || song.composer || 'Đang cập nhật', true)}</p>
                          </div>
                          {song.requiresPassword && <Lock className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
                          {i === currentIndex && <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_theme(colors.purple.400)]" />}
@@ -2009,8 +2012,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           </h2>
           {(demo.composer || demo.singer || demo.author) && (
             <p className="text-sm font-medium text-center mb-6 opacity-80">
-               {formatText(demo.singer || demo.author)}
-               {demo.composer && <span className="block text-xs mt-1 opacity-70">Sáng tác: {formatText(demo.composer)}</span>}
+               {formatText(demo.singer || demo.author, !!playlistSongs)}
+               {demo.composer && <span className="block text-xs mt-1 opacity-70">Sáng tác: {formatText(demo.composer, !!playlistSongs)}</span>}
             </p>
           )}
           
@@ -2117,14 +2120,15 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         </button>
         <button
           onClick={() => {
-            const baseUrl = playlistSongs ? '/playlist/' : '/demo/';
-            const dynamicId = playlistSongs ? window.location.pathname.split('/').pop() : (demo.slug || demo.id);
+            if (!demo) return;
+            const baseUrl = '/demo/';
+            const dynamicId = demo.slug || demo.id;
             let url = window.location.origin + baseUrl + dynamicId;
             if (url.includes('xn--ti-jia.com')) {
               url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
             }
             navigator.clipboard.writeText(url);
-            setToast('Đã copy link!');
+            setToast('Đã copy link bài hát!');
             setTimeout(() => setToast(''), 3000);
           }}
           className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
@@ -2135,8 +2139,9 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         {isAdmin && demo?.secretKey && (
           <button
             onClick={() => {
-              const baseUrl = playlistSongs ? '/playlist/' : '/demo/';
-              const dynamicId = playlistSongs ? window.location.pathname.split('/').pop() : (demo.slug || demo.id);
+              if (!demo) return;
+              const baseUrl = '/demo/';
+              const dynamicId = demo.slug || demo.id;
               let url = window.location.origin + baseUrl + dynamicId;
               if (url.includes('xn--ti-jia.com')) {
                 url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
@@ -2308,8 +2313,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               )}
             </span>
           </h1>
-          {(demo.singer || demo.author) && <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">{formatText(demo.singer || demo.author)}</p>}
-          {demo.composer && <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">{t.sAuth} {formatText(demo.composer)}</p>}
+          {(demo.singer || demo.author) && <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">{formatText(demo.singer || demo.author, !!playlistSongs)}</p>}
+          {demo.composer && <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">{t.sAuth} {formatText(demo.composer, !!playlistSongs)}</p>}
           {!demo.singer && !demo.author && !demo.composer && <div className="mb-0 md:mb-6"></div>}
           </motion.div>
           
@@ -3209,6 +3214,7 @@ function AdminCreateDemo() {
     formData.set('audioUrl', uploadedAudioUrl);
     formData.set('coverUrl', uploadedCoverUrl);
     formData.set('backgroundUrl', uploadedBgUrl);
+    formData.append('playlistIds', JSON.stringify(playlistIds));
     
     if (!formData.get('slug')) {
         formData.set('slug', slug);
@@ -3738,6 +3744,8 @@ function AdminPlaylistEdit() {
   const [toast, setToast] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [title, setTitle] = useState('');
+  const [coverUrlPreview, setCoverUrlPreview] = useState('');
+  const [coverProgress, setCoverProgress] = useState(0);
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
   const [appData, setAppData] = useState<AppData | null>(null);
 
@@ -3751,6 +3759,30 @@ function AdminPlaylistEdit() {
     return url;
   };
 
+  const uploadWithProgress = (file: File, setProgress: (p: number) => void): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload', true);
+      xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('adminToken') || ''}`);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          setProgress(100);
+          const res = JSON.parse(xhr.responseText);
+          resolve(res.url);
+        } else reject(new Error('Upload failed'));
+      };
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send(formData);
+    });
+  };
+
   useEffect(() => {
     Promise.all([
       fetch(`/api/playlists/${id}`, {
@@ -3762,6 +3794,7 @@ function AdminPlaylistEdit() {
     ]).then(([playlistData, data]) => {
       setPlaylist(playlistData.playlist);
       setTitle(playlistData.playlist.title);
+      setCoverUrlPreview(playlistData.playlist.coverUrl || '');
       setSongs(playlistData.songs);
       setAppData(data);
       setIsLoading(false);
@@ -3776,7 +3809,7 @@ function AdminPlaylistEdit() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` 
       },
-      body: JSON.stringify({ title, songIds })
+      body: JSON.stringify({ title, coverUrl: coverUrlPreview, songIds })
     });
     setToast('Đã lưu thành công!');
     setTimeout(() => setToast(''), 3000);
@@ -3827,6 +3860,45 @@ function AdminPlaylistEdit() {
                onChange={e => setTitle(e.target.value)} 
                className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-bold" 
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh bìa Playlist (Kích thước vuông)</label>
+            <div className="flex flex-wrap gap-4 items-center">
+              {coverUrlPreview && <img src={getPreviewUrl(coverUrlPreview)} className="w-24 h-24 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+              <button 
+                type="button" 
+                className={`w-24 h-24 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${coverProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} 
+                onClick={() => document.getElementById('playlistCoverUpload')?.click()}
+              >
+                  {coverProgress > 0 && coverProgress < 100 && (
+                    <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${coverProgress}%` }}></div>
+                  )}
+                  <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1">
+                    <Upload className="w-5 h-5"/> {coverProgress > 0 && coverProgress < 100 ? `${coverProgress}%` : ''}
+                  </span>
+              </button>
+              {coverUrlPreview && (
+                <button 
+                  type="button" 
+                  onClick={() => { setCoverUrlPreview(''); setCoverProgress(0); (document.getElementById('playlistCoverUpload') as HTMLInputElement).value = ''; }} 
+                  className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"
+                >
+                  <X className="w-5 h-5"/>
+                </button>
+              )}
+              <input type="file" id="playlistCoverUpload" className="hidden" accept="image/*" onChange={async (e) => {
+                if (!e.target.files?.[0]) return;
+                try {
+                  const url = await uploadWithProgress(e.target.files[0], setCoverProgress);
+                  setCoverUrlPreview(url);
+                } catch (err) {
+                  alert('Lỗi upload');
+                  setCoverProgress(0);
+                }
+              }} />
+            </div>
+            <p className="text-xs text-stone-500 mt-2">Dùng để làm ảnh đại diện cho Playlist khi chia sẻ.</p>
           </div>
 
           <div>
