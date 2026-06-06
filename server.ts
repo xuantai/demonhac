@@ -866,7 +866,12 @@ async function startServer() {
       const defaultDesc = data.pageTitle || `Kho nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogTitle = data.pageTitle || `Thiên đường âm nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : '');
-      let ogDesc = defaultDesc;
+      
+      const cleanPath = url.split('?')[0];
+      const isHomepage = cleanPath === '/' || cleanPath === '/index.html' || cleanPath === '';
+      let ogDesc = isHomepage 
+        ? `Nơi cập nhật sản phẩm và demo của ${data.artistName || 'A.C Xuân Tài'}`
+        : defaultDesc;
 
       const match = url.match(/^\/demo\/([^\/?]+)/);
       if (match) {
