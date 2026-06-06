@@ -1,7 +1,9 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs/promises';
+import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
+import { GoogleGenAI } from '@google/genai';
 import multer from 'multer';
 import sharp from 'sharp';
 import { initializeApp } from 'firebase/app';
@@ -73,7 +75,8 @@ async function loadData() {
     youtubePlaylistUrl: '',
     spotifyUrl: '',
     releasedSongs: [],
-    demos: []
+    demos: [],
+    playlists: []
   };
 }
 
@@ -96,6 +99,7 @@ async function startServer() {
   await ensureUploadsDir();
   const app = express();
   app.set('trust proxy', 1);
+  app.use(cors());
   
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
   // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=3333
@@ -103,6 +107,32 @@ async function startServer() {
   const PORT = Number(process.env.PORT || 3000);
 
   app.use(express.json());
+
+  const isRequestAdmin = (req: express.Request): boolean => {
+    // 1. Check authorization header or x-admin-token header
+    const authHeader = req.headers.authorization || req.headers['x-admin-token'];
+    if (authHeader) {
+      const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ') 
+        ? authHeader.slice(7) 
+        : String(authHeader);
+      
+      if (token === 'MatKhauDay123') return true;
+    }
+
+    // 2. Check cookies
+    const cookieHeader = req.headers.cookie;
+    if (!cookieHeader) return false;
+    
+    const cookies: Record<string, string> = {};
+    cookieHeader.split(';').forEach(c => {
+      const parts = c.split('=');
+      if (parts.length >= 2) {
+        cookies[parts[0].trim()] = decodeURIComponent(parts[1].trim());
+      }
+    });
+    
+    return cookies['adminToken'] === 'MatKhauDay123';
+  };
 
   // API Routes
   const injectCoverUrl = (demos: any[], slideshowImages?: string[]) => {
@@ -128,6 +158,19 @@ async function startServer() {
         finalBaseUrl = 'https://' + finalBaseUrl;
       }
       finalBaseUrl = finalBaseUrl.replace(/\/$/, '');
+    }
+
+    // If the URL is an uploaded file (contains /uploads/)
+    const uploadMatch = url.match(/\/uploads\/[^/]+$/);
+    if (uploadMatch) {
+      if (finalBaseUrl) return finalBaseUrl + uploadMatch[0];
+      if (url.startsWith('http')) return url;
+      return uploadMatch[0];
+    }
+    if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
+      let normalized = url.startsWith('/') ? url : '/' + url;
+      if (finalBaseUrl) return finalBaseUrl + normalized;
+      return normalized;
     }
 
     // Replace any absolute ais-dev or ais-pre URLs with the global base URL if set
@@ -180,17 +223,46 @@ async function startServer() {
     res.json({ ...data, demos: publicDemos });
   });
 
+  // Admin authentication endpoints
+  app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    if (password === 'MatKhauDay123') {
+      res.setHeader('Set-Cookie', 'adminToken=MatKhauDay123; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000'); // 30 days
+      res.json({ success: true, token: 'MatKhauDay123' });
+    } else {
+      res.status(401).json({ error: 'Sai mật khẩu!' });
+    }
+  });
+
+  app.post('/api/admin/logout', (req, res) => {
+    res.setHeader('Set-Cookie', [
+      'adminToken=; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=0',
+      'adminToken=; Path=/; HttpOnly; Max-Age=0'
+    ]);
+    res.json({ success: true });
+  });
+
+  app.get('/api/admin/check', (req, res) => {
+    if (isRequestAdmin(req)) {
+      res.json({ isAdmin: true });
+    } else {
+      res.json({ isAdmin: false });
+    }
+  });
+
   // Admin access to real data (including passwords for editing)
   app.get('/api/admin/data', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const data = await loadData();
-    // For admin, we don't strictly inject it because we want them to see if it's missing.
-    // However if they edit, they shouldn't accidentally save it. Let's send a separate field or just not inject.
-    // Wait, let's inject it as 'displayCoverUrl' maybe? No, UI handles random too?
-    // Actually we only need it for the public view.
     res.json(data);
   });
 
   app.post('/api/profile', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const data = await loadData();
     data.pageTitle = req.body.pageTitle ?? data.pageTitle;
     data.artistName = req.body.artistName ?? data.artistName;
@@ -200,6 +272,10 @@ async function startServer() {
     data.ogImageUrl = req.body.ogImageUrl ?? data.ogImageUrl;
     data.youtubePlaylistUrl = req.body.youtubePlaylistUrl ?? data.youtubePlaylistUrl;
     data.spotifyUrl = req.body.spotifyUrl ?? data.spotifyUrl;
+    data.socialFacebook = req.body.socialFacebook ?? data.socialFacebook;
+    data.socialInstagram = req.body.socialInstagram ?? data.socialInstagram;
+    data.socialYoutube = req.body.socialYoutube ?? data.socialYoutube;
+    data.socialTiktok = req.body.socialTiktok ?? data.socialTiktok;
     data.globalPassword = req.body.globalPassword ?? data.globalPassword;
     data.globalBaseUrl = req.body.globalBaseUrl !== undefined ? req.body.globalBaseUrl : data.globalBaseUrl;
     if (req.body.slideshowImages) data.slideshowImages = req.body.slideshowImages;
@@ -321,6 +397,9 @@ async function startServer() {
   });
 
   app.post('/api/released', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const data = await loadData();
     data.releasedSongs = req.body.releasedSongs || [];
     await saveData(data);
@@ -339,6 +418,9 @@ async function startServer() {
   };
 
   app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const data = await loadData();
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const audioFile = files['audio']?.[0];
@@ -364,7 +446,8 @@ async function startServer() {
       createdAt: Date.now(),
       composer: req.body.composer || 'A.C Xuân Tài',
       singer: req.body.singer || 'A.C Xuân Tài',
-      isReleased: req.body.isReleased === 'true'
+      isReleased: req.body.isReleased === 'true',
+      playlistIds: req.body.playlistIds ? JSON.parse(req.body.playlistIds) : []
     };
     data.demos.push(newDemo);
     await saveData(data);
@@ -372,6 +455,9 @@ async function startServer() {
   });
   
   app.post('/api/demos/:id/update', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
      const data = await loadData();
      const idx = data.demos.findIndex((d: any) => d.id === req.params.id || d.slug === req.params.id);
      if (idx >= 0) {
@@ -397,6 +483,9 @@ async function startServer() {
         if (req.body.isReleased !== undefined) {
              updatedData.isReleased = req.body.isReleased === 'true';
         }
+        if (req.body.playlistIds !== undefined) {
+            updatedData.playlistIds = JSON.parse(req.body.playlistIds);
+        }
 
         data.demos[idx] = { ...data.demos[idx], ...updatedData };
         await saveData(data);
@@ -407,29 +496,124 @@ async function startServer() {
   });
   
   app.post('/api/demos/:id/delete', async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
      const data = await loadData();
      data.demos = data.demos.filter((d: any) => d.id !== req.params.id && d.slug !== req.params.id);
      await saveData(data);
      res.json({ success: true });
   });
 
+  app.post('/api/playlists', express.json(), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const data = await loadData();
+    const newPlaylist = {
+       id: Date.now().toString(),
+       title: req.body.title || 'Untitled Playlist'
+    };
+    if (!data.playlists) data.playlists = [];
+    data.playlists.push(newPlaylist);
+    await saveData(data);
+    res.json(newPlaylist);
+  });
+
+  app.post('/api/playlists/:id/update', express.json(), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const data = await loadData();
+    if (!data.playlists) data.playlists = [];
+    const idx = data.playlists.findIndex((p: any) => p.id === req.params.id);
+    if (idx >= 0) {
+       if (req.body.title !== undefined) data.playlists[idx].title = req.body.title;
+       if (req.body.songIds !== undefined) data.playlists[idx].songIds = req.body.songIds;
+       await saveData(data);
+       res.json(data.playlists[idx]);
+    } else {
+       res.status(404).json({ error: 'Not found' });
+    }
+  });
+
+  app.post('/api/playlists/:id/delete', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const data = await loadData();
+    if (!data.playlists) data.playlists = [];
+    data.playlists = data.playlists.filter((p: any) => p.id !== req.params.id);
+    // Also remove from all demos
+    if (data.demos) {
+       data.demos = data.demos.map((demo: any) => ({
+           ...demo,
+           playlistIds: demo.playlistIds ? demo.playlistIds.filter((pid: string) => pid !== req.params.id) : []
+       }));
+    }
+    await saveData(data);
+    res.json({ success: true });
+  });
+
   app.post('/api/demos/:id/verify', async (req, res) => {
     const data = await loadData();
-    const demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
+    let demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
     if (!demo) return res.status(404).json({ error: 'Not found' });
     const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
     if (expectedPassword && expectedPassword === req.body.password) {
-      // Send back the audio template securely, or just success
+      if (!demo.coverUrl && data.slideshowImages && data.slideshowImages.length > 0) {
+          const idStr = String(demo.id || '');
+          const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+          demo = { ...demo, coverUrl: data.slideshowImages[hash % data.slideshowImages.length] };
+      }
+      
       const formattedDemo = {
         ...demo,
         audioUrl: formatUrl(demo.audioUrl, data.globalBaseUrl),
         coverUrl: formatUrl(demo.coverUrl, data.globalBaseUrl),
-        backgroundUrl: formatUrl(demo.backgroundUrl, data.globalBaseUrl)
+        backgroundUrl: formatUrl(demo.backgroundUrl, data.globalBaseUrl),
+        globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl)
       };
       res.json({ success: true, demo: formattedDemo });
     } else {
       res.status(401).json({ error: 'Sai mật khẩu' });
     }
+  });
+
+  app.get('/api/playlists/:id', async (req, res) => {
+      const data = await loadData();
+      const playlist = data.playlists?.find((p: any) => p.id === req.params.id);
+      if (!playlist) return res.status(404).json({ error: 'Playlist not found' });
+      
+      const isUserAdmin = isRequestAdmin(req);
+      let songs = data.demos.filter((d: any) => {
+         if (d.status !== 'public' && !isUserAdmin) return false;
+         return d.playlistIds && d.playlistIds.includes(playlist.id);
+      });
+
+      if (playlist.songIds && playlist.songIds.length > 0) {
+         songs.sort((a: any, b: any) => {
+            const indexA = playlist.songIds.indexOf(a.id);
+            const indexB = playlist.songIds.indexOf(b.id);
+            if (indexA === -1 && indexB === -1) return 0;
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+         });
+      }
+
+      songs = songs.map((d: any) => ({
+         id: d.id,
+         slug: d.slug,
+         title: d.title,
+         singer: d.singer,
+         author: d.author,
+         composer: d.composer,
+         coverUrl: formatUrl(d.coverUrl, data.globalBaseUrl),
+         requiresPassword: !!(!d.isReleased && (d.password || data.globalPassword))
+      }));
+
+      res.json({ playlist, songs });
   });
 
   app.get('/api/demos/:id', async (req, res) => {
@@ -452,8 +636,10 @@ async function startServer() {
       };
 
       const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
+      const isUserAdmin = isRequestAdmin(req);
+      const fromPlaylist = req.query.fromPlaylist === 'true';
       // If it requires password, only return basic metadata without audio/lyrics
-      if (expectedPassword && expectedPassword !== req.query.pwd && req.query.admin !== '1') {
+      if (expectedPassword && expectedPassword !== req.query.pwd && !isUserAdmin) {
           return res.json({ 
               id: demo.id, 
               title: demo.title,
@@ -467,13 +653,16 @@ async function startServer() {
               requiresPassword: true 
           });
       }
-      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl) });
+      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword });
   });
 
   // Serve static files from public/uploads
   app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
   app.post('/api/upload', upload.single('file'), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     if (req.file) {
       if (req.file.mimetype.startsWith('image/')) {
         try {
@@ -501,6 +690,9 @@ async function startServer() {
   });
 
   app.post('/api/upload-base64', express.json({limit: '50mb'}), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     try {
       const { image, name } = req.body;
       if (!image) return res.status(400).json({ error: 'No image provided' });
@@ -520,6 +712,9 @@ async function startServer() {
   });
 
   app.post('/api/demos/:id/thumbnail', express.json(), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const data = await loadData();
     const idx = data.demos.findIndex((d: any) => d.id === req.params.id || d.slug === req.params.id);
     if (idx >= 0) {
@@ -528,6 +723,38 @@ async function startServer() {
        return res.json({ success: true });
     }
     res.status(404).json({ error: 'Not found' });
+  });
+
+  app.post('/api/translate', express.json(), async (req, res) => {
+    const { text, targetLang } = req.body;
+    if (!text) return res.json({ translated: '' });
+    
+    try {
+       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+       const targetLanguageName = targetLang === 'en' ? 'English' : 
+                                  targetLang === 'ko' ? 'Korean' : 
+                                  targetLang === 'ja' ? 'Japanese' : 
+                                  targetLang === 'th' ? 'Thai' : 
+                                  targetLang === 'zh' ? 'Chinese' : 'Vietnamese';
+       
+       if (targetLanguageName === 'Vietnamese') return res.json({ translated: text });
+  
+       const response = await ai.models.generateContent({
+         model: 'gemini-2.5-flash',
+         contents: [
+           {
+             role: 'user', 
+             parts: [{ text: `Translate the following short text (like a song title or bio) into ${targetLanguageName}. Only output the translation, do not include any quotes, extra words, or markdown. Text to translate:\n\n${text}` }]
+           }
+         ]
+       });
+       
+       const translated = response.text?.trim() || text;
+       res.json({ translated });
+    } catch (error) {
+       console.log('Translation fallback (quota or network error):', (error as any)?.message);
+       res.json({ translated: text });
+    }
   });
 
   // Serve runtime uploads folder
@@ -561,7 +788,7 @@ async function startServer() {
         html = await fs.readFile(path.join(process.cwd(), 'dist', 'index.html'), 'utf-8');
       }
 
-      let ogTitle = data.pageTitle || `Thiên đường demo của ${data.artistName || 'A.C Xuân Tài'}`;
+      let ogTitle = data.pageTitle || `Thiên đường âm nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : '');
       let ogDesc = data.artistBio || '';
 

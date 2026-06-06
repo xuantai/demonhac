@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2 } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Shuffle, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -37,8 +37,8 @@ function formatText(text: string | null | undefined) {
 // Global styles added in index.css
 
 const translations: Record<string, Record<string, string>> = {
-  vi: { dDesc: "Thiên đường demo của", btnSpot: "Nghe trên Spotify", lDemos: "Đề Mô", lReleased: "Ra Rồi", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt", lDemosMobile: "Đề mô", lReleasedMobile: "Ra Rồi" },
-  en: { dDesc: "Demo paradise of", btnSpot: "Listen on Spotify", lDemos: "Unreleased Demos", lReleased: "Released Music", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
+  vi: { dDesc: "Thiên đường âm nhạc của", btnSpot: "Nghe trên Spotify", lDemos: "Đề Mô", lReleased: "Ra Rồi", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Cần Mật Khẩu", pNow: "Nghe Ngay", nDemo: "Chưa có demo nào.", rMv: "MV Đã Phát Hành", nMv: "Chưa có MV nào.", lMore: "Hiển thị thêm", mList: "người nghe hàng tháng", load: "Đang tải...", back: "Trở về", adm: "AdminCP", edit: "Chỉnh sửa", pPrompt: "Cần mật khẩu", pPrompt2: "Nhập mật khẩu để nghe demo này", unlock: "Mở khóa", wPass: "Sai mật khẩu", lyric: "Lời bài hát", nLyric: "Chưa cập nhật lời bài hát", sAuth: "Sáng tác:", lang: "Tiếng Việt", lDemosMobile: "Đề mô", lReleasedMobile: "Ra Rồi" },
+  en: { dDesc: "Music paradise of", btnSpot: "Listen on Spotify", lDemos: "Demo", lReleased: "Release", lDemoMark: "DEMO", lReleasedMark: "RELEASED", pReq: "Password", pNow: "Play Now", nDemo: "No demos yet.", rMv: "Released Music Videos", nMv: "No MVs yet.", lMore: "Load more", mList: "monthly listeners", load: "Loading...", back: "Back", adm: "Admin", edit: "Edit", pPrompt: "Password required", pPrompt2: "Enter password to listen to this demo", unlock: "Unlock", wPass: "Wrong password", lyric: "Lyrics", nLyric: "No lyrics yet", sAuth: "Composer:", lang: "English" },
   ko: { dDesc: "데모 파라다이스", btnSpot: "Spotify에서 듣기", lDemos: "최신 데모", lReleased: "발매된 음악", lDemoMark: "데모", lReleasedMark: "발매됨", pReq: "비밀번호", pNow: "지금 듣기", nDemo: "데모 없음", rMv: "발매된 뮤직비디오", nMv: "MV 없음", lMore: "더 보기", mList: "월간 청취자", load: "로딩 중...", back: "뒤로", adm: "관리자", edit: "편집", pPrompt: "비밀번호 필요", pPrompt2: "이 데모를 들으려면 비밀번호를 입력하세요", unlock: "잠금 해제", wPass: "잘못된 비밀번호", lyric: "가사", nLyric: "가사 없음", sAuth: "작곡가:", lang: "한국어" },
   ja: { dDesc: "デモパラダイス", btnSpot: "Spotifyで聴く", lDemos: "最新のデモ", lReleased: "リリースされた音楽", lDemoMark: "デモ", lReleasedMark: "リリース済", pReq: "パスワード", pNow: "今すぐ聴く", nDemo: "デモなし", rMv: "リリースされたMV", nMv: "MVなし", lMore: "もっと見る", mList: "月間リスナー", load: "読み込み中...", back: "戻る", adm: "管理者", edit: "編集", pPrompt: "パスワードが必要", pPrompt2: "このデモを聴くにはパスワードを入力してください", unlock: "ロック解除", wPass: "パスワードが間違っています", lyric: "歌詞", nLyric: "歌詞なし", sAuth: "作曲:", lang: "日本語" },
   th: { dDesc: "สวรรค์แห่งเพลงเดโม่ของ", btnSpot: "ฟังบน Spotify", lDemos: "ตัวอย่างล่าสุด", lReleased: "เพลงที่ปล่อยแล้ว", lDemoMark: "เดโม่", lReleasedMark: "ปล่อยแล้ว", pReq: "รหัสผ่าน", pNow: "ฟังเลย", nDemo: "ไม่มีตัวอย่าง", rMv: "มิวสิควิดีโอ", nMv: "ไม่มี MV", lMore: "โหลดเพิ่ม", mList: "ผู้ฟังรายเดือน", load: "กำลังโหลด...", back: "กลับ", adm: "แอดมิน", edit: "แก้ไข", pPrompt: "ต้องใช้รหัสผ่าน", pPrompt2: "ใส่รหัสผ่านเพื่อฟังเดโม่นี้", unlock: "ปลดล็อค", wPass: "รหัสผ่านผิด", lyric: "เนื้อเพลง", nLyric: "ไม่มีเนื้อเพลง", sAuth: "แต่งโดย:", lang: "ไทย" },
@@ -59,13 +59,23 @@ function AdminLogin() {
   const [err, setErr] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwd === 'MatKhauDay123') {
-      localStorage.setItem('adminToken', pwd);
-      window.location.reload();
-    } else {
-      setErr('Sai mật khẩu!');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      if (res.ok) {
+        localStorage.setItem('adminToken', 'MatKhauDay123');
+        window.location.href = window.location.pathname;
+      } else {
+        const data = await res.json();
+        setErr(data.error || 'Sai mật khẩu!');
+      }
+    } catch (err) {
+      setErr('Lỗi kết nối máy chủ!');
     }
   };
 
@@ -109,9 +119,11 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
         <Route path="/demo/:id" element={<DemoPlayer />} />
+        <Route path="/playlist/:id" element={<PlaylistPlayer />} />
         <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
         <Route path="/admin/new" element={<RequireAdmin><AdminCreateDemo /></RequireAdmin>} />
         <Route path="/admin/edit/:id" element={<RequireAdmin><AdminEditDemo /></RequireAdmin>} />
+        <Route path="/admin/playlist/:id" element={<RequireAdmin><AdminPlaylistEdit /></RequireAdmin>} />
       </Routes>
     </AnimatePresence>
   );
@@ -119,6 +131,15 @@ function AnimatedRoutes() {
 
 export default function App() {
   const [lang, setLang] = useState('vi');
+  const isAdmin = !!localStorage.getItem('adminToken');
+
+  const handleLogout = async () => {
+    localStorage.removeItem('adminToken');
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (e) {}
+    window.location.href = '/';
+  };
 
   useEffect(() => {
     fetch('https://get.geojs.io/v1/ip/country.json').then(r=>r.json()).then(res => {
@@ -135,6 +156,15 @@ export default function App() {
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>
       <BrowserRouter>
+        {isAdmin && (
+           <button 
+             onClick={handleLogout}
+             className="fixed left-6 top-1/2 -translate-y-1/2 z-[100] flex items-center justify-center p-3 rounded-full bg-red-500/80 text-white backdrop-blur-md shadow-lg hover:bg-red-600 transition-colors hover:scale-110"
+             title="Đăng xuất"
+           >
+             <LogOut className="w-5 h-5" />
+           </button>
+        )}
         <AnimatedRoutes />
       </BrowserRouter>
     </LanguageContext.Provider>
@@ -142,6 +172,68 @@ export default function App() {
 }
 
 // ---- HOME PAGE ----
+
+const AutoTranslate = ({ text, className = "" }: { text: string; className?: string }) => {
+  const { lang } = useContext(LanguageContext);
+  const [translated, setTranslated] = useState(text);
+
+  useEffect(() => {
+     if (lang === 'vi') {
+        setTranslated(text);
+        return;
+     }
+     const abort = new AbortController();
+     fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, targetLang: lang }),
+        signal: abort.signal
+     }).then(r => r.json()).then(data => {
+        if (data.translated && data.translated !== text) setTranslated(data.translated);
+     }).catch(() => {});
+     return () => abort.abort();
+  }, [lang, text]);
+
+  return <span className={className}>{translated}</span>;
+};
+
+const HoverTranslate = ({ text, className = "", format = false }: { text: string; className?: string, format?: boolean }) => {
+  const { lang } = useContext(LanguageContext);
+  const [translated, setTranslated] = useState(text);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+     if (lang === 'vi') return;
+     if (isHovered && !hasFetched) {
+        setHasFetched(true);
+        fetch('/api/translate', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ text, targetLang: lang })
+        }).then(r => r.json()).then(data => {
+           if (data.translated) setTranslated(data.translated);
+        }).catch(() => {});
+     }
+  }, [lang, isHovered, hasFetched, text]);
+
+  useEffect(() => {
+     setHasFetched(false); 
+     setTranslated(text);
+  }, [lang, text]);
+
+  const output = (isHovered && lang !== 'vi') ? translated : text;
+
+  return (
+    <span 
+      className={className} 
+      onMouseEnter={() => setIsHovered(true)} 
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {format ? formatText(output) : output}
+    </span>
+  );
+};
 
 const SpotifyIcon = ({className}: {className?: string}) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -198,7 +290,7 @@ function Home() {
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [spotifyInfo, setSpotifyInfo] = useState<any>(null);
   const [visibleMVs, setVisibleMVs] = useState(4);
-  const [activeListTab, setActiveListTab] = useState<'demos'|'released'>('released');
+  const [activeListTab, setActiveListTab] = useState<'demos'|'released'|'albums'>('released');
   const [showArtist, setShowArtist] = useState(false);
   const [spotifyLoaded, setSpotifyLoaded] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -207,10 +299,14 @@ function Home() {
 
   useEffect(() => {
     const tabInterval = setInterval(() => {
-      setActiveListTab(prev => prev === 'demos' ? 'released' : 'demos');
+      setActiveListTab(prev => {
+        if (prev === 'released') return 'demos';
+        if (prev === 'demos' && data?.playlists && data.playlists.length > 0) return 'albums';
+        return 'released';
+      });
     }, 20000);
     return () => clearInterval(tabInterval);
-  }, []);
+  }, [data]);
 
   // For slideshow
   useEffect(() => {
@@ -230,6 +326,16 @@ function Home() {
     });
     if (node) observer.current.observe(node);
   }, [visibleMVs, ytVideos.length]);
+
+  const handleSharePlaylist = (e: React.MouseEvent, playlistId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    let url = window.location.origin + '/playlist/' + playlistId;
+    if (url.includes('xn--ti-jia.com')) url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+    navigator.clipboard.writeText(url);
+    setToast(t.toastCopy || 'Đã copy link!');
+    setTimeout(() => setToast(''), 3000);
+  };
 
   useEffect(() => {
     fetch('/api/data').then(res => res.json()).then(data => {
@@ -290,6 +396,7 @@ function Home() {
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-rose-500 selection:text-white relative z-0 bg-notebook-dark"
     >
+      <SocialCarousel data={data} />
       {data.slideshowImages && data.slideshowImages.length > 0 ? (
         <div className="fixed inset-0 z-[-1] pointer-events-none bg-neutral-950">
           <AnimatePresence mode="popLayout">
@@ -423,7 +530,7 @@ function Home() {
                   onAnimationComplete={() => setShowArtist(true)}
                   className="text-xl sm:text-2xl text-stone-200 font-medium max-w-3xl mx-auto drop-shadow-lg mb-2"
                 >
-                  {(data.artistBio === "Thiên đường demo của" || !data.artistBio) ? t.dDesc : data.artistBio}
+                  <AutoTranslate text={(!data.artistBio || ["Thiên đường demo của", "Thiên đường âm nhạc của"].includes(data.artistBio?.trim() || '')) ? t.dDesc : data.artistBio} />
                 </motion.p>
                 <AnimatePresence>
                   {showArtist && (
@@ -449,7 +556,7 @@ function Home() {
                   onAnimationComplete={() => setShowArtist(true)}
                   className="text-lg text-neutral-400 font-medium mb-4"
                 >
-                  {(data.artistBio === "Thiên đường demo của" || !data.artistBio) ? t.dDesc : data.artistBio}
+                  <AutoTranslate text={(!data.artistBio || ["Thiên đường demo của", "Thiên đường âm nhạc của"].includes(data.artistBio?.trim() || '')) ? t.dDesc : data.artistBio} />
                 </motion.p>
                 <AnimatePresence>
                   {showArtist && (
@@ -482,7 +589,7 @@ function Home() {
                     >
                       {spotifyInfo && (
                         <div className="flex items-center gap-4 px-2">
-                           <img src={spotifyInfo.image} crossOrigin="anonymous" className="w-16 h-16 rounded-full shadow-lg border border-white/20 object-cover" alt="Spotify" />
+                           <img src={spotifyInfo.image} className="w-16 h-16 rounded-full shadow-lg border border-white/20 object-cover" alt="Spotify" />
                            <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-white text-lg">{data.artistName}</span>
@@ -540,80 +647,147 @@ function Home() {
         
         {/* Demos Section */}
         <section>
-          <div className="flex flex-wrap items-center gap-2 mb-8 bg-neutral-900/50 p-1.5 rounded-2xl border border-white/5 w-fit">
-             <button onClick={() => setActiveListTab('released')} className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                <Music className={`w-4 h-4 md:w-5 md:h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} />
-                <span>{t.lReleased}</span>
+          <div className="flex items-center gap-1 sm:gap-2 mb-8 bg-neutral-900/50 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-white/5 w-full flex-nowrap overflow-x-auto custom-scrollbar">
+             <button onClick={() => setActiveListTab('released')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Music className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} />
+                <span className="whitespace-nowrap">{t.lReleasedMobile || t.lReleased}</span>
              </button>
-             <button onClick={() => setActiveListTab('demos')} className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                <Disc3 className={`w-4 h-4 md:w-5 md:h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} />
-                <span>{t.lDemos}</span>
+             <button onClick={() => setActiveListTab('demos')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Disc3 className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} />
+                <span className="whitespace-nowrap">{t.lDemosMobile || t.lDemos}</span>
              </button>
+             {data?.playlists && data.playlists.length > 0 && (
+               <button onClick={() => setActiveListTab('albums')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'albums' ? 'bg-purple-500/20 text-purple-400 shadow-[0_0_20px_-5px_rgba(168,85,247,0.3)] border border-purple-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                  <ListMusic className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'albums' ? 'text-purple-400' : 'text-neutral-500'}`} />
+                  <span className="whitespace-nowrap">Album/EP</span>
+               </button>
+             )}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
-              <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
-                <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
-                  {demo.coverUrl ? (
-                     <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
-                  ) : (
-                     <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
-                       <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
-                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
-                      <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+            {activeListTab === 'albums' ? (
+              data.playlists?.map((playlist: any) => {
+                const songsInPlaylist = data.demos.filter(d => d.status === 'public' && d.playlistIds && d.playlistIds.includes(playlist.id));
+                if (songsInPlaylist.length === 0) return null;
+                
+                let coverUrl = '';
+                if (data.slideshowImages && data.slideshowImages.length > 0) {
+                   const hash = Array.from(playlist.id as string).reduce((sum: number, char: any) => sum + char.charCodeAt(0), 0);
+                   coverUrl = data.slideshowImages[hash % data.slideshowImages.length];
+                }
+
+                return (
+                  <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-purple-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 transition-all duration-500"></div>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-purple-500/30 transition-colors">
+                      {coverUrl ? (
+                         <img src={coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={playlist.title} />
+                      ) : (
+                         <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-purple-500 transition-colors">
+                           <ListMusic className="w-6 h-6 sm:w-8 sm:h-8" />
+                         </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
+                          <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0 relative z-10 pr-12">
-                  <h3 className="text-base sm:text-lg font-bold group-hover:text-rose-400 transition-colors">
-                    <div className="w-full break-words">
-                      {formatText(demo.title)}
+                    <div className="flex-1 min-w-0 relative z-10 pr-12">
+                      <h3 className="text-base sm:text-lg font-bold group-hover:text-purple-400 transition-colors truncate">
+                        {playlist.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-neutral-400 mt-1">{songsInPlaylist.length} bài hát</p>
                     </div>
-                  </h3>
-                </div>
-                {demo.isReleased ? (
-                  <>
-                    <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
-                      {t.lReleasedMark || 'RELEASED'}
-                    </span>
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        let url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
+                        let url = `${window.location.origin}/playlist/${playlist.id}`;
                         if (url.includes('xn--ti-jia.com')) {
                           url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
                         }
                         navigator.clipboard.writeText(url);
-                        setToast('Đã copy link bài hát!');
+                        setToast('Đã copy link playlist!');
                         setTimeout(() => setToast(''), 3000);
                       }}
                       className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
-                      title="Chia sẻ bài hát"
+                      title="Chia sẻ playlist"
                     >
                       <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
                     </button>
-                  </>
-                ) : (
-                  <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
-                    {t.lDemoMark || 'DEMO'}
-                  </span>
-                )}
-                {demo.password && !demo.isReleased && (
-                  <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
-                     <Lock className="w-3.5 h-3.5 text-yellow-500" />
+                  </Link>
+                );
+              })
+            ) : (
+              data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
+                <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
+                    {demo.coverUrl ? (
+                       <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
+                    ) : (
+                       <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
+                         <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                       </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
+                        <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+                      </div>
+                    </div>
                   </div>
-                )}
-              </Link>
-            ))}
-            {data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
+                  <div className="flex-1 min-w-0 relative z-10 pr-12">
+                    <h3 className="text-base sm:text-lg font-bold group-hover:text-rose-400 transition-colors">
+                      <div className="w-full break-words">
+                        <HoverTranslate text={demo.title} format={true} />
+                      </div>
+                    </h3>
+                  </div>
+                  {demo.isReleased ? (
+                    <>
+                      <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
+                        {t.lReleasedMark || 'RELEASED'}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          let url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
+                          if (url.includes('xn--ti-jia.com')) {
+                            url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                          }
+                          navigator.clipboard.writeText(url);
+                          setToast('Đã copy link bài hát!');
+                          setTimeout(() => setToast(''), 3000);
+                        }}
+                        className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
+                        title="Chia sẻ bài hát"
+                      >
+                        <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
+                      {t.lDemoMark || 'DEMO'}
+                    </span>
+                  )}
+                  {demo.password && !demo.isReleased && (
+                    <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
+                       <Lock className="w-3.5 h-3.5 text-yellow-500" />
+                    </div>
+                  )}
+                </Link>
+              ))
+            )}
+            {activeListTab !== 'albums' && data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
               <div className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl">
                 {activeListTab === 'demos' ? t.nDemo : 'Chưa có bài hát phát hành nào.'}
+              </div>
+            )}
+            {activeListTab === 'albums' && data.playlists?.filter(p => data.demos.some(d => d.status === 'public' && d.playlistIds && d.playlistIds.includes(p.id))).length === 0 && (
+              <div className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl">
+                Chưa có album/EP nào.
               </div>
             )}
           </div>
@@ -663,14 +837,16 @@ function Home() {
   );
 }
 
-function CustomAudioPlayer({ src, template }: { src: string, template: string }) {
+function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const almostEndedTriggered = useRef(false);
 
   useEffect(() => {
+    almostEndedTriggered.current = false;
     if (audioRef.current) {
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
@@ -694,7 +870,14 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+      const cTime = audioRef.current.currentTime;
+      const dTime = audioRef.current.duration;
+      setCurrentTime(cTime);
+      
+      if (dTime && dTime > 0 && dTime - cTime <= 2 && !almostEndedTriggered.current) {
+        almostEndedTriggered.current = true;
+        if (onAlmostEnded) onAlmostEnded();
+      }
     }
   };
 
@@ -755,6 +938,7 @@ function CustomAudioPlayer({ src, template }: { src: string, template: string })
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onEnded={onEnded}
       />
       
       {/* Wave visualizer */}
@@ -1262,12 +1446,210 @@ function EightBitGameEffect() {
   );
 }
 
-function DemoPlayer() {
+function PlaylistPlayer() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const isAdmin = searchParams.get('admin') === '1' || localStorage.getItem('adminToken') === 'MatKhauDay123';
+  const navigate = useNavigate();
+  const [playlist, setPlaylist] = useState<any>(null);
+  const [songs, setSongs] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [shuffle, setShuffle] = useState(false);
+  const [repeat, setRepeat] = useState(false);
+  const [error, setError] = useState('');
+  
+  const [isMinimized, setIsMinimized] = useState(false);
+  const interactTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const activeSongRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!isMinimized && activeSongRef.current) {
+      activeSongRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [currentIndex, isMinimized]);
+
+  const resetTimer = useCallback(() => {
+     if (interactTimerRef.current) clearTimeout(interactTimerRef.current);
+     interactTimerRef.current = setTimeout(() => {
+        setIsMinimized(true);
+     }, 3000);
+  }, []);
+
+  useEffect(() => {
+     if (!isMinimized) {
+        resetTimer();
+     } else {
+        if (interactTimerRef.current) clearTimeout(interactTimerRef.current);
+     }
+     return () => {
+        if (interactTimerRef.current) clearTimeout(interactTimerRef.current);
+     };
+  }, [isMinimized, resetTimer]);
+
+  useEffect(() => {
+     if (songs.length > 0) {
+        setIsMinimized(false);
+        resetTimer();
+     }
+  }, [currentIndex, resetTimer, songs.length]);
+
+  useEffect(() => {
+    fetch(`/api/playlists/${id}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) throw new Error(data.error);
+      setPlaylist(data.playlist);
+      setSongs(data.songs);
+      setLoading(false);
+    })
+    .catch(err => {
+      setError(err.message);
+      setLoading(false);
+    });
+  }, [id]);
+
+  const handleNext = () => {
+     if (songs.length === 0) return;
+     if (shuffle) {
+         let nextIdx = Math.floor(Math.random() * songs.length);
+         if (songs.length > 1 && nextIdx === currentIndex) {
+             nextIdx = (nextIdx + 1) % songs.length;
+         }
+         setCurrentIndex(nextIdx);
+     } else {
+         if (currentIndex < songs.length - 1) {
+             setCurrentIndex(currentIndex + 1);
+         } else if (repeat) {
+             setCurrentIndex(0);
+         }
+     }
+  };
+
+  const handleEnd = () => handleNext();
+
+  const handleAlmostEnded = () => {
+     setIsMinimized(false);
+     if (interactTimerRef.current) clearTimeout(interactTimerRef.current);
+  };
+
+  if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t.load}</div>;
+  if (error || !playlist) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Error: {error || 'Playlist not found'}</div>;
+
+  const currentSong = songs[currentIndex];
+  
+  return (
+    <div 
+      className="relative min-h-screen bg-black overflow-hidden"
+      onClick={() => setIsMinimized(true)}
+    >
+      {currentSong && (
+         <div className="absolute inset-0 z-0 overflow-y-auto custom-scrollbar">
+            <DemoPlayer songIdP={currentSong.slug || currentSong.id} onEnd={handleEnd} onAlmostEnded={handleAlmostEnded} playlistSongs={songs} />
+         </div>
+      )}
+
+      {/* Frame on top */}
+      <AnimatePresence>
+         {!isMinimized && (
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.9, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+               transition={{ duration: 0.2 }}
+               className="absolute top-0 right-0 max-w-sm w-full p-4 z-[100] drop-shadow-xl pointer-events-none"
+            >
+              <div 
+                 className="bg-black/85 backdrop-blur-xl border border-white/10 rounded-2xl p-4 pointer-events-auto shadow-2xl"
+                 onMouseMove={resetTimer} onTouchStart={resetTimer} onClick={(e) => { e.stopPropagation(); resetTimer(); }}
+              >
+                 <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-white truncate pr-2">{playlist.title}</h2>
+                    <div className="flex items-center gap-2">
+                       <button onClick={(e) => { e.stopPropagation(); setIsMinimized(true); }} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition" title="Thu nhỏ">
+                          <ChevronRight className="w-5 h-5" />
+                       </button>
+                    </div>
+                 </div>
+                 
+                 <div className="flex gap-2 mb-4">
+                   <button onClick={() => setShuffle(!shuffle)} className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${shuffle ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'bg-white/5 text-neutral-400 hover:text-white border-white/5'}`}>
+                     <Shuffle className="w-4 h-4" />
+                   </button>
+                   <button onClick={() => setRepeat(!repeat)} className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${repeat ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'bg-white/5 text-neutral-400 hover:text-white border-white/5'}`}>
+                     <Repeat className="w-4 h-4" /> 
+                   </button>
+                   <button onClick={() => handleNext()} className="flex-1 bg-white/10 text-white rounded-xl font-bold text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                      Bài Tiếp Theo <Play className="w-3 h-3 fill-white" />
+                   </button>
+                 </div>
+
+                 <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar" onScroll={resetTimer}>
+                   {songs.map((song, i) => (
+                      <button 
+                        key={song.id} 
+                        ref={i === currentIndex ? activeSongRef : null}
+                        onClick={() => setCurrentIndex(i)}
+                        className={`w-full text-left p-2 rounded-xl flex items-center gap-3 transition-colors ${i === currentIndex ? 'bg-purple-500/20 border-purple-500/30 border' : 'hover:bg-white/5 border border-transparent'}`}
+                      >
+                         <div className="w-10 h-10 rounded-lg bg-neutral-800 flex-shrink-0 overflow-hidden border border-white/5">
+                            {song.coverUrl ? <img src={song.coverUrl} className="w-full h-full object-cover" /> : <Music className="w-0.5 h-0.5 m-2.5 text-neutral-500" />}
+                         </div>
+                         <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-bold truncate ${i === currentIndex ? 'text-purple-400' : 'text-white'}`}>
+                              <HoverTranslate text={song.title} />
+                            </p>
+                            <p className="text-xs text-neutral-400 truncate">{song.singer || song.composer || 'Đang cập nhật'}</p>
+                         </div>
+                         {song.requiresPassword && <Lock className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
+                         {i === currentIndex && <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_theme(colors.purple.400)]" />}
+                      </button>
+                   ))}
+                 </div>
+              </div>
+            </motion.div>
+         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+         {isMinimized && (
+            <motion.div
+               initial={{ opacity: 0, scale: 0.5, y: -20, x: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+               exit={{ opacity: 0, scale: 0.5, y: -20, x: 20 }}
+               transition={{ duration: 0.2 }}
+               className="absolute top-6 right-6 z-[100]"
+            >
+               <button 
+                  onClick={(e) => {
+                     e.stopPropagation();
+                     setIsMinimized(false);
+                     resetTimer();
+                  }}
+                  className="w-14 h-14 bg-black/80 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl hover:bg-black/90 transition-all hover:scale-105 active:scale-95 group relative animate-heartbeat"
+               >
+                  <ListMusic className="w-6 h-6 text-white" />
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-purple-500 rounded-full border-2 border-black flex items-center justify-center">
+                     <Music className="w-2.5 h-2.5 text-white" />
+                  </div>
+               </button>
+            </motion.div>
+         )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded }: any = {}) {
+  const { lang } = useContext(LanguageContext);
+  const t = translations[lang] || translations['vi'];
+  const paramsId = useParams().id;
+  const id = songIdP || paramsId;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isAdmin = localStorage.getItem('adminToken') === 'MatKhauDay123';
   const [demo, setDemo] = useState<DemoSong | null>(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -1275,15 +1657,58 @@ function DemoPlayer() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
 
+  const pwdTouchedRef = useRef(false);
+  const pwdRef = useRef(password);
+
   useEffect(() => {
-    fetch(`/api/demos/${id}${isAdmin ? '?admin=1' : ''}`)
+     pwdRef.current = password;
+  }, [password]);
+
+  useEffect(() => {
+     // Reset touched state when id changes
+     pwdTouchedRef.current = false;
+  }, [id]);
+
+  useEffect(() => {
+     if (loading || unlocked || isAdmin || !playlistSongs) return;
+
+     const t1 = setTimeout(() => {
+        if (!pwdTouchedRef.current) {
+           onEnd?.();
+        }
+     }, 3000);
+
+     const t2 = setTimeout(() => {
+        if (pwdRef.current === '') {
+           onEnd?.();
+        }
+     }, 10000);
+
+     return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+     };
+  }, [loading, unlocked, isAdmin, playlistSongs, id, onEnd]);
+
+  useEffect(() => {
+    setLoading(true);
+    setUnlocked(false);
+    setPassword('');
+    setError('');
+    pwdTouchedRef.current = false;
+
+    fetch(`/api/demos/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      }
+    })
       .then(res => res.json())
       .then(data => {
         setDemo(data);
         if (!data.requiresPassword || isAdmin) setUnlocked(true);
         setLoading(false);
       });
-  }, [id, isAdmin]);
+  }, [id, isAdmin, playlistSongs]);
 
   useEffect(() => {
     if (unlocked && window.innerWidth < 768) {
@@ -1308,6 +1733,15 @@ function DemoPlayer() {
       setError('');
     } else {
       setError(data.error || t.wPass);
+    }
+  };
+
+  const handleBack = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.state?.fromAdmin) {
+      navigate(-1);
+    } else {
+      navigate('/');
     }
   };
 
@@ -1430,14 +1864,16 @@ function DemoPlayer() {
           ></div>
         )}
 
-        <Link to="/" className={`fixed top-6 left-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-20 transition-opacity font-medium ${isLight ? 'text-stone-900' : 'text-white'}`}>
-          <ArrowLeft className="w-5 h-5" /> {t.back}
-        </Link>
+        {true && (
+          <button onClick={handleBack} className={`fixed top-6 left-6 opacity-60 hover:opacity-100 flex items-center gap-2 z-20 transition-opacity font-medium ${isLight ? 'text-stone-900' : 'text-white'}`}>
+            <ArrowLeft className="w-5 h-5" /> {t.back}
+          </button>
+        )}
 
         <div className={`relative z-10 w-full max-w-md ${isLight ? 'bg-white/40' : 'bg-black/40'} backdrop-blur-xl border ${isLight ? 'border-white/40' : 'border-white/10'} p-8 rounded-[2rem] shadow-2xl`}>
           {displayCoverUrl ? (
             <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white/20 shadow-xl relative animate-[spin_8s_linear_infinite]">
-              <img src={displayCoverUrl} crossOrigin="anonymous" className="w-full h-full object-cover" alt="Cover" />
+              <img src={displayCoverUrl} className="w-full h-full object-cover" alt="Cover" />
               <div className="absolute inset-0 flex items-center justify-center">
                  <div className={`w-6 h-6 rounded-full ${isLight ? 'bg-white/80' : 'bg-black/60'} border border-white/30 backdrop-blur-sm shadow-inner`}></div>
               </div>
@@ -1448,7 +1884,9 @@ function DemoPlayer() {
             </div>
           )}
           
-          <h2 className={`text-2xl font-black text-center mb-1 drop-shadow-sm`}>{demo.title}</h2>
+          <h2 className={`text-2xl font-black text-center mb-1 drop-shadow-sm`}>
+            <HoverTranslate text={demo.title} />
+          </h2>
           {(demo.composer || demo.singer || demo.author) && (
             <p className="text-sm font-medium text-center mb-6 opacity-80">
                {formatText(demo.singer || demo.author)}
@@ -1456,16 +1894,22 @@ function DemoPlayer() {
             </p>
           )}
           
-          <p className="text-center mb-6 text-sm font-semibold opacity-70">{t.pPrompt2}</p>
+          <p className="text-center mb-6 text-sm font-semibold opacity-70">
+             {t.pPrompt2}
+             {playlistSongs && <span className="block mt-2 italic text-xs">Sẽ tự động chuyển bài nếu không nhập mật khẩu</span>}
+          </p>
           
-          <form onSubmit={handleUnlock} className="space-y-4">
+          <form onSubmit={handleUnlock} onClick={(e) => e.stopPropagation()} className="space-y-4">
             <input 
               type="password" 
               placeholder="***" 
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onFocus={() => { pwdTouchedRef.current = true; }}
+              onChange={e => {
+                setPassword(e.target.value);
+                pwdTouchedRef.current = true;
+              }}
               className={`w-full ${isLight ? 'bg-white/60 focus:bg-white text-stone-900 placeholder:text-stone-400' : 'bg-black/40 focus:bg-black/60 text-white placeholder:text-stone-500'} border-none px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 transition-all text-center tracking-widest font-mono text-lg shadow-inner`}
-              autoFocus
             />
             {error && <p className="text-red-500 text-sm text-center font-bold drop-shadow-sm">{error}</p>}
             <button type="submit" className={`w-full ${isLight ? 'bg-stone-900 text-white hover:bg-stone-800' : 'bg-white text-black hover:bg-stone-200'} font-bold py-3.5 rounded-xl transition-colors shadow-lg active:scale-95`}>
@@ -1523,13 +1967,15 @@ function DemoPlayer() {
         className={`fixed top-0 inset-x-0 h-16 bg-gradient-to-b ${isLight ? 'from-[#faf9f6]/50' : 'from-black/40'} to-transparent pointer-events-none z-40`}
       />
 
-      <div className="fixed top-6 left-6 flex items-center gap-3 z-50">
-        <Link to="/" className="opacity-60 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium drop-shadow-md">
-          <ArrowLeft className="w-5 h-5" /> {t.back}
-        </Link>
+      <div className={`fixed top-6 left-6 flex items-center gap-3 z-[60] ${isLight ? 'text-stone-900' : 'text-white'}`}>
+        <button onClick={handleBack} className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current" title={t.back}>
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <button
           onClick={() => {
-            let url = window.location.origin + '/demo/' + (demo.slug || demo.id);
+            const baseUrl = playlistSongs ? '/playlist/' : '/demo/';
+            const dynamicId = playlistSongs ? window.location.pathname.split('/').pop() : (demo.slug || demo.id);
+            let url = window.location.origin + baseUrl + dynamicId;
             if (url.includes('xn--ti-jia.com')) {
               url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
             }
@@ -1545,9 +1991,9 @@ function DemoPlayer() {
       </div>
 
       {isAdmin && demo && (
-        <div id="admin-controls-ui" className="fixed top-6 right-6 flex items-center gap-2 z-50">
-          <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center gap-2 transition-opacity font-medium bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl">
-            <Edit3 className="w-4 h-4" /> {t.edit}
+        <div id="admin-controls-ui" className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
+          <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center justify-center transition-all bg-black/40 p-3 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl hover:scale-110" title={t.edit}>
+            <Edit3 className="w-5 h-5" />
           </Link>
         </div>
       )}
@@ -1604,7 +2050,6 @@ function DemoPlayer() {
                   {displayCoverUrl ? (
                     <img 
                       src={displayCoverUrl} 
-                      crossOrigin="anonymous" 
                       alt="Cover" 
                       className="w-full h-full rounded-full object-cover aspect-square z-10" 
                     />
@@ -1650,7 +2095,6 @@ function DemoPlayer() {
                 {displayCoverUrl ? (
                   <img 
                     src={displayCoverUrl} 
-                    crossOrigin="anonymous" 
                     alt="Cover" 
                     className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`}
                   />
@@ -1665,7 +2109,7 @@ function DemoPlayer() {
             )}
           <h1 className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
             <span className="relative inline-block pr-10">
-              {formatText(demo.title)}
+              <HoverTranslate text={demo.title} format={true} />
               {demo.isReleased ? (
                <div className="absolute -top-3 -right-6 origin-bottom-left rotate-[15deg] bg-emerald-600 text-[10px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle">
                  {t.lReleasedMark || 'RELEASED'}
@@ -1699,7 +2143,7 @@ function DemoPlayer() {
               )}
             </div>
             <div className="relative z-10 px-4 pt-2 pb-3 md:px-5 md:pt-3 md:pb-4">
-               <CustomAudioPlayer src={demo.audioUrl} template={templateType} />
+               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} />
             </div>
           </div>
         </div>
@@ -1735,10 +2179,156 @@ function DemoPlayer() {
   );
 }
 
+// ---- SOCIAL CAROUSEL ----
+function formatSocialLink(url: string, platform: string) {
+  if (!url) return '';
+  url = url.trim();
+  if (url.startsWith('http')) return url;
+  if (platform === 'fb') return `https://facebook.com/${url}`;
+  if (platform === 'ig') return `https://instagram.com/${url}`;
+  if (platform === 'yt') return `https://youtube.com/@${url.replace(/^@/, '')}`;
+  if (platform === 'tk') return `https://tiktok.com/@${url.replace(/^@/, '')}`;
+  return url;
+}
+
+const FollowIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7 4a2 2 0 0 1 10 0v2H7V4zM5 8a2 2 0 0 1 14 0v2H5V8z" opacity="0.6"/>
+    <path fillRule="evenodd" clipRule="evenodd" d="M6 9a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-8a3 3 0 0 0-3-3H6zm5 4a1 1 0 0 1 2 0v2h2a1 1 0 1 1 0 2h-2v2a1 1 0 1 1-2 0v-2H9a1 1 0 1 1 0-2h2v-2z" />
+  </svg>
+);
+
+function SocialCarousel({ data }: { data: AppData }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentIconIdx, setCurrentIconIdx] = useState(-1);
+
+  const socials = [
+    { id: 'fb', url: formatSocialLink(data.socialFacebook || '', 'fb'), Icon: Facebook, color: 'hover:bg-blue-600' },
+    { id: 'ig', url: formatSocialLink(data.socialInstagram || '', 'ig'), Icon: Instagram, color: 'hover:bg-pink-600' },
+    { id: 'yt', url: formatSocialLink(data.socialYoutube || '', 'yt'), Icon: Youtube, color: 'hover:bg-red-600' },
+    { id: 'tk', url: formatSocialLink(data.socialTiktok || '', 'tk'), color: 'hover:bg-neutral-800', Icon: ({ className }: { className?: string }) => (
+       <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+         <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.23-.71 4.46-2.06 6.17-1.4 1.76-3.46 2.89-5.71 3.11-2.27.22-4.63-.44-6.24-2.02-1.72-1.7-2.61-4.04-2.58-6.42.03-2.38.99-4.72 2.76-6.38 1.4-1.31 3.32-2.12 5.25-2.27.13 1.34.05 2.69.05 4.03-1.07.03-2.14.33-3.05.97-.68.48-1.21 1.15-1.5 1.95-.31.86-.34 1.83-.1 2.73.28 1.09.97 2.05 1.89 2.65.94.61 2.11.83 3.2.7.99-.12 1.93-.61 2.61-1.36.85-.92 1.25-2.21 1.25-3.47.01-6.73-.01-13.45.01-20.17h4.15l-4.15-10.15z" />
+       </svg>
+    ) }
+  ].filter(s => s.url);
+
+  useEffect(() => {
+    if (isOpen || socials.length === 0) {
+       setCurrentIconIdx(-1);
+       return;
+    }
+
+    let timeoutId: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout;
+
+    const playLoop = () => {
+       let idx = 0;
+       setCurrentIconIdx(idx);
+       intervalId = setInterval(() => {
+          idx++;
+          if (idx >= socials.length) {
+             clearInterval(intervalId);
+             setCurrentIconIdx(-1);
+             timeoutId = setTimeout(playLoop, 5000);
+          } else {
+             setCurrentIconIdx(idx);
+          }
+       }, 700);
+    };
+
+    timeoutId = setTimeout(playLoop, 5000);
+
+    return () => {
+       clearTimeout(timeoutId);
+       clearInterval(intervalId);
+    };
+  }, [isOpen, socials.length]);
+
+  if (socials.length === 0) return null;
+
+  return (
+    <div className="fixed top-6 left-6 z-50 flex flex-col items-center gap-3">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 hover:scale-110 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all cursor-pointer"
+        title="Follow"
+      >
+        <AnimatePresence mode="popLayout">
+           {!isOpen ? (
+             <motion.div
+                key={currentIconIdx === -1 ? 'follow' : `social-${currentIconIdx}`}
+                initial={{ scale: 0.5, opacity: 0, rotate: -45 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0, rotate: 45 }}
+                transition={{ duration: 0.3 }}
+                className="absolute"
+             >
+                {currentIconIdx === -1 ? (
+                   <FollowIcon className="w-5 h-5" />
+                ) : (
+                   (() => {
+                      const ActiveIcon = socials[currentIconIdx].Icon;
+                      return <ActiveIcon className="w-5 h-5" />;
+                   })()
+                )}
+             </motion.div>
+           ) : (
+             <motion.div
+                key="close"
+                initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
+                transition={{ duration: 0.3 }}
+                className="absolute"
+             >
+                <X className="w-5 h-5" />
+             </motion.div>
+           )}
+        </AnimatePresence>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={{
+              hidden: { opacity: 0, transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+              visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+            }}
+            className="flex flex-col gap-3"
+          >
+            {socials.map((social) => {
+              const IconComponent = social.Icon;
+              return (
+                <motion.a
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variants={{
+                    hidden: { opacity: 0, y: -10, scale: 0.8 },
+                    visible: { opacity: 1, y: 0, scale: 1 }
+                  }}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white ${social.color} hover:scale-110 shadow-lg transition-all`}
+                >
+                  <IconComponent className="w-5 h-5" />
+                </motion.a>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ---- ADMIN DASHBOARD ----
 function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
-  const [activeTab, setActiveTab] = useState<'demos'|'profile'>('demos');
+  const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'>('demos');
   const [toast, setToast] = useState('');
   const [slideshowImages, setSlideshowImages] = useState<string[]>([]);
   const [homeCoverProgress, setHomeCoverProgress] = useState(0);
@@ -1753,17 +2343,45 @@ function AdminDashboard() {
   
   const navigate = useNavigate();
 
-  const loadData = () => fetch('/api/admin/data').then(res => res.json()).then(resData => {
-    setData(resData);
-    if (resData.slideshowImages) {
-      setSlideshowImages(resData.slideshowImages);
-    }
-    if (resData.homeCoverUrl) setHomeCoverUrlPreview(resData.homeCoverUrl);
-    if (resData.faviconUrl) setFaviconUrlPreview(resData.faviconUrl);
-    if (resData.ogImageUrl) setOgImageUrlPreview(resData.ogImageUrl);
-  });
+  const loadData = () => {
+    fetch('/api/admin/data', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      }
+    })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
+      .then(resData => {
+        setData(resData);
+        if (resData.slideshowImages) {
+          setSlideshowImages(resData.slideshowImages);
+        }
+        if (resData.homeCoverUrl) setHomeCoverUrlPreview(resData.homeCoverUrl);
+        if (resData.faviconUrl) setFaviconUrlPreview(resData.faviconUrl);
+        if (resData.ogImageUrl) setOgImageUrlPreview(resData.ogImageUrl);
+      })
+      .catch(err => {
+        console.error("Lỗi tải thông tin quản trị:", err);
+      });
+  };
 
   useEffect(() => { loadData(); }, []);
+
+  const getPreviewUrl = (url: string | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    if (data?.globalBaseUrl && url.startsWith('/uploads')) {
+       const base = data.globalBaseUrl.startsWith('http') ? data.globalBaseUrl : `https://${data.globalBaseUrl}`;
+       return `${base}${url}`;
+    }
+    return url;
+  };
 
   const uploadWithProgress = (file: File, setProgress: (p: number) => void): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -1771,6 +2389,7 @@ function AdminDashboard() {
       formData.append('file', file);
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/upload', true);
+      xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('adminToken') || ''}`);
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
           setProgress(Math.round((e.loaded / e.total) * 100));
@@ -1800,7 +2419,12 @@ function AdminDashboard() {
 
   const handleDelete = async (id: string) => {
     if(!confirm('Bạn có chắc muốn xóa demo này?')) return;
-    await fetch(`/api/demos/${id}/delete`, { method: 'POST' });
+    await fetch(`/api/demos/${id}/delete`, { 
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      }
+    });
     loadData();
   };
 
@@ -1811,7 +2435,10 @@ function AdminDashboard() {
 
     await fetch('/api/profile', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      },
       body: JSON.stringify({
         pageTitle: payload.pageTitle,
         artistName: payload.artistName,
@@ -1821,7 +2448,12 @@ function AdminDashboard() {
         ogImageUrl: payload.ogImageUrl,
         youtubePlaylistUrl: payload.youtubePlaylistUrl,
         spotifyUrl: payload.spotifyUrl,
+        socialFacebook: payload.socialFacebook,
+        socialInstagram: payload.socialInstagram,
+        socialYoutube: payload.socialYoutube,
+        socialTiktok: payload.socialTiktok,
         globalPassword: payload.globalPassword,
+        globalBaseUrl: payload.globalBaseUrl,
         slideshowImages: slideshowImages
       }),
     });
@@ -1852,13 +2484,25 @@ function AdminDashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
-        <aside className="w-full md:w-64 shrink-0 space-y-1">
-          <button onClick={() => setActiveTab('demos')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'demos' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
-            <Disc3 className="w-5 h-5" /> Quản lý
-          </button>
-          <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
-            <Settings className="w-5 h-5" /> Hồ sơ & Playlist
-          </button>
+        <aside className="w-full md:w-64 shrink-0">
+          <div className="mb-6 space-y-1">
+            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Quản lý</h3>
+            <button onClick={() => setActiveTab('demos')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'demos' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
+              <Disc3 className="w-5 h-5" /> Bài Hát
+            </button>
+            <button onClick={() => setActiveTab('playlists')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
+              <ListMusic className="w-5 h-5" /> Playlist
+            </button>
+          </div>
+          <div className="mb-6 space-y-1">
+            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Hồ sơ & Mở rộng</h3>
+            <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
+              <Settings className="w-5 h-5" /> Cài Đặt
+            </button>
+            <button onClick={() => setActiveTab('socials')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'socials' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
+              <Globe className="w-5 h-5" /> Mạng Xã Hội
+            </button>
+          </div>
         </aside>
 
         <main className="flex-1 bg-white rounded-3xl border border-stone-200 shadow-sm p-8">
@@ -1879,7 +2523,7 @@ function AdminDashboard() {
                     {data.demos.map((demo, index) => (
                       <div key={demo.id} className="border-b border-stone-100 last:border-0 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-stone-50 transition-colors px-2">
                         <div className="flex flex-col gap-1.5 flex-1 break-all">
-                          <Link to={`/demo/${demo.slug || demo.id}?admin=1`} className="hover:text-blue-600 flex items-center gap-2 text-base font-bold text-stone-800">
+                          <Link to={`/demo/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 flex items-center gap-2 text-base font-bold text-stone-800">
                             <span className="text-stone-400 font-medium text-sm w-5">{index + 1}.</span> {demo.title}
                           </Link>
                           <div className="flex items-center flex-wrap gap-2 text-xs pl-7">
@@ -1929,6 +2573,40 @@ function AdminDashboard() {
             </div>
           )}
 
+          {activeTab === 'playlists' && (
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold">Danh sách Playlist</h2>
+              </div>
+              
+              <div className="overflow-x-auto">
+                {(!data.playlists || data.playlists.length === 0) ? (
+                  <div className="text-center py-12 text-stone-500 border-2 border-dashed border-stone-200 rounded-2xl">
+                    Chưa có playlist nào. Hãy tạo mới một playlist trên màn hình thêm bài hát.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {data.playlists.map(pl => {
+                       const songCount = data.demos.filter(d => 
+                          (d.playlistIds && d.playlistIds.includes(pl.id)) || 
+                          (pl.songIds && pl.songIds.includes(d.id))
+                       ).length;
+                       
+                       return (
+                        <Link to={`/admin/playlist/${pl.id}`} key={pl.id} className="block p-4 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer" title="Quản lý bài hát">
+                          <div>
+                            <h3 className="font-bold text-lg text-stone-900">{pl.title}</h3>
+                            <p className="text-xs text-stone-500 mt-1">{songCount} bài hát</p>
+                          </div>
+                        </Link>
+                       );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {activeTab === 'profile' && (
             <div className="max-w-2xl">
               <h2 className="text-2xl font-bold mb-8">Thông tin hồ sơ</h2>
@@ -1948,7 +2626,7 @@ function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh bìa trang chủ</label>
                   <div className="flex flex-wrap gap-4 items-center">
-                    {homeCoverUrlPreview && <img src={homeCoverUrlPreview} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                    {homeCoverUrlPreview && <img src={getPreviewUrl(homeCoverUrlPreview)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
                     <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${homeCoverProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('homeCoverUpload')?.click()}>
                         {homeCoverProgress > 0 && homeCoverProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${homeCoverProgress}%` }}></div>}
                         <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {homeCoverProgress > 0 && homeCoverProgress < 100 ? `${homeCoverProgress}%` : ''}</span>
@@ -1990,7 +2668,7 @@ function AdminDashboard() {
                              onDragEnd={() => setDraggingSlideIdx(null)}
                              className={`relative w-24 h-24 bg-stone-200 rounded-xl overflow-hidden border border-stone-300 group cursor-move ${draggingSlideIdx === i ? 'opacity-50' : 'opacity-100'}`}
                           >
-                             <img src={src} className="w-full h-full object-cover pointer-events-none" />
+                             <img src={getPreviewUrl(src)} className="w-full h-full object-cover pointer-events-none" />
                              <button type="button" onClick={() => setSlideshowImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold text-sm">Xóa</button>
                           </div>
                        ))}
@@ -2020,7 +2698,7 @@ function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Favicon (Icon tab trình duyệt)</label>
                   <div className="flex flex-wrap gap-4 items-center">
-                    {faviconUrlPreview && <img src={faviconUrlPreview} className="w-16 h-16 rounded-xl object-contain border border-stone-200 shadow-sm" />}
+                    {faviconUrlPreview && <img src={getPreviewUrl(faviconUrlPreview)} className="w-16 h-16 rounded-xl object-contain border border-stone-200 shadow-sm" />}
                     <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${faviconProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('faviconUpload')?.click()}>
                         {faviconProgress > 0 && faviconProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${faviconProgress}%` }}></div>}
                         <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {faviconProgress > 0 && faviconProgress < 100 ? `${faviconProgress}%` : ''}</span>
@@ -2042,7 +2720,7 @@ function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2">Thumbnail Website (Ảnh khi share link)</label>
                   <div className="flex flex-wrap gap-4 items-center">
-                    {ogImageUrlPreview && <img src={ogImageUrlPreview} className="w-24 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                    {ogImageUrlPreview && <img src={getPreviewUrl(ogImageUrlPreview)} className="w-24 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
                     <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${ogImageProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('ogImageUpload')?.click()}>
                         {ogImageProgress > 0 && ogImageProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${ogImageProgress}%` }}></div>}
                         <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {ogImageProgress > 0 && ogImageProgress < 100 ? `${ogImageProgress}%` : ''}</span>
@@ -2079,10 +2757,38 @@ function AdminDashboard() {
                   <p className="text-sm text-stone-500 mt-2">Tất cả các link ở trang chủ nếu chưa đặt mật khẩu riêng thì sẽ được bảo vệ bởi mật khẩu chung này.</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-stone-700 mb-2">URL Gốc cho Tài nguyên (Tùy chọn)</label>
-                  <input name="globalBaseUrl" defaultValue={data.globalBaseUrl} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono" placeholder="Ví dụ: https://files.yourdomain.com" />
-                  <p className="text-sm text-stone-500 mt-2">Dùng để đồng bộ nếu host file ở server khác. Nếu link nhạc/ảnh là đường dẫn tương đối (bắt đầu bằng /), hệ thống sẽ thêm URL Gốc này vào trước (nếu có).</p>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">URL Gốc cho Tài nguyên (Tùy chọn) (không cần nhập https://)</label>
+                  <input name="globalBaseUrl" defaultValue={data.globalBaseUrl} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono" placeholder="VD: tài.com" />
+                  <p className="text-sm text-stone-500 mt-2">Dùng để đồng bộ nếu host file ở server khác. Nếu link nhạc/ảnh là đường dẫn tương đối (bắt đầu bằng /) hoặc bị lỗi Gốc, hệ thống sẽ thêm/đổi sang URL này.</p>
                 </div>
+                <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
+                    <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {activeTab === 'socials' && (
+            <div className="max-w-2xl">
+              <h2 className="text-2xl font-bold mb-8">Mạng xã hội</h2>
+              <form onSubmit={handleProfileSave} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Facebook</label>
+                  <input name="socialFacebook" defaultValue={data.socialFacebook} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" placeholder="https://facebook.com/..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Instagram</label>
+                  <input name="socialInstagram" defaultValue={data.socialInstagram} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" placeholder="https://instagram.com/..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">YouTube</label>
+                  <input name="socialYoutube" defaultValue={data.socialYoutube} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" placeholder="https://youtube.com/..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">TikTok</label>
+                  <input name="socialTiktok" defaultValue={data.socialTiktok} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900" placeholder="https://tiktok.com/@..." />
+                </div>
+                
                 <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
                     <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
                 </div>
@@ -2095,6 +2801,82 @@ function AdminDashboard() {
   );
 }
 
+function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onChange: (ids: string[]) => void }) {
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [newTitle, setNewTitle] = useState('');
+  
+  useEffect(() => {
+    fetch('/api/admin/data', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      setPlaylists(data.playlists || []);
+    });
+  }, []);
+
+  const handleCreate = async () => {
+    if (!newTitle.trim()) return;
+    const res = await fetch('/api/playlists', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      },
+      body: JSON.stringify({ title: newTitle.trim() })
+    });
+    if (res.ok) {
+      const p = await res.json();
+      setPlaylists([...playlists, p]);
+      onChange([...selectedIds, p.id]);
+      setNewTitle('');
+    }
+  };
+
+  const toggle = (id: string) => {
+    if (selectedIds.includes(id)) {
+      onChange(selectedIds.filter(x => x !== id));
+    } else {
+      onChange([...selectedIds, id]);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <label className="block text-sm font-bold text-stone-700">Thêm vào Playlist</label>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {playlists.map(p => (
+          <label key={p.id} className="flex items-center gap-2 text-sm p-2 border rounded-xl hover:bg-stone-50 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={selectedIds.includes(p.id)} 
+              onChange={() => toggle(p.id)} 
+              className="rounded text-stone-900 border-stone-300 focus:ring-stone-900"
+            />
+            <span className="truncate">{p.title}</span>
+          </label>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <input 
+          type="text" 
+          value={newTitle} 
+          onChange={e => setNewTitle(e.target.value)}
+          placeholder="Tên Playlist mới..." 
+          className="flex-1 px-4 py-2 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent text-sm font-medium"
+        />
+        <button 
+          type="button" 
+          onClick={handleCreate}
+          className="px-4 py-2 bg-stone-900 text-white rounded-xl text-sm font-bold hover:bg-stone-800"
+        >
+          Tạo mới
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ---- ADMIN CREATE DEMO ----
 function AdminCreateDemo() {
   const navigate = useNavigate();
@@ -2102,6 +2884,7 @@ function AdminCreateDemo() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [isSlugEdited, setIsSlugEdited] = useState(false);
+  const [playlistIds, setPlaylistIds] = useState<string[]>([]);
 
   const [audioUploadProgress, setAudioUploadProgress] = useState(0);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState('');
@@ -2141,6 +2924,7 @@ function AdminCreateDemo() {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload', true);
+    xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('adminToken') || ''}`);
 
     xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -2207,6 +2991,9 @@ function AdminCreateDemo() {
     try {
         const res = await fetch('/api/demos', {
             method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+            },
             body: formData
         });
         if (res.ok) {
@@ -2354,6 +3141,10 @@ function AdminCreateDemo() {
               </div>
             </div>
 
+            <div className="pt-4 border-t border-stone-100">
+              <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+            </div>
+
             <button disabled={loading} type="submit" className="w-full bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1 mt-8">
               {loading ? 'Đang xuất bản...' : 'Xuất Bản Demo'}
             </button>
@@ -2370,10 +3161,12 @@ function AdminEditDemo() {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [demo, setDemo] = useState<DemoSong | null>(null);
+  const [appData, setAppData] = useState<AppData | null>(null);
 
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [isSlugEdited, setIsSlugEdited] = useState(false);
+  const [playlistIds, setPlaylistIds] = useState<string[]>([]);
   
   const [audioUploadProgress, setAudioUploadProgress] = useState(0);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState('');
@@ -2382,10 +3175,32 @@ function AdminEditDemo() {
   const [bgUploadProgress, setBgUploadProgress] = useState(0);
   const [uploadedBgUrl, setUploadedBgUrl] = useState('');
 
+  const getPreviewUrl = (url: string | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    if (appData?.globalBaseUrl && url.startsWith('/uploads')) {
+       const base = appData.globalBaseUrl.startsWith('http') ? appData.globalBaseUrl : `https://${appData.globalBaseUrl}`;
+       return `${base}${url}`;
+    }
+    return url;
+  };
+
   useEffect(() => {
-    fetch('/api/admin/data')
-      .then(res => res.json())
+    fetch('/api/admin/data', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      }
+    })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
       .then(data => {
+        setAppData(data);
         const found = data.demos.find((d: any) => d.id === id);
         if (found) {
           setDemo(found);
@@ -2394,7 +3209,11 @@ function AdminEditDemo() {
           setIsSlugEdited(!!found.slug);
           setUploadedCoverUrl(found.coverUrl || '');
           setUploadedBgUrl(found.backgroundUrl || '');
+          setPlaylistIds(found.playlistIds || []);
         }
+      })
+      .catch(err => {
+        console.error("Lỗi tải thông tin quản trị:", err);
       });
   }, [id]);
 
@@ -2429,6 +3248,7 @@ function AdminEditDemo() {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload', true);
+    xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('adminToken') || ''}`);
 
     xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -2496,10 +3316,14 @@ function AdminEditDemo() {
     if (!formData.get('slug')) {
         formData.set('slug', slug);
     }
+    formData.append('playlistIds', JSON.stringify(playlistIds));
     
     try {
         const res = await fetch(`/api/demos/${id}/update`, {
             method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+            },
             body: formData
         });
         if (res.ok) {
@@ -2566,7 +3390,7 @@ function AdminEditDemo() {
                <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa Mới (Tùy chọn)</label>
                 <div className="flex flex-wrap gap-4 items-center">
-                  {uploadedCoverUrl && <img src={uploadedCoverUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  {uploadedCoverUrl && <img src={getPreviewUrl(uploadedCoverUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
                   <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${coverUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('coverEditUpload')?.click()}>
                       {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${coverUploadProgress}%` }}></div>}
                       <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {coverUploadProgress > 0 && coverUploadProgress < 100 ? `${coverUploadProgress}%` : ''}</span>
@@ -2582,7 +3406,7 @@ function AdminEditDemo() {
                <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền Mới (Tùy chọn)</label>
                 <div className="flex flex-wrap gap-4 items-center">
-                  {uploadedBgUrl && <img src={uploadedBgUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  {uploadedBgUrl && <img src={getPreviewUrl(uploadedBgUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
                   <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgEditUpload')?.click()}>
                       {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
                       <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
@@ -2648,10 +3472,152 @@ function AdminEditDemo() {
               </div>
             </div>
 
+            <div className="pt-4 border-t border-stone-100">
+              <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+            </div>
+
             <button disabled={loading} type="submit" className="w-full bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1 mt-8">
               {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
             </button>
           </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminPlaylistEdit() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [playlist, setPlaylist] = useState<any>(null);
+  const [songs, setSongs] = useState<any[]>([]);
+  const [toast, setToast] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [title, setTitle] = useState('');
+  const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+  const [appData, setAppData] = useState<AppData | null>(null);
+
+  const getPreviewUrl = (url: string | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    if (appData?.globalBaseUrl && url.startsWith('/uploads')) {
+       const base = appData.globalBaseUrl.startsWith('http') ? appData.globalBaseUrl : `https://${appData.globalBaseUrl}`;
+       return `${base}${url}`;
+    }
+    return url;
+  };
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`/api/playlists/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+      }).then(r => r.json()),
+      fetch('/api/admin/data', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+      }).then(r => r.json())
+    ]).then(([playlistData, data]) => {
+      setPlaylist(playlistData.playlist);
+      setTitle(playlistData.playlist.title);
+      setSongs(playlistData.songs);
+      setAppData(data);
+      setIsLoading(false);
+    });
+  }, [id]);
+
+  const handleSave = async () => {
+    const songIds = songs.map(s => s.id);
+    await fetch(`/api/playlists/${id}/update`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` 
+      },
+      body: JSON.stringify({ title, songIds })
+    });
+    setToast('Đã lưu thành công!');
+    setTimeout(() => setToast(''), 3000);
+  };
+
+  const handleDragStart = (idx: number) => {
+    setDraggingIdx(idx);
+  };
+
+  const handleDragEnter = (targetIdx: number) => {
+    if (draggingIdx === null || draggingIdx === targetIdx) return;
+    const newSongs = [...songs];
+    const draggedItem = newSongs[draggingIdx];
+    newSongs.splice(draggingIdx, 1);
+    newSongs.splice(targetIdx, 0, draggedItem);
+    setDraggingIdx(targetIdx);
+    setSongs(newSongs);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingIdx(null);
+  };
+
+  if (isLoading) return <div className="min-h-screen bg-stone-100 flex items-center justify-center text-stone-500">Đang tải...</div>;
+
+  return (
+    <div className="min-h-screen bg-stone-100 text-stone-900 font-sans relative pb-24">
+      {toast && (
+        <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-xl font-bold z-50 animate-[bounce_1s_ease-in-out]">
+          {toast}
+        </div>
+      )}
+      <header className="bg-white border-b border-stone-200 sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/admin" className="text-sm font-medium text-stone-500 hover:text-stone-900 flex items-center gap-1">
+             <ArrowLeft className="w-4 h-4" /> Quay lại
+          </Link>
+          <button onClick={handleSave} className="bg-stone-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-stone-800 transition-colors shadow-sm">Lưu thay đổi</button>
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 space-y-8">
+          <div>
+            <label className="block text-sm font-bold text-stone-700 mb-2">Tên Playlist</label>
+            <input 
+               value={title} 
+               onChange={e => setTitle(e.target.value)} 
+               className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-bold" 
+            />
+          </div>
+
+          <div>
+             <h3 className="text-sm font-bold text-stone-700 mb-4">Danh sách bài hát (Kéo thả để sắp xếp)</h3>
+             {songs.length === 0 ? (
+               <div className="text-center py-8 text-stone-400 border-2 border-dashed rounded-xl">Chưa có bài hát nào trong playlist này.</div>
+             ) : (
+               <div className="space-y-2">
+                 {songs.map((song, i) => (
+                    <div 
+                       key={song.id}
+                       draggable
+                       onDragStart={() => handleDragStart(i)}
+                       onDragEnter={() => handleDragEnter(i)}
+                       onDragOver={(e) => e.preventDefault()}
+                       onDragEnd={handleDragEnd}
+                       className={`flex items-center gap-4 p-3 rounded-xl border transition-all ${draggingIdx === i ? 'bg-stone-100 border-stone-400 opacity-50 relative z-10' : 'bg-white border-stone-200 hover:bg-stone-50'} cursor-grab active:cursor-grabbing`}
+                    >
+                       <GripVertical className="w-5 h-5 text-stone-400 shrink-0" />
+                       {song.coverUrl ? (
+                         <img src={getPreviewUrl(song.coverUrl)} className="w-12 h-12 rounded object-cover border border-stone-200 shrink-0" alt="" />
+                       ) : (
+                         <div className="w-12 h-12 bg-stone-100 rounded flex items-center justify-center shrink-0 border border-stone-200">
+                           <Disc3 className="w-6 h-6 text-stone-400" />
+                         </div>
+                       )}
+                       <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-stone-800 truncate">{song.title}</h4>
+                          <p className="text-xs text-stone-500 truncate">{song.singer || song.author}</p>
+                       </div>
+                    </div>
+                 ))}
+               </div>
+             )}
+          </div>
         </div>
       </div>
     </div>
