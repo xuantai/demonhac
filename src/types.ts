@@ -30,6 +30,7 @@ export interface DemoSong {
   isReleased?: boolean;
   playlistIds?: string[];
   createdAt: number;
+  secretKey?: string;
 }
 
 export interface AppData {

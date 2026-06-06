@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Shuffle, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,20 +11,45 @@ function formatText(text: string | null | undefined) {
   return (
     <>
       {lines.map((line, lineIdx) => {
-        const parts = line.split(/(A\.C Xuân Tài|AC Xuân Tài)/gi);
+        const segments = line.split(/(\s*,\s*|\s*&\s*)/g);
         return (
           <React.Fragment key={lineIdx}>
             {lineIdx > 0 && <br />}
-            {parts.map((part, i) => {
-              const lower = part.toLowerCase();
-              if (lower === 'a.c xuân tài' || lower === 'ac xuân tài') {
+            {segments.map((segment, segIdx) => {
+              const isSeparator = /^(\s*,\s*|\s*&\s*)$/.test(segment);
+              if (isSeparator) {
+                return <span key={`${lineIdx}-${segIdx}`}>{segment}</span>;
+              }
+              
+              const isSecret = segment.toLowerCase().includes("secret");
+              if (isSecret) {
                 return (
-                  <a key={`${lineIdx}-${i}`} href="https://acxuantai.com" target="_blank" rel="noreferrer" className="transition-colors hover:opacity-80">
-                    {part}
-                  </a>
+                  <span 
+                    key={`${lineIdx}-${segIdx}`}
+                    className="select-none filter blur-[4.5px] cursor-help inline-block bg-white/5 px-1.5 py-0.5 rounded border border-white/5 mx-0.5" 
+                    title="Nghệ sĩ bí mật"
+                  >
+                    {segment}
+                  </span>
                 );
               }
-              return <span key={`${lineIdx}-${i}`}>{part}</span>;
+              
+              const parts = segment.split(/(A\.C Xuân Tài|AC Xuân Tài)/gi);
+              return (
+                <React.Fragment key={`${lineIdx}-${segIdx}`}>
+                  {parts.map((part, i) => {
+                    const lower = part.toLowerCase();
+                    if (lower === 'a.c xuân tài' || lower === 'ac xuân tài') {
+                      return (
+                        <a key={`${lineIdx}-${segIdx}-${i}`} href="https://acxuantai.com" target="_blank" rel="noreferrer" className="transition-colors hover:opacity-80">
+                          {part}
+                        </a>
+                      );
+                    }
+                    return <span key={`${lineIdx}-${segIdx}-${i}`}>{part}</span>;
+                  })}
+                </React.Fragment>
+              );
             })}
           </React.Fragment>
         );
@@ -743,6 +768,11 @@ function Home() {
                         <HoverTranslate text={demo.title} format={true} />
                       </div>
                     </h3>
+                    {(demo.singer || demo.author) && (
+                      <p className="text-xs text-neutral-400 mt-1 truncate">
+                        {formatText(demo.singer || demo.author)}
+                      </p>
+                    )}
                   </div>
                   {demo.isReleased ? (
                     <>
@@ -837,7 +867,7 @@ function Home() {
   );
 }
 
-function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void }) {
+function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -939,6 +969,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded }: { src: str
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={onEnded}
+        loop={playlistContext?.repeat === 2}
       />
       
       {/* Wave visualizer */}
@@ -989,16 +1020,37 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded }: { src: str
             />
          </div>
 
-        <button 
-          onClick={togglePlay}
-          className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center ${isLight ? 'bg-stone-900 text-white shadow-[0_0_20px_rgba(0,0,0,0.15)]' : 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]'} rounded-full hover:scale-105 transition-all outline-none`}
-        >
-          {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-          ) : (
-             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          )}
-        </button>
+        {playlistContext ? (
+          <div className="flex items-center gap-4">
+             <button onClick={() => playlistContext.setShuffle(!playlistContext.shuffle)} className={`opacity-60 hover:opacity-100 ${playlistContext.shuffle ? 'text-blue-400 opacity-100' : ''}`}><Shuffle className="w-4 h-4 md:w-5 md:h-5" /></button>
+             <button onClick={playlistContext.handlePrev} className="opacity-80 hover:opacity-100 hover:scale-110 transition"><SkipBack className="w-5 h-5 md:w-6 md:h-6 fill-current" /></button>
+             <button 
+               onClick={togglePlay}
+               className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center ${isLight ? 'bg-stone-900 text-white shadow-[0_0_20px_rgba(0,0,0,0.15)]' : 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]'} rounded-full hover:scale-105 transition-all outline-none`}
+             >
+               {isPlaying ? (
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+               ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+               )}
+             </button>
+             <button onClick={playlistContext.handleNext} className="opacity-80 hover:opacity-100 hover:scale-110 transition"><SkipForward className="w-5 h-5 md:w-6 md:h-6 fill-current" /></button>
+             <button onClick={() => playlistContext.setRepeat((playlistContext.repeat + 1) % 3)} className={`opacity-60 hover:opacity-100 ${playlistContext.repeat > 0 ? 'text-blue-400 opacity-100' : ''}`}>
+               {playlistContext.repeat === 2 ? <Repeat1 className="w-4 h-4 md:w-5 md:h-5" /> : <Repeat className="w-4 h-4 md:w-5 md:h-5" />}
+             </button>
+          </div>
+        ) : (
+          <button 
+            onClick={togglePlay}
+            className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center ${isLight ? 'bg-stone-900 text-white shadow-[0_0_20px_rgba(0,0,0,0.15)]' : 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]'} rounded-full hover:scale-105 transition-all outline-none`}
+          >
+            {isPlaying ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            ) : (
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            )}
+          </button>
+        )}
 
         <div className="w-20 md:w-24 flex justify-end"></div>
       </div>
@@ -1446,6 +1498,48 @@ function EightBitGameEffect() {
   );
 }
 
+function PuzzleEffect() {
+  const colors = [
+    'text-pink-500 drop-shadow-[0_0_10px_rgba(236,72,153,0.8)]',
+    'text-purple-500 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]',
+    'text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]',
+    'text-teal-400 drop-shadow-[0_0_10px_rgba(45,212,191,0.8)]',
+    'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]',
+    'text-orange-500 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]',
+    'text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]',
+    'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]'
+  ];
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[1] opacity-75">
+      {/* Colorful background ambient blur bubbles */}
+      <div className="absolute top-[10%] left-[10%] w-[45vw] h-[45vw] bg-pink-500/10 blur-[130px] rounded-full animate-pulse" style={{ animationDuration: '8s' }}></div>
+      <div className="absolute bottom-[10%] right-[10%] w-[45vw] h-[45vw] bg-purple-600/10 blur-[140px] rounded-full animate-pulse" style={{ animationDuration: '12s' }}></div>
+      <div className="absolute top-[35%] right-[20%] w-[38vw] h-[38vw] bg-cyan-500/10 blur-[110px] rounded-full animate-pulse" style={{ animationDuration: '10s' }}></div>
+      <div className="absolute bottom-[30%] left-[20%] w-[40vw] h-[40vw] bg-yellow-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDuration: '9s' }}></div>
+
+      {Array.from({ length: 30 }).map((_, i) => {
+        const colorClass = colors[i % colors.length];
+        const randomRot = Math.random() * 360;
+        const randomScale = 0.5 + Math.random() * 1.5;
+        return (
+          <div 
+            key={i} 
+            className={`absolute text-2xl sm:text-4xl animate-snow select-none ${colorClass}`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              transform: `rotate(${randomRot}deg) scale(${randomScale})`,
+              animationDuration: `${Math.random() * 10 + 6}s`,
+              animationDelay: `${Math.random() * -15}s`
+            }}
+          >
+            🧩
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function PlaylistPlayer() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
@@ -1456,7 +1550,7 @@ function PlaylistPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(false);
+  const [repeat, setRepeat] = useState<0 | 1 | 2>(0); // 0: off, 1: playlist, 2: one
   const [error, setError] = useState('');
   
   const [isMinimized, setIsMinimized] = useState(false);
@@ -1489,7 +1583,6 @@ function PlaylistPlayer() {
 
   useEffect(() => {
      if (songs.length > 0) {
-        setIsMinimized(false);
         resetTimer();
      }
   }, [currentIndex, resetTimer, songs.length]);
@@ -1511,7 +1604,7 @@ function PlaylistPlayer() {
     });
   }, [id]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
      if (songs.length === 0) return;
      if (shuffle) {
          let nextIdx = Math.floor(Math.random() * songs.length);
@@ -1522,13 +1615,33 @@ function PlaylistPlayer() {
      } else {
          if (currentIndex < songs.length - 1) {
              setCurrentIndex(currentIndex + 1);
-         } else if (repeat) {
+         } else if (repeat === 1 || repeat === 2) {
              setCurrentIndex(0);
          }
      }
-  };
+  }, [songs.length, shuffle, currentIndex, repeat]);
 
-  const handleEnd = () => handleNext();
+  const handlePrev = useCallback(() => {
+     if (songs.length === 0) return;
+     if (shuffle) {
+         let nextIdx = Math.floor(Math.random() * songs.length);
+         setCurrentIndex(nextIdx);
+     } else {
+         if (currentIndex > 0) {
+             setCurrentIndex(currentIndex - 1);
+         } else if (repeat === 1 || repeat === 2) {
+             setCurrentIndex(songs.length - 1);
+         }
+     }
+  }, [songs.length, shuffle, currentIndex, repeat]);
+
+  const handleEnd = () => {
+    if (repeat === 2) {
+      // Loop is handled natively by audio tag. If it still calls onEnd, do nothing to stay on the same track.
+    } else {
+      handleNext();
+    }
+  };
 
   const handleAlmostEnded = () => {
      setIsMinimized(false);
@@ -1547,7 +1660,7 @@ function PlaylistPlayer() {
     >
       {currentSong && (
          <div className="absolute inset-0 z-0 overflow-y-auto custom-scrollbar">
-            <DemoPlayer songIdP={currentSong.slug || currentSong.id} onEnd={handleEnd} onAlmostEnded={handleAlmostEnded} playlistSongs={songs} />
+            <DemoPlayer songIdP={currentSong.slug || currentSong.id} onEnd={handleEnd} onAlmostEnded={handleAlmostEnded} playlistSongs={songs} playlistContext={{ handlePrev, handleNext, shuffle, setShuffle, repeat, setRepeat }} />
          </div>
       )}
 
@@ -1601,7 +1714,7 @@ function PlaylistPlayer() {
                             <p className={`text-sm font-bold truncate ${i === currentIndex ? 'text-purple-400' : 'text-white'}`}>
                               <HoverTranslate text={song.title} />
                             </p>
-                            <p className="text-xs text-neutral-400 truncate">{song.singer || song.composer || 'Đang cập nhật'}</p>
+                            <p className="text-xs text-neutral-400 truncate">{formatText(song.singer || song.composer || 'Đang cập nhật')}</p>
                          </div>
                          {song.requiresPassword && <Lock className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
                          {i === currentIndex && <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_theme(colors.purple.400)]" />}
@@ -1642,12 +1755,14 @@ function PlaylistPlayer() {
   );
 }
 
-function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded }: any = {}) {
+function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext }: any = {}) {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
   const paramsId = useParams().id;
   const id = songIdP || paramsId;
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const secretKey = searchParams.get('secret');
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem('adminToken') === 'MatKhauDay123';
   const [demo, setDemo] = useState<DemoSong | null>(null);
@@ -1697,7 +1812,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
     setError('');
     pwdTouchedRef.current = false;
 
-    fetch(`/api/demos/${id}`, {
+    const queryParam = secretKey ? `?secret=${encodeURIComponent(secretKey)}` : '';
+    fetch(`/api/demos/${id}${queryParam}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
       }
@@ -1829,6 +1945,9 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
   } else if (templateType === '15') {
     themeClasses = "bg-[#090615] text-emerald-400 font-mono tracking-tight";
     accentClass = "bg-[#ec4899] hover:bg-[#db2777] text-white border-2 border-[#10b981] shadow-[4px_4px_0_rgba(16,185,129,0.7)] font-extrabold uppercase rounded-none tracking-widest";
+  } else if (templateType === '16') {
+    themeClasses = "bg-gradient-to-tr from-[#1e1b4b] via-[#3c0952] via-[#094154] to-[#111115] text-white font-sans";
+    accentClass = "bg-gradient-to-r from-yellow-400 via-pink-400 via-purple-500 to-indigo-500 hover:from-yellow-300 hover:via-pink-300 hover:via-purple-400 hover:to-indigo-450 text-white font-black tracking-widest uppercase rounded-2xl shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-pink-500/20";
   }
 
   if (!unlocked) {
@@ -1856,6 +1975,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
         {templateType === '13' && <><SunsetSunEffect /><SunsetLeavesEffect /></>}
         {templateType === '14' && <><OceanWavesEffect /><OceanNightSkyEffect /></>}
         {templateType === '15' && <EightBitGameEffect />}
+        {templateType === '16' && <PuzzleEffect />}
         
         {pageBgUrl && (
           <div 
@@ -1923,6 +2043,29 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
 
   return (
     <div className={`min-h-screen px-4 py-8 ${themeClasses} transition-colors duration-1000 relative`}>
+      <svg width="0" height="0" className="absolute pointer-events-none">
+        <defs>
+          <clipPath id="puzzle-clip" clipPathUnits="objectBoundingBox">
+            <path d="M 0.15 0.15 
+                     H 0.4 
+                     C 0.4 0.04 0.46 0.0 0.5 0.0 
+                     C 0.54 0.0 0.6 0.04 0.6 0.15 
+                     H 0.85 
+                     V 0.4 
+                     C 0.96 0.4 1.0 0.46 1.0 0.5 
+                     C 1.0 0.54 0.96 0.6 0.85 0.6 
+                     V 0.85 
+                     H 0.6 
+                     C 0.6 0.96 0.54 1.0 0.5 1.0 
+                     C 0.46 1.0 0.4 0.96 0.4 0.85 
+                     H 0.15 
+                     V 0.6 
+                     C 0.04 0.6 0.0 0.54 0.0 0.5 
+                     C 0.0 0.46 0.04 0.4 0.15 0.4 
+                     Z" />
+          </clipPath>
+        </defs>
+      </svg>
       <motion.div 
         initial={{ scaleY: 1 }} 
         animate={{ scaleY: 0 }} 
@@ -1952,6 +2095,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
       {templateType === '13' && <><SunsetSunEffect /><SunsetLeavesEffect /></>}
       {templateType === '14' && <><OceanWavesEffect /><OceanNightSkyEffect /></>}
       {templateType === '15' && <EightBitGameEffect />}
+      {templateType === '16' && <PuzzleEffect />}
       
       {pageBgUrl && (
         <div 
@@ -1988,6 +2132,26 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
         >
           <Share2 className="w-4.5 h-4.5" />
         </button>
+        {isAdmin && demo?.secretKey && (
+          <button
+            onClick={() => {
+              const baseUrl = playlistSongs ? '/playlist/' : '/demo/';
+              const dynamicId = playlistSongs ? window.location.pathname.split('/').pop() : (demo.slug || demo.id);
+              let url = window.location.origin + baseUrl + dynamicId;
+              if (url.includes('xn--ti-jia.com')) {
+                url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+              }
+              url += `?secret=${demo.secretKey}`;
+              navigator.clipboard.writeText(url);
+              setToast('Đã copy Secret Link!');
+              setTimeout(() => setToast(''), 3000);
+            }}
+            className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
+            title="Copy Secret Link"
+          >
+            <Lock className="w-4.5 h-4.5" />
+          </button>
+        )}
       </div>
 
       {isAdmin && demo && (
@@ -2084,7 +2248,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
                 templateType === '11' ? 'shadow-[0_0_30px_rgba(212,175,55,0.2)] rounded-2xl border-2 border-stone-800' :
                 templateType === '13' ? 'shadow-[0_0_40px_rgba(244,63,94,0.3)] bg-black/40 border border-[#f43f5e]/20 rounded-[2.5rem] hover:scale-105 transition-transform duration-500' : 
                 templateType === '14' ? 'shadow-[0_0_50px_rgba(14,165,233,0.35)] bg-gradient-to-b from-[#134074] to-[#0B2545] border-4 border-sky-400/50 rounded-[2rem] hover:scale-102 transition-transform duration-500' : 
-                templateType === '15' ? 'border-[6px] border-[#ec4899] rounded-none shadow-[6px_6px_0_#10b981] bg-black hover:scale-105 transition-transform duration-300' : 'shadow-2xl rounded-3xl border-4'
+                templateType === '15' ? 'border-[6px] border-[#ec4899] rounded-none shadow-[6px_6px_0_#10b981] bg-black hover:scale-105 transition-transform duration-300' : 
+                templateType === '16' ? 'rounded-none overflow-visible hover:scale-105 transition-transform duration-500 max-w-[280px] md:max-w-[340px]' : 'shadow-2xl rounded-3xl border-4'
               }`}>
                 {templateType === '9' && (
                   <>
@@ -2092,7 +2257,29 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
                     <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-10 drop-shadow-md" style={{animationDelay: '1s'}}>☁️</div>
                   </>
                 )}
-                {displayCoverUrl ? (
+                {templateType === '16' ? (
+                  <div className="relative w-full aspect-square p-2">
+                    {/* Colorful neon/gradient outer backdrop offset shadows */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-yellow-400 via-emerald-400 to-indigo-500 opacity-95 blur-[3px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.06)' }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-bl from-yellow-400 via-orange-500 via-red-500 to-purple-600 opacity-70 blur-[1px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.03)' }}></div>
+                    
+                    {/* Black base fill so cover art fits perfectly */}
+                    <div className="absolute inset-0 bg-black" style={{ clipPath: 'url(#puzzle-clip)' }}></div>
+                    
+                    {displayCoverUrl ? (
+                      <img 
+                        src={displayCoverUrl} 
+                        alt="Cover" 
+                        className="w-full h-full object-cover animate-zoom-gentle relative z-10"
+                        style={{ clipPath: 'url(#puzzle-clip)' }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-stone-900 flex flex-col justify-center items-center relative z-10" style={{ clipPath: 'url(#puzzle-clip)' }}>
+                        <Music className="w-16 h-16 text-yellow-400 opacity-80" />
+                      </div>
+                    )}
+                  </div>
+                ) : displayCoverUrl ? (
                   <img 
                     src={displayCoverUrl} 
                     alt="Cover" 
@@ -2104,7 +2291,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
                   </div>
                 )}
                 <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''}`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
               </div>
             )}
           <h1 className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
@@ -2143,7 +2330,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded 
               )}
             </div>
             <div className="relative z-10 px-4 pt-2 pb-3 md:px-5 md:pt-3 md:pb-4">
-               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} />
+               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} />
             </div>
           </div>
         </div>
@@ -2545,7 +2732,8 @@ function AdminDashboard() {
                                demo.template === '12' ? 'Cổ điển' : 
                                demo.template === '13' ? 'Hoàng hôn' : 
                                demo.template === '14' ? 'Đại dương' : 
-                               demo.template === '15' ? 'Retro 8-Bit' : 'Mặc định'}
+                               demo.template === '15' ? 'Retro 8-Bit' : 
+                               demo.template === '16' ? 'Puzzle Xếp hình' : 'Mặc định'}
                             </span>
                             {demo.password && (
                               <span className="bg-stone-100 px-2 py-0.5 rounded font-medium border border-stone-200 flex items-center gap-1 text-stone-800">
@@ -2577,6 +2765,28 @@ function AdminDashboard() {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Danh sách Playlist</h2>
+                <button
+                   onClick={async () => {
+                     const title = prompt("Nhập tên playlist mới:");
+                     if (!title) return;
+                     const res = await fetch('/api/playlists', {
+                       method: 'POST',
+                       headers: { 
+                         'Content-Type': 'application/json',
+                         'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                       },
+                       body: JSON.stringify({ title })
+                     });
+                     if (res.ok) {
+                        setToast('Tạo playlist thành công!');
+                        setTimeout(() => setToast(''), 3000);
+                        loadData();
+                     }
+                   }}
+                   className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-xl font-bold hover:bg-stone-800 transition-colors"
+                >
+                   <Plus className="w-4 h-4" /> Tạo Playlist
+                </button>
               </div>
               
               <div className="overflow-x-auto">
@@ -2763,6 +2973,20 @@ function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
                     <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
+                    <button type="button" onClick={async () => {
+                      if (!confirm("Bạn có chắc muốn làm mới toàn bộ Secret Link? Các Secret Link cũ sẽ không còn hoạt động, tự động chuyển về đường dẫn gốc yêu cầu mật khẩu.")) return;
+                      const res = await fetch('/api/admin/reset-secret-links', {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                        }
+                      });
+                      if (res.ok) {
+                        setToast("Đã reset toàn bộ Secret Link thành công!");
+                        setTimeout(() => setToast(''), 3000);
+                        loadData();
+                      }
+                    }} className="text-red-500 font-bold ml-auto px-4 py-2 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">Reset Toàn Bộ Secret Link</button>
                 </div>
               </form>
             </div>
@@ -2846,15 +3070,17 @@ function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onCh
       <label className="block text-sm font-bold text-stone-700">Thêm vào Playlist</label>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         {playlists.map(p => (
-          <label key={p.id} className="flex items-center gap-2 text-sm p-2 border rounded-xl hover:bg-stone-50 cursor-pointer">
+          <div key={p.id} className="flex items-center gap-2 text-sm p-2 border rounded-xl hover:bg-stone-50">
             <input 
               type="checkbox" 
               checked={selectedIds.includes(p.id)} 
               onChange={() => toggle(p.id)} 
-              className="rounded text-stone-900 border-stone-300 focus:ring-stone-900"
+              className="rounded text-stone-900 border-stone-300 focus:ring-stone-900 cursor-pointer"
             />
-            <span className="truncate">{p.title}</span>
-          </label>
+            <Link to={`/admin/playlist/${p.id}`} target="_blank" className="truncate flex-1 hover:text-blue-600 hover:underline cursor-pointer" title="Quản lý Playlist (mở tab mới)">
+               {p.title}
+            </Link>
+          </div>
         ))}
       </div>
       <div className="flex gap-2">
@@ -3119,6 +3345,7 @@ function AdminCreateDemo() {
                   <option value="13">Hoàng hôn (Cam đỏ trời chiều, lá rụng)</option>
                   <option value="14">Đại Dương (Sóng biển dập dồn, vỏ sò rơi)</option>
                   <option value="15">Retro 8-Bit (Game Nhật Bản, tay cầm rơi)</option>
+                  <option value="16">Xếp hình Puzzle (Nhiều sắc màu, mảnh ghép rơi)</option>
                 </select>
               </div>
 
@@ -3450,6 +3677,7 @@ function AdminEditDemo() {
                   <option value="13">Hoàng hôn (Cam đỏ trời chiều, lá rụng)</option>
                   <option value="14">Đại Dương (Sóng biển dập dồn, vỏ sò rơi)</option>
                   <option value="15">Retro 8-Bit (Game Nhật Bản, tay cầm rơi)</option>
+                  <option value="16">Xếp hình Puzzle (Nhiều sắc màu, mảnh ghép rơi)</option>
                 </select>
               </div>
 
@@ -3476,9 +3704,25 @@ function AdminEditDemo() {
               <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
             </div>
 
-            <button disabled={loading} type="submit" className="w-full bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1 mt-8">
-              {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
-            </button>
+            <div className="flex flex-col md:flex-row gap-4 mt-8">
+              <button disabled={loading} type="submit" className="flex-1 bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1">
+                {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
+              </button>
+              <button disabled={loading} type="button" onClick={async () => {
+                if (!confirm("Bạn có chắc muốn làm mới Secret Link của bài này? Secret Link cũ sẽ không còn hoạt động, tự động chuyển về đường dẫn gốc yêu cầu mật khẩu.")) return;
+                const res = await fetch(`/api/demos/${demo.id}/reset-secret`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                  }
+                });
+                if (res.ok) {
+                  alert("Đã reset Secret Link thành công!");
+                }
+              }} className="flex-1 border-2 border-red-200 text-red-500 hover:bg-red-50 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1">
+                Làm mới Secret Link
+              </button>
+            </div>
           </form>
         </div>
       </div>

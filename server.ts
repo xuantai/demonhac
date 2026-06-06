@@ -438,6 +438,7 @@ async function startServer() {
       author: req.body.author || '',
       audioUrl: audioFile ? `/uploads/${audioFile.filename}` : (req.body.audioUrl || ''),
       coverUrl: coverFile ? `/uploads/${coverFile.filename}` : processDriveLink(req.body.coverUrl || ''),
+      secretKey: require('crypto').randomBytes(8).toString('hex'),
       backgroundUrl: processDriveLink(req.body.backgroundUrl || ''),
       lyrics: req.body.lyrics || '',
       template: req.body.template || '1',
@@ -495,6 +496,42 @@ async function startServer() {
      }
   });
   
+  const crypto = require('crypto');
+  
+  app.post('/api/admin/reset-secret-links', express.json(), async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
+     const data = await loadData();
+     data.demos = data.demos.map((d: any) => ({
+        ...d,
+        secretKey: crypto.randomBytes(8).toString('hex')
+     }));
+     await saveData(data);
+     res.json({ success: true });
+  });
+
+  app.post('/api/demos/:id/reset-secret', express.json(), async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
+     const data = await loadData();
+     let found = false;
+     data.demos = data.demos.map((d: any) => {
+        if (d.id === req.params.id || d.slug === req.params.id) {
+           d.secretKey = crypto.randomBytes(8).toString('hex');
+           found = true;
+        }
+        return d;
+     });
+     if (found) {
+        await saveData(data);
+        res.json({ success: true });
+     } else {
+        res.status(404).json({ error: 'Not found' });
+     }
+  });
+
   app.post('/api/demos/:id/delete', async (req, res) => {
      if (!isRequestAdmin(req)) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -638,8 +675,11 @@ async function startServer() {
       const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
       const isUserAdmin = isRequestAdmin(req);
       const fromPlaylist = req.query.fromPlaylist === 'true';
+      const providedSecret = req.query.secret as string | undefined;
+      const isValidSecret = !!(demo.secretKey && providedSecret && demo.secretKey === providedSecret);
+      
       // If it requires password, only return basic metadata without audio/lyrics
-      if (expectedPassword && expectedPassword !== req.query.pwd && !isUserAdmin) {
+      if (expectedPassword && expectedPassword !== req.query.pwd && !isValidSecret && !isUserAdmin) {
           return res.json({ 
               id: demo.id, 
               title: demo.title,
@@ -653,7 +693,7 @@ async function startServer() {
               requiresPassword: true 
           });
       }
-      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword });
+      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret });
   });
 
   // Serve static files from public/uploads
