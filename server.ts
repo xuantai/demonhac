@@ -828,9 +828,10 @@ async function startServer() {
         html = await fs.readFile(path.join(process.cwd(), 'dist', 'index.html'), 'utf-8');
       }
 
+      const defaultDesc = data.pageTitle || `Kho nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogTitle = data.pageTitle || `Thiên đường âm nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : '');
-      let ogDesc = data.artistBio || '';
+      let ogDesc = defaultDesc;
 
       const match = url.match(/^\/demo\/([^\/?]+)/);
       if (match) {
@@ -850,7 +851,7 @@ async function startServer() {
           }
           
           ogImage = demo.ogImageUrl || coverToUse || data.homeCoverUrl || data.ogImageUrl || '';
-          ogDesc = demo.author || demo.composer || data.artistBio || '';
+          ogDesc = defaultDesc;
         }
       }
 
