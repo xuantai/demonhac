@@ -50,7 +50,40 @@ async function loadData() {
   try {
     const docSnap = await getDoc(DOC_REF);
     if (docSnap.exists()) {
-      return docSnap.data();
+      const data = docSnap.data();
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      let changed = false;
+
+      if (data.demos) {
+         const lenBefore = data.demos.length;
+         data.demos = data.demos.filter((d: any) => {
+            if (d.deleted && d.deletedAt && (now - d.deletedAt > thirtyDaysMs)) {
+               return false;
+            }
+            return true;
+         });
+         if (data.demos.length !== lenBefore) changed = true;
+      }
+      if (data.playlists) {
+         const lenBefore = data.playlists.length;
+         data.playlists = data.playlists.filter((p: any) => {
+            if (p.deleted && p.deletedAt && (now - p.deletedAt > thirtyDaysMs)) {
+               return false;
+            }
+            return true;
+         });
+         if (data.playlists.length !== lenBefore) changed = true;
+      }
+
+      if (changed) {
+         await setDoc(DOC_REF, JSON.parse(JSON.stringify(data)));
+         try {
+            await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+         } catch (e) {}
+      }
+
+      return data;
     }
   } catch (error) {
     console.error("Firebase load error:", error);
@@ -132,6 +165,34 @@ async function startServer() {
     });
     
     return cookies['adminToken'] === 'MatKhauDay123';
+  };
+
+  const isRequestMember = (req: express.Request): boolean => {
+    if (isRequestAdmin(req)) return true;
+
+    // 1. Check authorization header or x-admin-token header
+    const authHeader = req.headers.authorization || req.headers['x-admin-token'];
+    if (authHeader) {
+      const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ') 
+        ? authHeader.slice(7) 
+        : String(authHeader);
+      
+      if (token === 'XuanTaiDepTrai') return true;
+    }
+
+    // 2. Check cookies
+    const cookieHeader = req.headers.cookie;
+    if (!cookieHeader) return false;
+    
+    const cookies: Record<string, string> = {};
+    cookieHeader.split(';').forEach(c => {
+      const parts = c.split('=');
+      if (parts.length >= 2) {
+        cookies[parts[0].trim()] = decodeURIComponent(parts[1].trim());
+      }
+    });
+    
+    return cookies['memberToken'] === 'XuanTaiDepTrai';
   };
 
   // API Routes
@@ -245,6 +306,14 @@ async function startServer() {
   app.get('/api/data', async (req, res) => {
     let data = await loadData();
     data = applyBaseUrl(data);
+    
+    if (data.demos) {
+       data.demos = data.demos.filter((d: any) => !d.deleted);
+    }
+    if (data.playlists) {
+       data.playlists = data.playlists.filter((p: any) => !p.deleted);
+    }
+
     // Do not leak passwords
     let publicDemos = data.demos.map((d: any) => ({ ...d, password: !!(d.password || data.globalPassword) })); 
     publicDemos = injectCoverUrl(publicDemos, data.slideshowImages);
@@ -276,6 +345,33 @@ async function startServer() {
       res.json({ isAdmin: true });
     } else {
       res.json({ isAdmin: false });
+    }
+  });
+
+  // Member authentication endpoints
+  app.post('/api/member/login', (req, res) => {
+    const { password } = req.body;
+    if (password === 'XuanTaiDepTrai') {
+      res.setHeader('Set-Cookie', 'memberToken=XuanTaiDepTrai; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000'); // 30 days
+      res.json({ success: true, token: 'XuanTaiDepTrai' });
+    } else {
+      res.status(401).json({ error: 'Mật khẩu thành viên không chính xác!' });
+    }
+  });
+
+  app.post('/api/member/logout', (req, res) => {
+    res.setHeader('Set-Cookie', [
+      'memberToken=; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=0',
+      'memberToken=; Path=/; HttpOnly; Max-Age=0'
+    ]);
+    res.json({ success: true });
+  });
+
+  app.get('/api/member/check', (req, res) => {
+    if (isRequestMember(req)) {
+      res.json({ isMember: true });
+    } else {
+      res.json({ isMember: false });
     }
   });
 
@@ -566,9 +662,60 @@ async function startServer() {
         return res.status(401).json({ error: 'Unauthorized' });
      }
      const data = await loadData();
-     data.demos = data.demos.filter((d: any) => d.id !== req.params.id && d.slug !== req.params.id);
+     const idx = data.demos.findIndex((d: any) => d.id === req.params.id || d.slug === req.params.id);
+     if (idx >= 0) {
+        data.demos[idx].deleted = true;
+        data.demos[idx].deletedAt = Date.now();
+        await saveData(data);
+        res.json({ success: true });
+     } else {
+        res.status(404).json({ error: 'Not found' });
+     }
+  });
+
+  app.post('/api/demos/:id/restore', async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
+     const data = await loadData();
+     const idx = data.demos.findIndex((d: any) => d.id === req.params.id || d.slug === req.params.id);
+     if (idx >= 0) {
+        data.demos[idx].deleted = false;
+        delete data.demos[idx].deletedAt;
+        await saveData(data);
+        res.json({ success: true });
+     } else {
+        res.status(404).json({ error: 'Not found' });
+     }
+  });
+
+  app.post('/api/admin/reorder-demos', express.json(), async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
+     const { demoIds } = req.body;
+     if (!Array.isArray(demoIds)) {
+        return res.status(400).json({ error: 'Invalid payload' });
+     }
+     const data = await loadData();
+     const demosMap = new Map(data.demos.map((d: any) => [d.id, d]));
+     const orderedDemos: any[] = [];
+     
+     demoIds.forEach((id: string) => {
+        const demo = demosMap.get(id);
+        if (demo) {
+           orderedDemos.push(demo);
+           demosMap.delete(id);
+        }
+     });
+     
+     demosMap.forEach((demo) => {
+        orderedDemos.push(demo);
+     });
+     
+     data.demos = orderedDemos;
      await saveData(data);
-     res.json({ success: true });
+     res.json({ success: true, demos: data.demos });
   });
 
   app.post('/api/playlists', express.json(), async (req, res) => {
@@ -610,16 +757,61 @@ async function startServer() {
     }
     const data = await loadData();
     if (!data.playlists) data.playlists = [];
-    data.playlists = data.playlists.filter((p: any) => p.id !== req.params.id);
-    // Also remove from all demos
-    if (data.demos) {
-       data.demos = data.demos.map((demo: any) => ({
-           ...demo,
-           playlistIds: demo.playlistIds ? demo.playlistIds.filter((pid: string) => pid !== req.params.id) : []
-       }));
+    const idx = data.playlists.findIndex((p: any) => p.id === req.params.id);
+    if (idx >= 0) {
+       data.playlists[idx].deleted = true;
+       data.playlists[idx].deletedAt = Date.now();
+       await saveData(data);
+       res.json({ success: true });
+    } else {
+       res.status(404).json({ error: 'Not found' });
     }
+  });
+
+  app.post('/api/playlists/:id/restore', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const data = await loadData();
+    if (!data.playlists) data.playlists = [];
+    const idx = data.playlists.findIndex((p: any) => p.id === req.params.id);
+    if (idx >= 0) {
+       data.playlists[idx].deleted = false;
+       delete data.playlists[idx].deletedAt;
+       await saveData(data);
+       res.json({ success: true });
+    } else {
+       res.status(404).json({ error: 'Not found' });
+    }
+  });
+
+  app.post('/api/admin/reorder-playlists', express.json(), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { playlistIds } = req.body;
+    if (!Array.isArray(playlistIds)) {
+       return res.status(400).json({ error: 'Invalid payload' });
+    }
+    const data = await loadData();
+    const playlistsMap = new Map((data.playlists || []).map((p: any) => [p.id, p]));
+    const orderedPlaylists: any[] = [];
+    
+    playlistIds.forEach((id: string) => {
+       const pl = playlistsMap.get(id);
+       if (pl) {
+          orderedPlaylists.push(pl);
+          playlistsMap.delete(id);
+       }
+    });
+    
+    playlistsMap.forEach((pl) => {
+       orderedPlaylists.push(pl);
+    });
+    
+    data.playlists = orderedPlaylists;
     await saveData(data);
-    res.json({ success: true });
+    res.json({ success: true, playlists: data.playlists });
   });
 
   app.post('/api/demos/:id/verify', async (req, res) => {
@@ -649,11 +841,13 @@ async function startServer() {
 
   app.get('/api/playlists/:id', async (req, res) => {
       const data = await loadData();
-      const playlist = data.playlists?.find((p: any) => p.id === req.params.id);
+      const playlist = data.playlists?.find((p: any) => p.id === req.params.id && !p.deleted);
       if (!playlist) return res.status(404).json({ error: 'Playlist not found' });
       
       const isUserAdmin = isRequestAdmin(req);
+      const isUserMember = isRequestMember(req);
       let songs = data.demos.filter((d: any) => {
+         if (d.deleted) return false;
          if (d.status !== 'public' && !isUserAdmin) return false;
          return d.playlistIds && d.playlistIds.includes(playlist.id);
       });
@@ -677,7 +871,7 @@ async function startServer() {
          author: d.author,
          composer: d.composer,
          coverUrl: formatUrl(d.coverUrl, data.globalBaseUrl),
-         requiresPassword: !!(!d.isReleased && (d.password || data.globalPassword))
+         requiresPassword: isUserMember ? false : !!(!d.isReleased && (d.password || data.globalPassword))
       }));
 
       const formattedPlaylist = {
@@ -690,7 +884,7 @@ async function startServer() {
 
   app.get('/api/demos/:id', async (req, res) => {
       const data = await loadData();
-      let demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
+      let demo = data.demos.find((d: any) => (d.id === req.params.id || d.slug === req.params.id) && !d.deleted);
       if (!demo) return res.status(404).json({ error: 'Not found' });
       
       // Inject random cover if missing
@@ -709,12 +903,13 @@ async function startServer() {
 
       const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
       const isUserAdmin = isRequestAdmin(req);
+      const isUserMember = isRequestMember(req);
       const fromPlaylist = req.query.fromPlaylist === 'true';
       const providedSecret = req.query.secret as string | undefined;
       const isValidSecret = !!(demo.secretKey && providedSecret && demo.secretKey === providedSecret);
       
       // If it requires password, only return basic metadata without audio/lyrics
-      if (expectedPassword && expectedPassword !== req.query.pwd && !isValidSecret && !isUserAdmin) {
+      if (expectedPassword && expectedPassword !== req.query.pwd && !isValidSecret && !isUserAdmin && !isUserMember) {
           return res.json({ 
               id: demo.id, 
               title: demo.title,
@@ -728,7 +923,7 @@ async function startServer() {
               requiresPassword: true 
           });
       }
-      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret });
+      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret && !isUserMember });
   });
 
   // Serve static files from public/uploads
@@ -881,7 +1076,7 @@ async function startServer() {
       const match = url.match(/^\/(?:demo|song)\/([^\/?]+)/);
       if (match) {
         const slug = match[1];
-        const demo = data.demos.find((d: any) => d.id === slug || d.slug === slug);
+        const demo = data.demos.find((d: any) => (d.id === slug || d.slug === slug) && !d.deleted);
         if (demo) {
           const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
           ogTitle = demo.isReleased 
@@ -904,13 +1099,13 @@ async function startServer() {
       if (playlistMatch) {
         const playlistId = playlistMatch[1];
         if (data.playlists) {
-          const playlist = data.playlists.find((p: any) => p.id === playlistId);
+          const playlist = data.playlists.find((p: any) => p.id === playlistId && !p.deleted);
           if (playlist) {
-            ogTitle = playlist.title;
+            ogTitle = `${playlist.title} - A.C Xuân Tài`;
             
             let pCover = playlist.coverUrl;
             if (!pCover) {
-              const pSongs = data.demos.filter((d: any) => d.status === 'public' && d.playlistIds && d.playlistIds.includes(playlist.id));
+              const pSongs = data.demos.filter((d: any) => !d.deleted && d.status === 'public' && d.playlistIds && d.playlistIds.includes(playlist.id));
               if (playlist.songIds && playlist.songIds.length > 0) {
                  pSongs.sort((a: any, b: any) => {
                     const indexA = playlist.songIds.indexOf(a.id);

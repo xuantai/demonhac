@@ -131,6 +131,125 @@ function AdminLogin() {
   );
 }
 
+// ---- MEMBER LOGIN & SERVICES ----
+function MemberLogin() {
+  const [pwd, setPwd] = useState('');
+  const [err, setErr] = useState('');
+  const isMember = localStorage.getItem('memberToken') === 'XuanTaiDepTrai';
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/member/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      if (res.ok) {
+        localStorage.setItem('memberToken', 'XuanTaiDepTrai');
+        window.location.href = '/';
+      } else {
+        const data = await res.json();
+        setErr(data.error || 'Sai mật khẩu thành viên!');
+      }
+    } catch (err) {
+      setErr('Lỗi kết nối máy chủ!');
+    }
+  };
+
+  const handleLogout = async () => {
+    localStorage.removeItem('memberToken');
+    try {
+      await fetch('/api/member/logout', { method: 'POST' });
+    } catch (e) {}
+    window.location.reload();
+  };
+
+  if (isMember) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Glow effect matching platform design */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse"></div>
+        
+        <div className="relative bg-neutral-900/50 border border-white/5 backdrop-blur-3xl p-8 rounded-[2rem] shadow-2xl max-w-md w-full text-center">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-purple-500 to-rose-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
+            <Music className="w-8 h-8 text-white animate-bounce" />
+          </div>
+          
+          <h2 className="text-2xl font-black mb-3 tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-rose-500 bg-clip-text text-transparent">
+            Chào Mừng Thành Viên!
+          </h2>
+          <p className="text-neutral-400 text-sm leading-relaxed mb-8">
+            Bạn đã đăng nhập thành công dưới quyền <strong>Thành viên VIP</strong>. Giờ đây bạn có thể thưởng thức toàn bộ album, danh sách phát và các bài hát đệm demo bảo mật trên hệ thống của <strong>A.C Xuân Tài</strong> mà không cần nhập passcode riêng biệt.
+          </p>
+
+          <div className="space-y-3">
+            <Link 
+              to="/" 
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-rose-650 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:scale-[1.02] transition-all duration-300"
+            >
+              <Play className="w-4 h-4 fill-white" /> Khám phá & Nghe nhạc ngay
+            </Link>
+            
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 bg-neutral-800/80 text-neutral-300 font-bold py-3 px-6 rounded-2xl border border-white/5 hover:bg-neutral-800 hover:text-white transition-all duration-300"
+            >
+              <LogOut className="w-4 h-4" /> Đăng xuất tài khoản
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Glow effect matching platform design */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-rose-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse"></div>
+      
+      <div className="relative bg-neutral-900/50 border border-white/5 backdrop-blur-3xl p-8 rounded-[2rem] shadow-2xl max-w-sm w-full">
+        <div className="text-center mb-6">
+          <div className="mx-auto w-14 h-14 bg-neutral-800 rounded-2xl flex items-center justify-center mb-4 border border-white/5">
+            <Lock className="w-6 h-6 text-rose-500" />
+          </div>
+          <h2 className="text-xl font-black tracking-tight">Khu Vực Thành Viên</h2>
+          <p className="text-neutral-500 text-xs mt-1 leading-relaxed">
+            Nhập mật khẩu thành viên để nghe nhạc tự do không cần passcode
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="relative">
+            <input 
+              type="password" 
+              autoFocus
+              value={pwd}
+              onChange={(e) => setPwd(e.target.value)}
+              className="w-full bg-black/40 text-white border border-white/10 px-5 py-3.5 rounded-2xl focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 text-center tracking-widest font-mono text-lg transition-all"
+              placeholder="••••••••"
+            />
+          </div>
+          {err && <p className="text-rose-500 text-xs font-bold text-center mt-1 bg-rose-500/10 py-2 rounded-xl px-3 border border-rose-500/15">{err}</p>}
+          <button 
+            type="submit" 
+            className="w-full bg-white text-black font-bold py-3.5 rounded-2xl hover:bg-neutral-200 transition-all active:scale-95 shadow-lg"
+          >
+            Xác nhận Đăng nhập
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-neutral-500 hover:text-neutral-300 text-xs transition-colors inline-flex items-center gap-1.5 font-medium">
+            <ArrowLeft className="w-3.5 h-3.5" /> Trở về Trang chủ
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('adminToken');
   if (token !== 'MatKhauDay123') {
@@ -146,6 +265,7 @@ function AnimatedRoutes() {
       {/* @ts-ignore */}
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
+        <Route path="/mem" element={<MemberLogin />} />
         <Route path="/demo/:id" element={<DemoPlayer />} />
         <Route path="/song/:id" element={<DemoPlayer />} />
         <Route path="/playlist/:id" element={<PlaylistPlayer />} />
@@ -345,6 +465,34 @@ function Home() {
     }, 4000); // 4 seconds
     return () => clearInterval(int);
   }, [data?.slideshowImages]);
+
+  // Auto scroll down to tab section after 5 seconds of inactivity
+  useEffect(() => {
+    let scrolled = false;
+    const handleScroll = () => {
+      scrolled = true;
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchmove', handleScroll);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchmove', handleScroll, { passive: true });
+
+    const timeoutId = setTimeout(() => {
+      if (!scrolled) {
+        const el = document.getElementById('music-tabs-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchmove', handleScroll);
+    };
+  }, []);
 
   const lastMvElementRef = useCallback((node: HTMLButtonElement) => {
     if (observer.current) observer.current.disconnect();
@@ -675,7 +823,7 @@ function Home() {
       <main className="max-w-5xl mx-auto px-6 sm:px-12 pb-32 space-y-24">
         
         {/* Demos Section */}
-        <section>
+        <section id="music-tabs-section" className="scroll-mt-24">
           <div className="flex items-center gap-1 sm:gap-2 mb-8 bg-neutral-900/50 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-white/5 w-full flex-nowrap overflow-x-auto custom-scrollbar">
              <button onClick={() => setActiveListTab('released')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
                 <Music className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} />
@@ -1595,7 +1743,7 @@ function PlaylistPlayer() {
 
   useEffect(() => {
     fetch(`/api/playlists/${id}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || localStorage.getItem('memberToken') || ''}` }
     })
     .then(res => res.json())
     .then(data => {
@@ -1819,15 +1967,17 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     pwdTouchedRef.current = false;
 
     const queryParam = secretKey ? `?secret=${encodeURIComponent(secretKey)}` : '';
+    const memberToken = localStorage.getItem('memberToken') || '';
+    const isMember = memberToken === 'XuanTaiDepTrai';
     fetch(`/api/demos/${id}${queryParam}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || memberToken || ''}`
       }
     })
       .then(res => res.json())
       .then(data => {
         setDemo(data);
-        if (!data.requiresPassword || isAdmin) setUnlocked(true);
+        if (!data.requiresPassword || isAdmin || isMember) setUnlocked(true);
         setLoading(false);
       });
   }, [id, isAdmin, playlistSongs]);
@@ -2524,6 +2674,14 @@ function SocialCarousel({ data }: { data: AppData }) {
 function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
   const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'>('demos');
+  const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'playlists' | 'trash'>('released');
+  const [draggedItemIdx, setDraggedItemIdx] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    type: 'song' | 'playlist';
+    id: string;
+    name: string;
+  } | null>(null);
   const [toast, setToast] = useState('');
   const [slideshowImages, setSlideshowImages] = useState<string[]>([]);
   const [homeCoverProgress, setHomeCoverProgress] = useState(0);
@@ -2612,14 +2770,40 @@ function AdminDashboard() {
     setTimeout(() => setToast(''), 3000);
   };
 
-  const handleDelete = async (id: string) => {
-    if(!confirm('Bạn có chắc muốn xóa demo này?')) return;
-    await fetch(`/api/demos/${id}/delete`, { 
+  const handleDeleteClick = (type: 'song' | 'playlist', id: string, name: string) => {
+    setDeleteConfirm({ isOpen: true, type, id, name });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return;
+    const { type, id } = deleteConfirm;
+    const endpoint = type === 'song' ? `/api/demos/${id}/delete` : `/api/playlists/${id}/delete`;
+    
+    await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
       }
     });
+    
+    setDeleteConfirm(null);
+    setToast(type === 'song' ? 'Đã di chuyển bài hát vào Thùng rác!' : 'Đã di chuyển playlist vào Thùng rác!');
+    setTimeout(() => setToast(''), 3000);
+    loadData();
+  };
+
+  const handleRestore = async (type: 'song' | 'playlist', id: string) => {
+    const endpoint = type === 'song' ? `/api/demos/${id}/restore` : `/api/playlists/${id}/restore`;
+    
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      }
+    });
+    
+    setToast(type === 'song' ? 'Đã khôi phục bài hát!' : 'Đã khôi phục playlist!');
+    setTimeout(() => setToast(''), 3000);
     loadData();
   };
 
@@ -2682,10 +2866,20 @@ function AdminDashboard() {
         <aside className="w-full md:w-64 shrink-0">
           <div className="mb-6 space-y-1">
             <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Quản lý</h3>
-            <button onClick={() => setActiveTab('demos')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'demos' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
+            <button
+              onClick={() => { setActiveTab('demos'); setDemosSubTab('released'); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                activeTab === 'demos' && demosSubTab !== 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
+              }`}
+            >
               <Disc3 className="w-5 h-5" /> Bài Hát
             </button>
-            <button onClick={() => setActiveTab('playlists')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
+            <button
+              onClick={() => { setActiveTab('demos'); setDemosSubTab('playlists'); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                activeTab === 'demos' && demosSubTab === 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
+              }`}
+            >
               <ListMusic className="w-5 h-5" /> Playlist
             </button>
           </div>
@@ -2703,124 +2897,415 @@ function AdminDashboard() {
         <main className="flex-1 bg-white rounded-3xl border border-stone-200 shadow-sm p-8">
           {activeTab === 'demos' && (
             <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold">Danh sách</h2>
-                <Link to="/admin/new" className="bg-stone-900 text-white p-2.5 rounded-lg flex items-center justify-center hover:bg-stone-800 transition-colors shadow-sm" title="Tạo mới">
-                  <Plus className="w-5 h-5" />
-                </Link>
+              {/* Header with Sub-tabs and Create button */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-stone-100 pb-4">
+                <div className="flex items-center gap-1.5 p-1 bg-stone-150/60 rounded-xl max-w-full overflow-x-auto custom-scrollbar flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setDemosSubTab('released')}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all relative ${
+                      demosSubTab === 'released'
+                        ? 'bg-white text-stone-900 shadow-sm'
+                        : 'text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <Music className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
+                    <span>Ra rồi</span>
+                    <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-xs">
+                      {data.demos?.filter(d => d.isReleased && !d.deleted).length || 0}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDemosSubTab('demos')}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all relative ${
+                      demosSubTab === 'demos'
+                        ? 'bg-white text-stone-900 shadow-sm'
+                        : 'text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <Disc3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500" />
+                    <span>Đề Mô</span>
+                    <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded text-xs">
+                      {data.demos?.filter(d => !d.isReleased && !d.deleted).length || 0}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDemosSubTab('playlists')}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all relative ${
+                      demosSubTab === 'playlists'
+                        ? 'bg-white text-stone-900 shadow-sm'
+                        : 'text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <ListMusic className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500" />
+                    <span>Playlist</span>
+                    <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-xs">
+                      {(data.playlists || []).filter(p => !p.deleted).length || 0}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDemosSubTab('trash')}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all relative ${
+                      demosSubTab === 'trash'
+                        ? 'bg-white text-stone-900 shadow-sm'
+                        : 'text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-500" />
+                    <span>Thùng rác</span>
+                    <span className="bg-stone-200 text-stone-700 px-1.5 py-0.5 rounded text-xs">
+                      {((data.demos?.filter(d => d.deleted).length || 0) + ((data.playlists || []).filter(p => p.deleted).length || 0))}
+                    </span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 self-end md:self-auto">
+                  {demosSubTab === 'playlists' ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const title = prompt("Nhập tên playlist mới:");
+                        if (!title) return;
+                        const res = await fetch('/api/playlists', {
+                          method: 'POST',
+                          headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                          },
+                          body: JSON.stringify({ title })
+                        });
+                        if (res.ok) {
+                           setToast('Tạo playlist thành công!');
+                           setTimeout(() => setToast(''), 3000);
+                           loadData();
+                        }
+                      }}
+                      className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-xl font-bold hover:bg-stone-800 transition-colors shadow-sm"
+                    >
+                      <Plus className="w-4 h-4" /> Tạo Playlist
+                    </button>
+                  ) : demosSubTab !== 'trash' ? (
+                    <Link to="/admin/new" className="bg-stone-900 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-stone-800 transition-colors shadow-sm font-bold" title="Tạo mới bài viết">
+                      <Plus className="w-4 h-4" /> Tạo bài hát
+                    </Link>
+                  ) : null}
+                </div>
               </div>
-              
-              <div className="overflow-x-auto">
-                {data.demos.length === 0 ? (
-                  <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có demo nào. Hãy tạo mới!</div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {data.demos.map((demo, index) => (
-                      <div key={demo.id} className="border-b border-stone-100 last:border-0 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-stone-50 transition-colors px-2">
-                        <div className="flex flex-col gap-1.5 flex-1 break-all">
-                          <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 flex items-center gap-2 text-base font-bold text-stone-800">
-                            <span className="text-stone-400 font-medium text-sm w-5">{index + 1}.</span> {demo.title}
-                          </Link>
-                          <div className="flex items-center flex-wrap gap-2 text-xs pl-7">
-                            <span className={`px-2 py-0.5 rounded font-semibold ${demo.status === 'public' ? 'bg-green-100 text-green-700' : 'bg-stone-200 text-stone-600'}`}>
-                              {demo.status === 'public' ? 'Công khai' : 'Ẩn'}
-                            </span>
-                            <span className="bg-stone-100 text-stone-600 px-2 py-0.5 rounded font-medium border border-stone-200">
-                              {demo.template === '1' ? 'Vui vẻ' : 
-                               demo.template === '2' ? 'Sôi động' : 
-                               demo.template === '3' ? 'Buồn' : 
-                               demo.template === '4' ? 'Thư giãn' : 
-                               demo.template === '5' ? 'Đáng yêu' : 
-                               demo.template === '6' ? 'Hạnh phúc' : 
-                               demo.template === '7' ? 'Học đường' : 
-                               demo.template === '8' ? 'Tổ quốc' : 
-                               demo.template === '9' ? 'Bầu trời xanh' : 
-                               demo.template === '10' ? 'Hip Hop' : 
-                               demo.template === '11' ? 'Kỳ bí' : 
-                               demo.template === '12' ? 'Cổ điển' : 
-                               demo.template === '13' ? 'Hoàng hôn' : 
-                               demo.template === '14' ? 'Đại dương' : 
-                               demo.template === '15' ? 'Retro 8-Bit' : 
-                               demo.template === '16' ? 'Puzzle Xếp hình' : 'Mặc định'}
-                            </span>
-                            {demo.password && (
-                              <span className="bg-stone-100 px-2 py-0.5 rounded font-medium border border-stone-200 flex items-center gap-1 text-stone-800">
-                                <Lock className="w-3 h-3 text-stone-500" /> <span className="font-mono">{demo.password}</span>
-                              </span>
-                            )}
+
+              {/* Action area for selected subtab */}
+              <div className="overflow-x-auto min-h-[300px]">
+                {demosSubTab === 'released' && (() => {
+                  const releasedList = data.demos?.filter(d => d.isReleased && !d.deleted) || [];
+                  if (releasedList.length === 0) {
+                    return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát đã phát hành nào. Hãy tạo mới và đặt trạng thái "Ra rồi"!</div>;
+                  }
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
+                        <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả các dòng bài hát để sắp xếp thứ tự hiển thị ưu tiên ngoài trang chủ
+                      </div>
+                      {releasedList.map((demo, idx) => (
+                        <div
+                          key={demo.id}
+                          draggable
+                          onDragStart={() => setDraggedItemIdx(idx)}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDragEnd={() => setDraggedItemIdx(null)}
+                          onDragEnter={(e) => {
+                            e.preventDefault();
+                            if (draggedItemIdx === null || draggedItemIdx === idx) return;
+                            const items = [...releasedList];
+                            const draggedItem = items.splice(draggedItemIdx, 1)[0];
+                            items.splice(idx, 0, draggedItem);
+                            setDraggedItemIdx(idx);
+                            
+                            // Reassemble
+                            const remaining = (data.demos || []).filter(d => !d.isReleased || d.deleted);
+                            const merged = [...items, ...remaining];
+                            setData({ ...data, demos: merged });
+                            
+                            // Call api to persist order
+                            fetch('/api/admin/reorder-demos', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                              },
+                              body: JSON.stringify({ demoIds: [...items, ...((data.demos || []).filter(d => !d.isReleased && !d.deleted))].map(d => d.id) })
+                            });
+                          }}
+                          className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-stone-550 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 font-bold text-stone-850 text-sm md:text-base block truncate">
+                                {demo.title}
+                              </Link>
+                              <div className="flex items-center flex-wrap gap-2 text-[10px] md:text-xs">
+                                <span className={`px-1.5 py-0.5 rounded font-semibold ${demo.status === 'public' ? 'bg-green-150 text-green-700 text-[10px]' : 'bg-stone-200 text-stone-600'}`}>
+                                  {demo.status === 'public' ? 'Công khai' : 'Ẩn'}
+                                </span>
+                                {demo.singer && <span className="text-stone-500 font-medium">Ca sĩ: {demo.singer}</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+                            <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
+                               <Globe className="w-4 h-4" />
+                            </button>
+                            <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
+                               <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <button type="button" onClick={() => handleDeleteClick('song', demo.id, demo.title)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold text-lg" title="Xóa">
+                              <X className="w-4 h-4 text-red-500 stroke-[3]" />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-200 p-2 rounded transition-colors" title="Chia sẻ Link">
-                             <Globe className="w-4 h-4" />
-                          </button>
-                          <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded transition-colors" title="Chỉnh sửa">
-                             <Edit3 className="w-4 h-4" />
-                          </Link>
-                          <button onClick={() => handleDelete(demo.id)} className="text-red-500 hover:bg-red-50 p-2 rounded transition-colors" title="Xóa">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {demosSubTab === 'demos' && (() => {
+                  const demoList = data.demos?.filter(d => !d.isReleased && !d.deleted) || [];
+                  if (demoList.length === 0) {
+                    return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát demo nào. Hãy tạo mới và đặt trạng thái "Đề mô"!</div>;
+                  }
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
+                        <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả các dòng bài hát để sắp xếp thứ tự hiển thị ưu tiên ngoài trang chủ
+                      </div>
+                      {demoList.map((demo, idx) => (
+                        <div
+                          key={demo.id}
+                          draggable
+                          onDragStart={() => setDraggedItemIdx(idx)}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDragEnd={() => setDraggedItemIdx(null)}
+                          onDragEnter={(e) => {
+                            e.preventDefault();
+                            if (draggedItemIdx === null || draggedItemIdx === idx) return;
+                            const items = [...demoList];
+                            const draggedItem = items.splice(draggedItemIdx, 1)[0];
+                            items.splice(idx, 0, draggedItem);
+                            setDraggedItemIdx(idx);
+                            
+                            // Reassemble
+                            const remaining = (data.demos || []).filter(d => d.isReleased || d.deleted);
+                            const merged = [...remaining, ...items];
+                            setData({ ...data, demos: merged });
+                            
+                            // Call api to persist order
+                            fetch('/api/admin/reorder-demos', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                              },
+                              body: JSON.stringify({ demoIds: [...((data.demos || []).filter(d => d.isReleased && !d.deleted)), ...items].map(d => d.id) })
+                            });
+                          }}
+                          className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-stone-550 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 font-bold text-stone-850 text-sm md:text-base block truncate">
+                                {demo.title}
+                              </Link>
+                              <div className="flex items-center flex-wrap gap-2 text-[10px] md:text-xs">
+                                <span className={`px-1.5 py-0.5 rounded font-semibold ${demo.status === 'public' ? 'bg-green-150 text-green-700 text-[10px]' : 'bg-stone-200 text-stone-600'}`}>
+                                  {demo.status === 'public' ? 'Công khai' : 'Ẩn'}
+                                </span>
+                                {demo.password && (
+                                  <span className="bg-stone-100 text-stone-700 px-1.5 py-0.5 border border-stone-200 rounded flex items-center gap-1 text-[10px] md:text-xs">
+                                    <Lock className="w-3 h-3 text-stone-500" /> <span className="font-mono">{demo.password}</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+                            <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
+                               <Globe className="w-4 h-4" />
+                            </button>
+                            <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
+                               <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <button type="button" onClick={() => handleDeleteClick('song', demo.id, demo.title)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold text-lg" title="Xóa">
+                              <X className="w-4 h-4 text-red-500 stroke-[3]" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {demosSubTab === 'playlists' && (() => {
+                  const playlistList = (data.playlists || []).filter(p => !p.deleted);
+                  if (playlistList.length === 0) {
+                    return <div className="py-12 text-center text-stone-500 border border-dashed border-stone-200 rounded-2xl italic bg-stone-50 font-medium text-sm">Chưa có playlist nào. Hãy tạo mới một playlist bên trên!</div>;
+                  }
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
+                        <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả để sắp xếp thứ tự hiển thị playlist ưu tiên ngoài trang chủ
+                      </div>
+                      {playlistList.map((pl, idx) => {
+                        const songCount = (data.demos || []).filter(d => 
+                           !d.deleted && ((d.playlistIds && d.playlistIds.includes(pl.id)) || 
+                           (pl.songIds && pl.songIds.includes(d.id)))
+                        ).length;
+
+                        return (
+                          <div
+                            key={pl.id}
+                            draggable
+                            onDragStart={() => setDraggedItemIdx(idx)}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnd={() => setDraggedItemIdx(null)}
+                            onDragEnter={(e) => {
+                              e.preventDefault();
+                              if (draggedItemIdx === null || draggedItemIdx === idx) return;
+                              const items = [...playlistList];
+                              const draggedItem = items.splice(draggedItemIdx, 1)[0];
+                              items.splice(idx, 0, draggedItem);
+                              setDraggedItemIdx(idx);
+                              
+                              // Reassemble
+                              const remaining = (data.playlists || []).filter(p => p.deleted);
+                              const merged = [...items, ...remaining];
+                              setData({ ...data, playlists: merged });
+                              
+                              // Call api to persist order
+                              fetch('/api/admin/reorder-playlists', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                                },
+                                body: JSON.stringify({ playlistIds: items.map(p => p.id) })
+                              });
+                            }}
+                            className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <span className="text-stone-550 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                              <div className="flex flex-col flex-1 min-w-0">
+                                <h4 className="font-bold text-stone-850 text-base">{pl.title}</h4>
+                                <span className="text-xs text-stone-400 mt-0.5">{songCount} bài nhạc</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+                              <Link to={`/admin/playlist/${pl.id}`} className="bg-stone-100 text-stone-700 hover:bg-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                Quản lý bài viết
+                              </Link>
+                              <button type="button" onClick={() => handleDeleteClick('playlist', pl.id, pl.title)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold" title="Xóa playlist">
+                                <X className="w-4 h-4 text-red-500 stroke-[3]" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+
+                {demosSubTab === 'trash' && (() => {
+                  const trashedDemos = data.demos?.filter(d => d.deleted) || [];
+                  const trashedPlaylists = (data.playlists || []).filter(p => p.deleted);
+                  
+                  if (trashedDemos.length === 0 && trashedPlaylists.length === 0) {
+                    return (
+                      <div className="text-center py-16 border rounded-2xl border-stone-200 bg-stone-50 flex flex-col items-center justify-center gap-3">
+                        <Trash2 className="w-12 h-12 text-stone-350" />
+                        <span className="text-stone-500 italic font-medium text-sm">Thùng rác trống rỗng.</span>
+                      </div>
+                    );
+                  }
+                  
+                  const getRemainingDays = (deletedAt?: number) => {
+                    if (!deletedAt) return '30 ngày';
+                    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+                    const elapsed = Date.now() - deletedAt;
+                    const remainingMs = thirtyDaysMs - elapsed;
+                    if (remainingMs <= 0) return '0 ngày ( sắp dọn dẹp )';
+                    const days = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+                    return `Còn ${days} ngày`;
+                  };
+
+                  return (
+                    <div className="space-y-6">
+                      <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-900 flex items-start gap-2.5 text-xs shadow-sm">
+                        <span className="font-bold flex items-center justify-center p-1 bg-amber-200 rounded-full w-5 h-5 text-[10px] shrink-0 text-amber-800">⚠️</span>
+                        <div className="space-y-0.5">
+                          <p className="font-bold text-stone-850">Lưu ý dọn dẹp thùng rác:</p>
+                          <p className="opacity-90">Hệ thống sẽ giữ tạm thời các mục trên tại đây tối đa 30 ngày. Quá thời gian này, các mục sẽ bị dọn dẹp và xóa vĩnh viễn không thể khôi phục.</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
-          {activeTab === 'playlists' && (
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold">Danh sách Playlist</h2>
-                <button
-                   onClick={async () => {
-                     const title = prompt("Nhập tên playlist mới:");
-                     if (!title) return;
-                     const res = await fetch('/api/playlists', {
-                       method: 'POST',
-                       headers: { 
-                         'Content-Type': 'application/json',
-                         'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                       },
-                       body: JSON.stringify({ title })
-                     });
-                     if (res.ok) {
-                        setToast('Tạo playlist thành công!');
-                        setTimeout(() => setToast(''), 3000);
-                        loadData();
-                     }
-                   }}
-                   className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-xl font-bold hover:bg-stone-800 transition-colors"
-                >
-                   <Plus className="w-4 h-4" /> Tạo Playlist
-                </button>
-              </div>
-              
-              <div className="overflow-x-auto">
-                {(!data.playlists || data.playlists.length === 0) ? (
-                  <div className="text-center py-12 text-stone-500 border-2 border-dashed border-stone-200 rounded-2xl">
-                    Chưa có playlist nào. Hãy tạo mới một playlist trên màn hình thêm bài hát.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {data.playlists.map(pl => {
-                       const songCount = data.demos.filter(d => 
-                          (d.playlistIds && d.playlistIds.includes(pl.id)) || 
-                          (pl.songIds && pl.songIds.includes(d.id))
-                       ).length;
-                       
-                       return (
-                        <Link to={`/admin/playlist/${pl.id}`} key={pl.id} className="block p-4 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer" title="Quản lý bài hát">
-                          <div>
-                            <h3 className="font-bold text-lg text-stone-900">{pl.title}</h3>
-                            <p className="text-xs text-stone-500 mt-1">{songCount} bài hát</p>
+                      {trashedDemos.length > 0 && (
+                        <div>
+                          <h4 className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2 px-1">Bài viết trong thùng rác ({trashedDemos.length})</h4>
+                          <div className="space-y-2">
+                            {trashedDemos.map(demo => (
+                              <div key={demo.id} className="border border-stone-100 p-3 rounded-xl flex items-center justify-between gap-3 bg-white shadow-sm hover:bg-stone-50/30 transition-all">
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold text-stone-800 text-sm md:text-base truncate">{demo.title}</span>
+                                  <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-400">
+                                    <span>{demo.isReleased ? 'Bài viết ra rồi' : 'Demo'}</span>
+                                    <span>•</span>
+                                    <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] md:text-xs">{getRemainingDays(demo.deletedAt)}</span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRestore('song', demo.id)}
+                                  className="text-stone-700 hover:bg-stone-100 border border-stone-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-sm transition-colors"
+                                >
+                                  Khôi phục
+                                </button>
+                              </div>
+                            ))}
                           </div>
-                        </Link>
-                       );
-                    })}
-                  </div>
-                )}
+                        </div>
+                      )}
+
+                      {trashedPlaylists.length > 0 && (
+                        <div>
+                          <h4 className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2 px-1">Playlist trong thùng rác ({trashedPlaylists.length})</h4>
+                          <div className="space-y-2">
+                            {trashedPlaylists.map(pl => (
+                              <div key={pl.id} className="border border-stone-100 p-3 rounded-xl flex items-center justify-between gap-3 bg-white shadow-sm hover:bg-stone-50/30 transition-all">
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold text-stone-850 text-base truncate">{pl.title}</span>
+                                  <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-400">
+                                    <span>Playlist</span>
+                                    <span>•</span>
+                                    <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] md:text-xs">{getRemainingDays(pl.deletedAt)}</span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRestore('playlist', pl.id)}
+                                  className="text-stone-700 hover:bg-stone-100 border border-stone-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-sm transition-colors"
+                                >
+                                  Khôi phục
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -3029,6 +3514,45 @@ function AdminDashboard() {
           )}
         </main>
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirm?.isOpen && (
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-150 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-3 text-red-650 mb-3">
+              <div className="p-2.5 bg-red-50 rounded-xl">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="font-bold text-lg text-stone-900">Xác nhận xóa tạm thời</h3>
+            </div>
+            
+            <div className="text-stone-700 text-sm mb-5 leading-relaxed bg-white">
+              Bạn có chắc chắn muốn xóa {deleteConfirm.type === 'song' ? 'bài hát' : 'playlist'}{' '}
+              <span className="font-bold my-1.5 block px-3 py-2 bg-stone-50 border border-stone-100 rounded-xl text-stone-900 truncate">
+                "{deleteConfirm.name}"
+              </span>
+              Mục này sẽ được chuyển vào <span className="font-bold text-stone-800">Thùng rác</span> tạm thời và tự động xóa vĩnh viễn sau 30 ngày.
+            </div>
+            
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(null)}
+                className="px-4 py-2 border rounded-xl font-bold bg-white text-stone-600 hover:bg-stone-50 text-sm transition-all"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 rounded-xl font-bold bg-red-550 text-white hover:bg-red-650 active:scale-95 text-sm transition-all"
+              >
+                Đồng ý xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
