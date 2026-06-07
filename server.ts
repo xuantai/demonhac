@@ -850,6 +850,11 @@ async function startServer() {
     app.use(express.static(distPath, { index: false }));
   }
 
+  app.get('/demo/:id', (req, res) => {
+    const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+    res.redirect(301, `/song/${req.params.id}${query}`);
+  });
+
   app.get('*', async (req, res, next) => {
     try {
       const url = req.originalUrl;
@@ -873,7 +878,7 @@ async function startServer() {
         ? `Nơi cập nhật sản phẩm và demo của ${data.artistName || 'A.C Xuân Tài'}`
         : defaultDesc;
 
-      const match = url.match(/^\/demo\/([^\/?]+)/);
+      const match = url.match(/^\/(?:demo|song)\/([^\/?]+)/);
       if (match) {
         const slug = match[1];
         const demo = data.demos.find((d: any) => d.id === slug || d.slug === slug);
@@ -939,6 +944,12 @@ async function startServer() {
       } else if (ogImage && !ogImage.startsWith('http')) {
          // ensure it's a full URL if it doesn't have http
          ogImage = `https://${host}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`;
+      }
+
+      if (ogImage) {
+         // Enforce punycode hostname in ogImage
+         ogImage = ogImage.replace(/t\u0300?a\u0300?i\.com/gi, 'xn--ti-jia.com');
+         ogImage = ogImage.replace(/t%C3%A0i\.com/gi, 'xn--ti-jia.com');
       }
 
       let ogUrl = `https://${host}${url}`;

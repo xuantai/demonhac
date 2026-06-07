@@ -147,6 +147,7 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
         <Route path="/demo/:id" element={<DemoPlayer />} />
+        <Route path="/song/:id" element={<DemoPlayer />} />
         <Route path="/playlist/:id" element={<PlaylistPlayer />} />
         <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
         <Route path="/admin/new" element={<RequireAdmin><AdminCreateDemo /></RequireAdmin>} />
@@ -749,14 +750,14 @@ function Home() {
               })
             ) : (
               data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
-                <Link to={`/demo/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
+                <Link to={`/song/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
                   <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
                     {demo.coverUrl ? (
                        <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
                     ) : (
                        <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
-                         <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                          <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
                        </div>
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -786,7 +787,7 @@ function Home() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          let url = `${window.location.origin}/demo/${demo.slug || demo.id}`;
+                          let url = `${window.location.origin}/song/${demo.slug || demo.id}`;
                           if (url.includes('xn--ti-jia.com')) {
                             url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
                           }
@@ -801,9 +802,11 @@ function Home() {
                       </button>
                     </>
                   ) : (
-                    <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
-                      {t.lDemoMark || 'DEMO'}
-                    </span>
+                    <>
+                      <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
+                        {t.lDemoMark || 'DEMO'}
+                      </span>
+                    </>
                   )}
                   {demo.password && !demo.isReleased && (
                     <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
@@ -2121,7 +2124,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         <button
           onClick={() => {
             if (!demo) return;
-            const baseUrl = '/demo/';
+            const baseUrl = '/song/';
             const dynamicId = demo.slug || demo.id;
             let url = window.location.origin + baseUrl + dynamicId;
             if (url.includes('xn--ti-jia.com')) {
@@ -2140,7 +2143,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           <button
             onClick={() => {
               if (!demo) return;
-              const baseUrl = '/demo/';
+              const baseUrl = '/song/';
               const dynamicId = demo.slug || demo.id;
               let url = window.location.origin + baseUrl + dynamicId;
               if (url.includes('xn--ti-jia.com')) {
@@ -2600,7 +2603,7 @@ function AdminDashboard() {
   };
 
   const handleShare = (slugOrId: string) => {
-    let url = window.location.origin + '/demo/' + slugOrId;
+    let url = window.location.origin + '/song/' + slugOrId;
     if (url.includes('xn--ti-jia.com')) {
       url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
     }
@@ -2715,7 +2718,7 @@ function AdminDashboard() {
                     {data.demos.map((demo, index) => (
                       <div key={demo.id} className="border-b border-stone-100 last:border-0 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-stone-50 transition-colors px-2">
                         <div className="flex flex-col gap-1.5 flex-1 break-all">
-                          <Link to={`/demo/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 flex items-center gap-2 text-base font-bold text-stone-800">
+                          <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 flex items-center gap-2 text-base font-bold text-stone-800">
                             <span className="text-stone-400 font-medium text-sm w-5">{index + 1}.</span> {demo.title}
                           </Link>
                           <div className="flex items-center flex-wrap gap-2 text-xs pl-7">
