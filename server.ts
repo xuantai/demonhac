@@ -73,13 +73,22 @@ async function loadData() {
 
       if (data.demos) {
          const lenBefore = data.demos.length;
+         let draftChanged = false;
          data.demos = data.demos.filter((d: any) => {
             if (d.deleted && d.deletedAt && (now - d.deletedAt > thirtyDaysMs)) {
                return false;
             }
+            // Sanitize isDraft values
+            if (d.isDraft === 'false' || d.isDraft === '0') {
+               d.isDraft = false;
+               draftChanged = true;
+            } else if (d.isDraft === 'true' || d.isDraft === '1') {
+               d.isDraft = true;
+               draftChanged = true;
+            }
             return true;
          });
-         if (data.demos.length !== lenBefore) changed = true;
+         if (data.demos.length !== lenBefore || draftChanged) changed = true;
       }
       if (data.playlists) {
          const lenBefore = data.playlists.length;
@@ -119,6 +128,17 @@ async function loadData() {
       currentMemberPassword = parsedData.memberPassword;
     } else {
       parsedData.memberPassword = currentMemberPassword;
+    }
+
+    if (parsedData.demos) {
+      parsedData.demos = parsedData.demos.map((d: any) => {
+        if (d.isDraft === 'false' || d.isDraft === '0') {
+          d.isDraft = false;
+        } else if (d.isDraft === 'true' || d.isDraft === '1') {
+          d.isDraft = true;
+        }
+        return d;
+      });
     }
 
     await setDoc(DOC_REF, parsedData); // upload to firebase for next time
@@ -653,6 +673,7 @@ async function startServer() {
       composer: req.body.composer || 'A.C Xuân Tài',
       singer: req.body.singer || 'A.C Xuân Tài',
       isReleased: req.body.isReleased === 'true',
+      isDraft: req.body.isDraft === 'true',
       playlistIds: req.body.playlistIds ? JSON.parse(req.body.playlistIds) : []
     };
     data.demos.push(newDemo);
@@ -688,6 +709,9 @@ async function startServer() {
         if (!updatedData.singer && !data.demos[idx].singer) updatedData.singer = 'A.C Xuân Tài';
         if (req.body.isReleased !== undefined) {
              updatedData.isReleased = req.body.isReleased === 'true';
+        }
+        if (req.body.isDraft !== undefined) {
+             updatedData.isDraft = req.body.isDraft === 'true';
         }
         if (req.body.playlistIds !== undefined) {
             updatedData.playlistIds = JSON.parse(req.body.playlistIds);

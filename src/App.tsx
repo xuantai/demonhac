@@ -1923,15 +1923,19 @@ function CheeringEffect() {
     };
   };
 
-  const generateHatWave = () => {
-    const items = Array.from({ length: 12 }).map((_, i) => {
+  const generateHatWave = (count: number) => {
+    const items = Array.from({ length: count }).map((_, i) => {
       const tx = (Math.random() * 40 - 20) + 'vw';
+      const ty = `-${25 + Math.random() * 30}vh`; // Heights from -25vh to -55vh
       const left = `${10 + Math.random() * 80}%`;
-      const duration = 4.0 + Math.random() * 2.0; // 4.0s to 6.0s max duration
+      const duration = 4.0 + Math.random() * 1.5; // 4.0s to 5.5s
+      const delay = Math.random() * 0.7; // Chaotic timing within the wave
       return {
         tx,
+        ty,
         left,
         duration,
+        delay,
       };
     });
     return {
@@ -1977,44 +1981,34 @@ function CheeringEffect() {
   useEffect(() => {
     let hatTimer1: any;
     let hatTimer2: any;
-    let hatTimer3: any;
     let hatInterval: any;
 
     const runHatCycle = () => {
-      // Wave 1 immediately
-      const wave1 = generateHatWave();
+      // Wave 1 immediately: 3 hats
+      const wave1 = generateHatWave(3);
       setHatWaves(prev => [...prev, wave1]);
       hatTimer1 = setTimeout(() => {
         setHatWaves(prev => prev.filter(w => w.id !== wave1.id));
-      }, 6500); // Clean after 6.5s (longer than max duration of 6s)
+      }, 7000); // Clean after 7.0s (longer than max duration + max delay)
 
-      // Wave 2 after 1.5s
+      // Wave 2 after close, random interval (0.8s to 1.4s): 3 hats
+      const wave2Delay = 800 + Math.random() * 600;
       hatTimer2 = setTimeout(() => {
-        const wave2 = generateHatWave();
+        const wave2 = generateHatWave(3);
         setHatWaves(prev => [...prev, wave2]);
         setTimeout(() => {
           setHatWaves(prev => prev.filter(w => w.id !== wave2.id));
-        }, 6500);
-      }, 1500);
-
-      // Wave 3 after 3.0s
-      hatTimer3 = setTimeout(() => {
-        const wave3 = generateHatWave();
-        setHatWaves(prev => [...prev, wave3]);
-        setTimeout(() => {
-          setHatWaves(prev => prev.filter(w => w.id !== wave3.id));
-        }, 6500);
-      }, 3000);
+        }, 7000);
+      }, wave2Delay);
     };
 
     runHatCycle();
-    // 3.0s delay + 6.5s fall time + 5s wait time = 14.5s cycle!
-    hatInterval = setInterval(runHatCycle, 14500);
+    // ~1.4s max wave2Delay + 5.5s max duration + 0.7s delay = ~7.6s total animation time + 5s wait time = 12.6s cycle
+    hatInterval = setInterval(runHatCycle, 12600);
 
     return () => {
       clearTimeout(hatTimer1);
       clearTimeout(hatTimer2);
-      clearTimeout(hatTimer3);
       clearInterval(hatInterval);
     };
   }, []);
@@ -2036,7 +2030,9 @@ function CheeringEffect() {
                 left: hat.left,
                 bottom: '-20%',
                 '--tx': hat.tx,
+                '--ty': hat.ty,
                 animation: `hat-toss ${hat.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`,
+                animationDelay: `${hat.delay}s`,
                 opacity: 0.7,
                 filter: 'brightness(1.5)',
               } as React.CSSProperties}
@@ -2696,7 +2692,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     themeClasses = "bg-red-600 text-yellow-50 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-500 to-red-700 [text-shadow:0_2px_4px_rgba(153,27,27,0.8)]";
     accentClass = "bg-yellow-400 text-red-900 font-bold shadow-[0_0_15px_rgba(250,204,21,0.5)]";
   } else if (templateType === '9') {
-    themeClasses = "bg-transparent text-sky-950 drop-shadow-sm";
+    themeClasses = "bg-transparent text-sky-950";
     accentClass = "bg-white/85 backdrop-blur text-sky-800 shadow-xl shadow-sky-200/50 outline outline-2 outline-white font-bold";
   } else if (templateType === '10') {
     themeClasses = "bg-neutral-900/80 bg-[url('/hiphop-bg.png')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
@@ -5319,7 +5315,7 @@ function AdminCreateDemo() {
                 className="flex-1 bg-stone-900 hover:bg-stone-800 text-white text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2"
               >
                 <Sparkles className="w-5 h-5 text-yellow-400" />
-                {loading ? 'Đang xuất bản...' : 'Xuất Bản Demo'}
+                {loading ? 'Đang xuất bản...' : 'Xuất Bản'}
               </button>
             </div>
           </form>
@@ -5746,7 +5742,7 @@ function AdminEditDemo() {
                     className="flex-1 bg-stone-900 hover:bg-stone-800 text-white text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2"
                   >
                     <Sparkles className="w-5 h-5 text-yellow-400" />
-                    {loading ? 'Đang xuất bản...' : 'Xuất Bản Demo'}
+                    {loading ? 'Đang xuất bản...' : 'Xuất Bản'}
                   </button>
                 </div>
               ) : (
