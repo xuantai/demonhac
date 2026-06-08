@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import { AppData, DemoSong } from './types';
+import { AppData, DemoSong, TemplateConfig } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 
 function formatText(text: string | null | undefined, disableLinks = false) {
@@ -278,9 +278,46 @@ function AnimatedRoutes() {
   );
 }
 
+function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
+  const isAdmin = !!localStorage.getItem('adminToken');
+  const location = useLocation();
+  
+  if (!isAdmin) return null;
+
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  return (
+    <div className="fixed left-6 top-1/2 -translate-y-1/2 z-[100] flex flex-col gap-4">
+       {isAdminPage ? (
+         <a 
+           href="/"
+           className="flex items-center justify-center p-3 rounded-full bg-stone-900/80 text-white backdrop-blur-md shadow-lg hover:bg-stone-800 transition-colors hover:scale-110"
+           title="Trang chủ"
+         >
+           <HomeIcon className="w-5 h-5" />
+         </a>
+       ) : (
+         <a 
+           href="/admin"
+           className="flex items-center justify-center p-3 rounded-full bg-stone-800/80 text-white backdrop-blur-md shadow-lg hover:bg-stone-700 transition-colors hover:scale-110 cursor-pointer"
+           title="Cài đặt (Admin)"
+         >
+           <Settings className="w-5 h-5" />
+         </a>
+       )}
+       <button 
+         onClick={onLogout}
+         className="flex items-center justify-center p-3 rounded-full bg-red-500/80 text-white backdrop-blur-md shadow-lg hover:bg-red-600 transition-colors hover:scale-110 cursor-pointer"
+         title="Đăng xuất"
+       >
+         <LogOut className="w-5 h-5" />
+       </button>
+    </div>
+  );
+}
+
 export default function App() {
   const [lang, setLang] = useState('vi');
-  const isAdmin = !!localStorage.getItem('adminToken');
 
   const handleLogout = async () => {
     localStorage.removeItem('adminToken');
@@ -305,15 +342,7 @@ export default function App() {
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>
       <BrowserRouter>
-        {isAdmin && (
-           <button 
-             onClick={handleLogout}
-             className="fixed left-6 top-1/2 -translate-y-1/2 z-[100] flex items-center justify-center p-3 rounded-full bg-red-500/80 text-white backdrop-blur-md shadow-lg hover:bg-red-600 transition-colors hover:scale-110"
-             title="Đăng xuất"
-           >
-             <LogOut className="w-5 h-5" />
-           </button>
-        )}
+        <AdminFloatingControls onLogout={handleLogout} />
         <AnimatedRoutes />
       </BrowserRouter>
     </LanguageContext.Provider>
@@ -575,7 +604,7 @@ function Home() {
     >
       <SocialCarousel data={data} />
       {data.slideshowImages && data.slideshowImages.length > 0 ? (
-        <div className="fixed inset-0 z-[-1] pointer-events-none bg-neutral-950">
+        <div className="absolute inset-0 z-[-1] pointer-events-none bg-neutral-950">
           <AnimatePresence mode="popLayout">
             <motion.div
               key={currentSlide}
@@ -898,7 +927,7 @@ function Home() {
               })
             ) : (
               data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
-                <Link to={`/song/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
+                <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
                   <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
                     {demo.coverUrl ? (
@@ -922,7 +951,7 @@ function Home() {
                     </h3>
                     {(demo.singer || demo.author) && (
                       <p className="text-xs text-neutral-400 mt-1 truncate">
-                        {formatText(demo.singer || demo.author)}
+                        {formatText(demo.singer || demo.author, true)}
                       </p>
                     )}
                   </div>
@@ -1021,9 +1050,9 @@ function Home() {
   );
 }
 
-function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any }) {
+function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext, isPreview }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any, isPreview?: boolean }) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(!isPreview);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -1031,7 +1060,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
 
   useEffect(() => {
     almostEndedTriggered.current = false;
-    if (audioRef.current) {
+    if (audioRef.current && !isPreview) {
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
@@ -1041,8 +1070,10 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
           setIsPlaying(false);
         });
       }
+    } else if (isPreview) {
+        setIsPlaying(false);
     }
-  }, [src]);
+  }, [src, isPreview]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -1096,7 +1127,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
 
   const waves = Array.from({ length: 32 });
 
-  const isLight = ['1', '4', '6', '7'].includes(template);
+  const isLight = ['1', '4', '6', '7', '17'].includes(template);
   let waveColor = "bg-white";
   if (template === '1') waveColor = "bg-orange-500";
   if (template === '2') waveColor = "bg-fuchsia-300";
@@ -1112,6 +1143,10 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
   if (template === '12') waveColor = "bg-[#d97706]";
   if (template === '13') waveColor = "bg-[#f43f5e]";
   if (template === '14') waveColor = "bg-[#38bdf8]";
+  if (template === '15') waveColor = "bg-[#10b981]";
+  if (template === '16') waveColor = "bg-purple-500";
+  if (template === '17') waveColor = "bg-yellow-400";
+  if (template === '18') waveColor = "bg-amber-300";
 
   return (
     <div className={`flex flex-col w-full gap-2 md:gap-4 ${isLight ? 'text-stone-900 font-extrabold drop-shadow-sm' : 'text-white font-extrabold drop-shadow-md'}`}>
@@ -1386,14 +1421,15 @@ function BlossomEffect() {
       {Array.from({ length: 30 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute bg-pink-300/40 rounded-full animate-snow shadow-[0_0_8px_rgba(244,114,182,0.6)]"
+          className="absolute bg-pink-300 animate-snow opacity-70 shadow-[0_0_8px_rgba(244,114,182,0.4)]"
           style={{
             left: `${Math.random() * 100}%`,
-            width: `${Math.random() * 8 + 4}px`,
-            height: `${Math.random() * 8 + 4}px`,
-            animationDuration: `${Math.random() * 10 + 5}s`,
+            width: `${Math.random() * 10 + 6}px`,
+            height: `${Math.random() * 6 + 4}px`,
+            borderRadius: '2px 10px',
+            animationDuration: `${Math.random() * 5 + 5}s`,
             animationDelay: `${Math.random() * -10}s`,
-            borderBottomRightRadius: '0px' // simple petal shape trick
+            filter: 'blur(0.5px)',
           }}
         ></div>
       ))}
@@ -1694,6 +1730,135 @@ function PuzzleEffect() {
   );
 }
 
+function CheeringEffect() {
+  const items = Array.from({ length: 40 });
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-20">
+      {/* Sun */}
+      <div className="absolute top-10 right-10 text-[80px] drop-shadow-[0_0_40px_rgba(255,255,255,0.8)] animate-[cute-spin_8s_ease-in-out_infinite]">
+        ☀️
+      </div>
+      {/* Clouds */}
+      <div className="absolute top-20 left-5 text-[60px] animate-[cloud-drift_6s_ease-in-out_infinite] opacity-90 drop-shadow-lg">☁️</div>
+      <div className="absolute top-10 left-[30%] text-[70px] animate-[cloud-drift_8s_ease-in-out_infinite] opacity-80 drop-shadow-lg" style={{ animationDelay: '1s' }}>☁️</div>
+      <div className="absolute top-32 right-32 text-[50px] animate-[cloud-drift_7s_ease-in-out_infinite] opacity-90 drop-shadow-md" style={{ animationDelay: '2s' }}>☁️</div>
+      <div className="absolute top-16 right-[45%] text-[55px] animate-[cloud-drift_9s_ease-in-out_infinite] opacity-70 drop-shadow-sm" style={{ animationDelay: '3s' }}>☁️</div>
+      
+      {/* Confetti and caps shooting from sides */}
+      {items.map((_, i) => {
+        const isLeft = i % 2 === 0;
+        const isCap = i % 8 === 0;
+        const tx = (Math.random() * 40 - 20) + 'vw';
+        
+        if (isCap) {
+          // Hats thrown from bottom
+          return (
+            <div
+              key={i}
+              className="absolute text-5xl md:text-6xl drop-shadow-xl"
+              style={{
+                left: `${10 + Math.random() * 80}%`,
+                bottom: '-20%',
+                '--tx': tx,
+                animation: `hat-toss ${4 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+              } as React.CSSProperties}
+            >
+              🎓
+            </div>
+          );
+        }
+
+        // Confetti shooting from sides
+        const colors = ['bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-yellow-400', 'bg-purple-500', 'bg-pink-500'];
+        const isSquare = Math.random() > 0.5;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        return (
+          <div
+            key={i}
+            className={`absolute ${color} ${isSquare ? 'w-2 h-2' : 'w-1.5 h-3'} opacity-80`}
+            style={{
+              left: isLeft ? '-10%' : '110%',
+              bottom: `${10 + Math.random() * 30}%`,
+              animation: isLeft 
+                ? `confetti-right ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite` 
+                : `confetti-left ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
+              animationDelay: `${Math.random() * 3}s`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function FireworksEffect() {
+  const fireworks = Array.from({ length: 15 });
+  const buildings = Array.from({ length: 35 }).map((_, i) => ({
+    height: 30 + Math.random() * 60,
+    width: 20 + Math.random() * 50,
+    lights: Math.random() > 0.3,
+    delay: Math.random() * 3
+  }));
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 flex justify-center items-center">
+      {/* Background flash */}
+      <div className="absolute inset-0 animate-pulse bg-amber-500/10 mix-blend-screen" style={{ animationDuration: '2s' }}></div>
+      
+      {fireworks.map((_, i) => {
+        const left = 10 + Math.random() * 80;
+        return (
+          <div
+            key={i}
+            className="absolute bottom-0"
+            style={{ left: `${left}%` }}
+          >
+             {/* Rocket shooting up */}
+             <div className="absolute bottom-0 w-1 rounded-full bg-orange-300" style={{
+                animation: `shootUp ${2 + Math.random()}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
+                animationDelay: `${Math.random() * 4}s`,
+             }}></div>
+             {/* Explosion ping */}
+             <div className="absolute" style={{
+                bottom: `${40 + Math.random() * 40}vh`,
+                animation: `blowUp ${2 + Math.random()}s ease-out infinite`,
+                animationDelay: `${Math.random() * 4}s`,
+             }}>
+                <div className="w-1.5 h-1.5 rounded-full animate-[ping_0.8s_cubic-bezier(0,0,0.2,1)_infinite]" style={{
+                  boxShadow: `0 0 60px 20px ${['#fef08a', '#fda4af', '#7dd3fc', '#86efac', '#fca5a5'][Math.floor(Math.random() * 5)]}`,
+                  background: 'white',
+                  animationDelay: `${Math.random() * 4}s`,
+                }}></div>
+             </div>
+          </div>
+        );
+      })}
+
+      {/* City Skyline */}
+      <div className="absolute bottom-0 inset-x-0 h-[25vh] flex items-end justify-center px-2 opacity-95 z-0">
+         {buildings.map((b, i) => (
+            <div key={i} className="bg-[#0a0a0a] border-t border-white/5 mx-[1px]" style={{
+                height: `${b.height}%`,
+                width: `${b.width}px`,
+                position: 'relative'
+            }}>
+                {b.lights && (
+                   <div className="absolute top-3 left-2 w-1.5 h-1.5 bg-yellow-200/60 animate-pulse" style={{ animationDelay: `${b.delay}s`}}></div>
+                )}
+                {b.lights && Math.random() > 0.5 && (
+                   <div className="absolute top-10 right-2 w-1.5 h-1.5 bg-yellow-200/40 animate-pulse" style={{ animationDelay: `${b.delay + 1}s`}}></div>
+                )}
+                {b.lights && Math.random() > 0.7 && (
+                   <div className="absolute top-16 left-3 w-1.5 h-1.5 bg-yellow-200/50 animate-pulse" style={{ animationDelay: `${b.delay + 0.5}s`}}></div>
+                )}
+            </div>
+         ))}
+      </div>
+      <div className="absolute bottom-0 inset-x-0 h-[40vh] bg-gradient-to-t from-black/90 to-transparent z-0"></div>
+    </div>
+  );
+}
+
 function PlaylistPlayer() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
@@ -1707,7 +1872,16 @@ function PlaylistPlayer() {
   const [repeat, setRepeat] = useState<0 | 1 | 2>(0); // 0: off, 1: playlist, 2: one
   const [error, setError] = useState('');
   
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(() => id === 'released');
+  
+  useEffect(() => {
+    if (id === 'released') {
+      setIsMinimized(true);
+    } else {
+      setIsMinimized(false);
+      if (interactTimerRef.current) clearTimeout(interactTimerRef.current);
+    }
+  }, [id]);
   const interactTimerRef = useRef<NodeJS.Timeout | null>(null);
   const activeSongRef = useRef<HTMLButtonElement | null>(null);
 
@@ -1742,20 +1916,53 @@ function PlaylistPlayer() {
   }, [currentIndex, resetTimer, songs.length]);
 
   useEffect(() => {
-    fetch(`/api/playlists/${id}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || localStorage.getItem('memberToken') || ''}` }
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.error) throw new Error(data.error);
-      setPlaylist(data.playlist);
-      setSongs(data.songs);
-      setLoading(false);
-    })
-    .catch(err => {
-      setError(err.message);
-      setLoading(false);
-    });
+    if (id === 'released') {
+      fetch('/api/data')
+      .then(res => res.json())
+      .then(data => {
+        const releasedSongs = (data.demos || [])
+          .filter((d: any) => d.isReleased && d.status === 'public' && !d.deleted);
+
+        const queryParams = new URLSearchParams(window.location.search);
+        const targetSongId = queryParams.get('song');
+        
+        let startIdx = 0;
+        if (targetSongId) {
+          const matchedIdx = releasedSongs.findIndex((d: any) => d.id === targetSongId || d.slug === targetSongId);
+          if (matchedIdx !== -1) {
+            startIdx = matchedIdx;
+          }
+        }
+
+        setPlaylist({
+          title: "Các bài hát đã phát hành",
+          id: "released",
+          coverUrl: releasedSongs[0]?.coverUrl || ''
+        });
+        setSongs(releasedSongs);
+        setCurrentIndex(startIdx);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+    } else {
+      fetch(`/api/playlists/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || localStorage.getItem('memberToken') || ''}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setPlaylist(data.playlist);
+        setSongs(data.songs);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+    }
   }, [id]);
 
   const handleNext = useCallback(() => {
@@ -1802,10 +2009,19 @@ function PlaylistPlayer() {
      if (interactTimerRef.current) clearTimeout(interactTimerRef.current);
   };
 
+  const currentSong = songs[currentIndex];
+
+  useEffect(() => {
+     if (id === 'released' && currentSong) {
+       const searchParams = new URLSearchParams(window.location.search);
+       if (searchParams.get('song') !== (currentSong.slug || currentSong.id)) {
+         window.history.replaceState(null, '', `/playlist/released?song=${currentSong.slug || currentSong.id}`);
+       }
+     }
+  }, [id, currentSong]);
+
   if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t.load}</div>;
   if (error || !playlist) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Error: {error || 'Playlist not found'}</div>;
-
-  const currentSong = songs[currentIndex];
   
   return (
     <div 
@@ -1909,7 +2125,7 @@ function PlaylistPlayer() {
   );
 }
 
-function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext }: any = {}) {
+function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext, previewConfig }: any = {}) {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
   const paramsId = useParams().id;
@@ -2019,7 +2235,10 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
 
   useEffect(() => {
      if (demo) {
-        const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
+        let titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
+        if (demo.secretKey && /secret/i.test(titleSuffix)) {
+          titleSuffix = titleSuffix.replace(/secret/gi, 'Ca sĩ Bí Mật');
+        }
         const pageTitle = demo.isReleased 
           ? `${demo.title} - ${titleSuffix}`
           : `${demo.title} - ${titleSuffix} ( demo )`;
@@ -2049,8 +2268,12 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   if (!demo) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Không tìm thấy demo</div>;
 
   // Templates
-  const templateType = demo.template || '1';
-  const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7';
+  const templateType = (previewConfig && previewConfig.id) ? previewConfig.id : (demo.template || '1');
+  const customConfig = previewConfig || demo.templateConfigs?.find((c: any) => c.id === templateType);
+  const isPreview = !!previewConfig;
+  const forceMobile = isPreview && !previewConfig.isPCPreviewMode;
+  const forcePC = isPreview && previewConfig.isPCPreviewMode;
+  const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7' || templateType === '17';
   const displayCoverUrl = demo.coverUrl || demo.globalCoverUrl || '';
   const pageBgUrl = demo.backgroundUrl || displayCoverUrl;
   let themeClasses = "";
@@ -2104,11 +2327,20 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   } else if (templateType === '16') {
     themeClasses = "bg-gradient-to-tr from-[#1e1b4b] via-[#3c0952] via-[#094154] to-[#111115] text-white font-sans";
     accentClass = "bg-gradient-to-r from-yellow-400 via-pink-400 via-purple-500 to-indigo-500 hover:from-yellow-300 hover:via-pink-300 hover:via-purple-400 hover:to-indigo-450 text-white font-black tracking-widest uppercase rounded-2xl shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-pink-500/20";
+  } else if (templateType === '17') {
+    themeClasses = "bg-sky-300 text-stone-900 font-sans";
+    accentClass = "bg-yellow-400 hover:bg-yellow-300 text-stone-900 rounded-full font-black border-[3px] border-white shadow-[0_0_20px_rgba(250,204,21,0.6)]";
+  } else if (templateType === '18') {
+    themeClasses = "bg-slate-900 text-amber-50 font-sans";
+    accentClass = "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-full font-bold shadow-[0_0_30px_rgba(245,158,11,0.5)]";
   }
 
   if (!unlocked) {
     return (
-      <div className={`min-h-screen px-4 py-12 flex flex-col items-center justify-center ${themeClasses} transition-colors duration-1000 relative overflow-hidden`}>
+      <div 
+        className={`min-h-screen px-4 py-12 flex flex-col items-center justify-center ${themeClasses} transition-colors duration-1000 relative overflow-hidden`}
+        style={{ backgroundColor: customConfig?.bgColor || undefined }}
+      >
         <motion.div 
           initial={{ scaleY: 1 }} 
           animate={{ scaleY: 0 }} 
@@ -2132,6 +2364,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         {templateType === '14' && <><OceanWavesEffect /><OceanNightSkyEffect /></>}
         {templateType === '15' && <EightBitGameEffect />}
         {templateType === '16' && <PuzzleEffect />}
+        {templateType === '17' && <CheeringEffect />}
+        {templateType === '18' && <FireworksEffect />}
         
         {pageBgUrl && (
           <div 
@@ -2198,7 +2432,10 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   }
 
   return (
-    <div className={`min-h-screen px-4 py-8 ${themeClasses} transition-colors duration-1000 relative`}>
+    <div 
+      className={`min-h-full min-w-full px-4 py-8 ${themeClasses} transition-colors duration-1000 relative ${forceMobile ? 'overflow-hidden' : ''}`}
+      style={{ backgroundColor: customConfig?.bgColor || undefined }}
+    >
       <svg width="0" height="0" className="absolute pointer-events-none">
         <defs>
           <clipPath id="puzzle-clip" clipPathUnits="objectBoundingBox">
@@ -2234,7 +2471,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.3 }}
-        className="absolute inset-0 pointer-events-none z-0" 
+        className="fixed inset-0 pointer-events-none z-0" 
       />
       {templateType === '1' && <ButterflyEffect />}
       {templateType === '2' && <ElectricEffect />}
@@ -2252,6 +2489,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
       {templateType === '14' && <><OceanWavesEffect /><OceanNightSkyEffect /></>}
       {templateType === '15' && <EightBitGameEffect />}
       {templateType === '16' && <PuzzleEffect />}
+      {templateType === '17' && <CheeringEffect />}
+      {templateType === '18' && <FireworksEffect />}
       
       {pageBgUrl && (
         <div 
@@ -2260,77 +2499,83 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         ></div>
       )}
 
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.3 }}
-        className={`fixed top-0 inset-x-0 h-16 bg-gradient-to-b ${isLight ? 'from-[#faf9f6]/50' : 'from-black/40'} to-transparent pointer-events-none z-40`}
-      />
+      {/* Hide fixed top UI elements if in preview mode */}
+      {!previewConfig && (
+        <>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className={`fixed top-0 inset-x-0 h-16 bg-gradient-to-b ${isLight ? 'from-[#faf9f6]/50' : 'from-black/40'} to-transparent pointer-events-none z-40`}
+          />
 
-      <div className={`fixed top-6 left-6 flex items-center gap-3 z-[60] ${isLight ? 'text-stone-900' : 'text-white'}`}>
-        <button onClick={handleBack} className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current" title={t.back}>
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => {
-            if (!demo) return;
-            const baseUrl = '/song/';
-            const dynamicId = demo.slug || demo.id;
-            let url = window.location.origin + baseUrl + dynamicId;
-            if (url.includes('xn--ti-jia.com')) {
-              url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-            }
-            navigator.clipboard.writeText(url);
-            setToast('Đã copy link bài hát!');
-            setTimeout(() => setToast(''), 3000);
-          }}
-          className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
-          title="Chia sẻ link"
-        >
-          <Share2 className="w-4.5 h-4.5" />
-        </button>
-        {isAdmin && demo?.secretKey && (
-          <button
-            onClick={() => {
-              if (!demo) return;
-              const baseUrl = '/song/';
-              const dynamicId = demo.slug || demo.id;
-              let url = window.location.origin + baseUrl + dynamicId;
-              if (url.includes('xn--ti-jia.com')) {
-                url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-              }
-              url += `?secret=${demo.secretKey}`;
-              navigator.clipboard.writeText(url);
-              setToast('Đã copy Secret Link!');
-              setTimeout(() => setToast(''), 3000);
-            }}
-            className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
-            title="Copy Secret Link"
-          >
-            <Lock className="w-4.5 h-4.5" />
-          </button>
-        )}
-      </div>
+          <div className={`fixed top-6 left-6 flex items-center gap-3 z-[60] ${isLight ? 'text-stone-900' : 'text-white'}`}>
+            <button onClick={handleBack} className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current" title={t.back}>
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => {
+                if (!demo) return;
+                const baseUrl = '/song/';
+                const dynamicId = demo.slug || demo.id;
+                let url = window.location.origin + baseUrl + dynamicId;
+                if (url.includes('xn--ti-jia.com')) {
+                  url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                }
+                navigator.clipboard.writeText(url);
+                setToast('Đã copy link bài hát!');
+                setTimeout(() => setToast(''), 3000);
+              }}
+              className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
+              title="Chia sẻ link"
+            >
+              <Share2 className="w-4.5 h-4.5" />
+            </button>
+            {isAdmin && demo?.secretKey && (
+              <button
+                onClick={() => {
+                  if (!demo) return;
+                  const baseUrl = '/song/';
+                  const dynamicId = demo.slug || demo.id;
+                  let url = window.location.origin + baseUrl + dynamicId;
+                  if (url.includes('xn--ti-jia.com')) {
+                    url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                  }
+                  url += `?secret=${demo.secretKey}`;
+                  navigator.clipboard.writeText(url);
+                  setToast('Đã copy Secret Link!');
+                  setTimeout(() => setToast(''), 3000);
+                }}
+                className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current"
+                title="Copy Secret Link"
+              >
+                <Lock className="w-4.5 h-4.5" />
+              </button>
+            )}
+          </div>
 
-      {isAdmin && demo && (
-        <div id="admin-controls-ui" className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
-          <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center justify-center transition-all bg-black/40 p-3 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl hover:scale-110" title={t.edit}>
-            <Edit3 className="w-5 h-5" />
-          </Link>
-        </div>
+          {isAdmin && demo && (
+            <div id="admin-controls-ui" className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
+              <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center justify-center transition-all bg-black/40 p-3 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl hover:scale-110" title={t.edit}>
+                <Edit3 className="w-5 h-5" />
+              </Link>
+            </div>
+          )}
+        </>
       )}
 
       <div 
-        className="max-w-5xl mx-auto w-full flex flex-col md:flex-row gap-0 md:gap-8 items-center md:items-start pt-16 relative z-10"
+        className={`max-w-5xl mx-auto w-full relative z-10 ${forceMobile ? 'block pb-16 pt-8' : forcePC ? 'flex flex-row gap-8 items-stretch pt-16' : 'block md:flex md:flex-row md:gap-8 md:items-stretch pb-16 md:pb-0 pt-8 md:pt-16'}`}
       >
         {/* Left: Player */}
-        <div className="flex-1 w-full max-w-md block md:flex text-center md:text-left flex-col items-center md:sticky md:top-24 self-start">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="w-full flex flex-col items-center"
-          >
+        <div className={`w-full max-w-md mx-auto block ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
+          <div className={`${forceMobile ? '' : forcePC ? 'flex flex-col items-center flex-1 text-left' : 'flex flex-col items-center md:items-start flex-1'}`}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className={`w-full flex flex-col items-center`}
+            >
             {templateType === '12' ? (
               /* WOODEN TURNTABLE CASE WITH REVOLVING VINYL AND DYNAMIC TONEARM */
               <div id="retro-turntable" className="relative w-full max-w-[280px] md:max-w-[340px] aspect-square p-6 md:p-8 bg-gradient-to-br from-[#4e342e] to-[#2d1a15] rounded-3xl border-8 border-[#3e2723] shadow-[inset_0_4px_10px_rgba(0,0,0,0.6),0_15px_30px_rgba(0,0,0,0.8)] flex items-center justify-center mb-4">
@@ -2407,7 +2652,9 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                 templateType === '13' ? 'shadow-[0_0_40px_rgba(244,63,94,0.3)] bg-black/40 border border-[#f43f5e]/20 rounded-[2.5rem] hover:scale-105 transition-transform duration-500' : 
                 templateType === '14' ? 'shadow-[0_0_50px_rgba(14,165,233,0.35)] bg-gradient-to-b from-[#134074] to-[#0B2545] border-4 border-sky-400/50 rounded-[2rem] hover:scale-102 transition-transform duration-500' : 
                 templateType === '15' ? 'border-[6px] border-[#ec4899] rounded-none shadow-[6px_6px_0_#10b981] bg-black hover:scale-105 transition-transform duration-300' : 
-                templateType === '16' ? 'rounded-none overflow-visible hover:scale-105 transition-transform duration-500 max-w-[280px] md:max-w-[340px]' : 'shadow-2xl rounded-3xl border-4'
+                templateType === '16' ? 'rounded-none overflow-visible hover:scale-105 transition-transform duration-500 max-w-[280px] md:max-w-[340px]' : 
+                templateType === '17' ? 'shadow-[0_0_50px_rgba(250,204,21,0.5)] border-[8px] border-white rounded-3xl rotate-2 hover:rotate-0 transition-transform duration-500' : 
+                templateType === '18' ? 'shadow-[0_0_60px_rgba(251,191,36,0.3)] border-2 border-amber-500/50 rounded-full hover:scale-105 transition-transform duration-500' : 'shadow-2xl rounded-3xl border-4'
               }`}>
                 {templateType === '9' && (
                   <>
@@ -2449,10 +2696,13 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                   </div>
                 )}
                 <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' || templateType === '18' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
               </div>
             )}
-          <h1 className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center">
+          <h1 
+            className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center"
+            style={{ color: customConfig?.titleColor || undefined }}
+          >
             <span className="relative inline-block pr-10">
               <HoverTranslate text={demo.title} format={true} />
               {demo.isReleased ? (
@@ -2472,7 +2722,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           </motion.div>
           
           <div 
-            className={`fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden mx-auto inset-x-0 md:inset-x-auto animate-fade-in`}
+            className={`rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden animate-fade-in ${forceMobile ? 'fixed bottom-4 w-[calc(100%-2rem)] inset-x-0 mx-auto' : forcePC ? 'relative bottom-auto w-full inset-x-auto mx-0' : 'fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full inset-x-0 md:inset-x-auto mx-auto md:mx-0'}`}
           >
             {/* Background with blur and mask */}
             <div 
@@ -2488,8 +2738,9 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               )}
             </div>
             <div className="relative z-10 px-4 pt-2 pb-3 md:px-5 md:pt-3 md:pb-4">
-               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} />
+               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} isPreview={isPreview} />
             </div>
+          </div>
           </div>
         </div>
 
@@ -2498,12 +2749,15 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="flex-1 w-full pb-32 md:pb-0 mt-8 md:mt-0"
+          className={`flex-1 w-full ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
         >
-          <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 md:mt-0 mt-0">{t.lyric}</h3>
+          <h3 className={`text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>{t.lyric}</h3>
           <div className="pr-4">
             {demo.lyrics ? (
-              <pre className={`whitespace-pre-wrap font-sans text-lg/relaxed sm:text-xl/loose font-semibold opacity-100 pb-20 pl-4 border-l ${isLight ? 'border-black/20 text-black/90' : 'border-white/20 text-white/95'} drop-shadow-md`}>
+              <pre 
+                className={`whitespace-pre-wrap font-sans text-lg/relaxed sm:text-xl/loose font-semibold opacity-100 pb-20 pl-4 border-l ${isLight ? 'border-black/20 text-black/90' : 'border-white/20 text-white/95'} drop-shadow-md`}
+                style={{ color: customConfig?.lyricsColor || undefined }}
+              >
                 {demo.lyrics}
               </pre>
             ) : (
@@ -2671,9 +2925,237 @@ function SocialCarousel({ data }: { data: AppData }) {
 }
 
 // ---- ADMIN DASHBOARD ----
+function AdminTemplatesSettings({ isPCPreviewMode, setIsPCPreviewMode }: { isPCPreviewMode?: boolean, setIsPCPreviewMode?: (b: boolean) => void }) {
+  const [templateConfigs, setTemplateConfigs] = useState<TemplateConfig[]>([
+    { id: '1', name: 'Vui vẻ (Ấm áp)', order: 1 },
+    { id: '2', name: 'Căng Cực (Sôi động)', order: 2 },
+    { id: '3', name: 'Buồn (Sâu lắng)', order: 3 },
+    { id: '4', name: 'Thư giãn (Nhẹ nhàng)', order: 4 },
+    { id: '5', name: 'Đáng yêu (Đỏ, Nhảy múa)', order: 5 },
+    { id: '6', name: 'Hạnh Phúc (Hồng, Hoa rơi)', order: 6 },
+    { id: '7', name: 'Học Đường (Trắng, Lá vàng rơi)', order: 7 },
+    { id: '8', name: 'Tổ Quốc (Đỏ, Cờ phấp phới)', order: 8 },
+    { id: '9', name: 'Bầu trời xanh (Mây trắng)', order: 9 },
+    { id: '10', name: 'Hip Hop (Đường phố)', order: 10 },
+    { id: '11', name: 'Kỳ bí (Đen vàng, Trăng khói mưa)', order: 11 },
+    { id: '12', name: 'Cổ điển (Nâu, retro)', order: 12 },
+    { id: '13', name: 'Hoàng hôn (Cam đỏ trời chiều)', order: 13 },
+    { id: '14', name: 'Đại Dương (Sóng biển)', order: 14 },
+    { id: '15', name: 'Retro 8-Bit (Game)', order: 15 },
+    { id: '16', name: 'Xếp hình Puzzle', order: 16 },
+    { id: '17', name: 'Cổ vũ (Mây, mặt trời)', order: 17 },
+    { id: '18', name: 'Pháo hoa (Năm mới)', order: 18 }
+  ]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [toast, setToast] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [demos, setDemos] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/data', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.templateConfigs && data.templateConfigs.length > 0) {
+          const merged = [...data.templateConfigs];
+          const defaultNames = [
+            'Vui vẻ (Ấm áp)', 'Căng Cực (Sôi động)', 'Buồn (Sâu lắng)', 'Thư giãn (Nhẹ nhàng)',
+            'Đáng yêu (Đỏ, Nhảy múa)', 'Hạnh Phúc (Hồng, Hoa rơi)', 'Học Đường (Trắng, Lá vàng rơi)',
+            'Tổ Quốc (Đỏ, Cờ phấp phới)', 'Bầu trời xanh (Mây trắng)', 'Hip Hop (Đường phố)',
+            'Kỳ bí (Đen vàng, Trăng khói mưa)', 'Cổ điển (Nâu, retro)', 'Hoàng hôn (Cam đỏ trời chiều)',
+            'Đại Dương (Sóng biển)', 'Retro 8-Bit (Game)', 'Xếp hình Puzzle', 'Cổ vũ (Mây, mặt trời)', 'Pháo hoa (Năm mới)'
+          ];
+          for (let i = 1; i <= 18; i++) {
+             const exist = merged.find((c: any) => c.id === String(i));
+             if (!exist) merged.push({ id: String(i), name: defaultNames[i - 1], order: i });
+          }
+          merged.sort((a: any,b: any) => a.order - b.order);
+          setTemplateConfigs(merged);
+        }
+        setDemos(data.demos || []);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleSaveAll = async (configsToSave: TemplateConfig[]) => {
+    fetch('/api/admin/save-templates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+      },
+      body: JSON.stringify({ configs: configsToSave })
+    });
+    setToast('Đã lưu cấu hình!');
+    setTimeout(() => setToast(''), 3000);
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData("text/plain", id);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    const sourceId = e.dataTransfer.getData("text/plain");
+    if (sourceId === targetId) return;
+
+    const sourceIdx = templateConfigs.findIndex(t => t.id === sourceId);
+    const targetIdx = templateConfigs.findIndex(t => t.id === targetId);
+    
+    if (sourceIdx >= 0 && targetIdx >= 0) {
+      const newConfigs = [...templateConfigs];
+      const [item] = newConfigs.splice(sourceIdx, 1);
+      newConfigs.splice(targetIdx, 0, item);
+      
+      newConfigs.forEach((c, idx) => c.order = idx + 1);
+      setTemplateConfigs(newConfigs);
+      handleSaveAll(newConfigs);
+    }
+  };
+
+  if (isLoading) return <div>Đang tải...</div>;
+
+  if (editingId) {
+    return <AdminTemplateEdit 
+             config={templateConfigs.find(c => c.id === editingId)!} 
+             demos={demos}
+             onBack={() => {
+                setEditingId(null);
+                if (setIsPCPreviewMode) setIsPCPreviewMode(false);
+             }}
+             onSave={async (newConfig: TemplateConfig) => {
+               const newConfigs = templateConfigs.map(c => c.id === editingId ? newConfig : c);
+               setTemplateConfigs(newConfigs);
+               await handleSaveAll(newConfigs);
+             }}
+             isPCPreviewMode={isPCPreviewMode}
+             setIsPCPreviewMode={setIsPCPreviewMode}
+           />;
+  }
+
+  return (
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
+        <h2 className="text-2xl font-black text-stone-900 tracking-tight">Sắp xếp Giao Diện</h2>
+        {toast && <span className="bg-emerald-100 text-emerald-700 font-bold px-4 py-2 rounded-xl text-sm animate-pulse">{toast}</span>}
+      </div>
+      <p className="text-stone-500 mb-6 text-sm">Kéo thả để sắp xếp lại thứ tự hiển thị của giao diện khi chọn. Nhấn vào Giao Diện để chỉnh sửa chi tiết.</p>
+      
+      <div className="space-y-3">
+        {templateConfigs.map(config => (
+          <div 
+            key={config.id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, config.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, config.id)}
+            onClick={() => setEditingId(config.id)}
+            className="flex items-center justify-between p-4 bg-stone-50 border border-stone-200 rounded-xl hover:bg-stone-100 cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+               <div className="cursor-grab text-stone-400 hover:text-stone-600 p-1 -m-1 shrink-0" onClick={e => e.stopPropagation()}>
+                 <GripVertical className="w-5 h-5" />
+               </div>
+               <span className="text-stone-550 font-mono font-bold text-xs sm:text-sm w-6 sm:w-7 tracking-tight flex items-center justify-center bg-stone-200/80 rounded-md h-6 sm:h-7 shrink-0">#{config.id}</span>
+               <span className="text-sm sm:text-base font-bold truncate">{config.name}</span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-stone-400 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, setIsPCPreviewMode }: any) {
+    const [name, setName] = useState(config.name);
+    const [bgColor, setBgColor] = useState(config.bgColor || '');
+    const [titleColor, setTitleColor] = useState(config.titleColor || '');
+    const [lyricsColor, setLyricsColor] = useState(config.lyricsColor || '');
+    const [previewSongId, setPreviewSongId] = useState(demos[0]?.id || '');
+
+    const currentConfig = { ...config, name, bgColor, titleColor, lyricsColor };
+
+    return (
+      <div className={`flex flex-col fixed inset-0 md:relative md:inset-auto bg-zinc-900 z-50 ${isPCPreviewMode ? 'w-full h-full' : 'md:h-[calc(100vh-128px)] md:-m-8'}`}>
+         <div className="bg-white p-4 border-b flex justify-between items-center z-10 shrink-0">
+             <button onClick={onBack} className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-medium font-sans">
+                 <ArrowLeft className="w-5 h-5"/> Trở về
+             </button>
+             <div className="flex items-center gap-4">
+                 <button 
+                     onClick={() => setIsPCPreviewMode && setIsPCPreviewMode(!isPCPreviewMode)} 
+                     className={`hidden md:flex items-center justify-center p-2 rounded-lg transition-colors ${isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-100 text-stone-500 hover:text-stone-900'} shadow-sm`}
+                     title="Giao diện xem trên máy tính"
+                 >
+                     <Monitor className="w-5 h-5" />
+                 </button>
+                 <button onClick={() => onSave(currentConfig)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-xl text-sm transition-colors shadow">
+                     Lưu cài đặt
+                 </button>
+             </div>
+         </div>
+         <div className="flex flex-1 flex-col md:flex-row overflow-y-auto md:overflow-hidden relative border-t-0">
+             <div className={`w-full h-auto md:h-full ${isPCPreviewMode ? 'md:w-[260px] p-4 space-y-4' : 'md:w-[400px] p-6 md:p-8 space-y-6'} bg-white flex-shrink-0 border-b md:border-b-0 md:border-r overflow-visible md:overflow-y-auto custom-scrollbar`}>
+                 <div>
+                     <h3 className={`${isPCPreviewMode ? 'text-lg' : 'text-2xl'} font-black mb-1`}>Chỉnh sửa</h3>
+                     <p className="inline-block bg-stone-100 text-stone-500 font-mono text-xs px-2 py-0.5 rounded-md mt-1">Giao diện #{config.id}</p>
+                 </div>
+                 
+                 <div>
+                    <label className={`${isPCPreviewMode ? 'text-xs' : 'text-sm'} block font-bold text-stone-700 mb-2`}>Bài hát Preview</label>
+                    <select className={`w-full border rounded-xl px-4 ${isPCPreviewMode ? 'py-2 text-sm' : 'py-3'} bg-stone-50`} value={previewSongId} onChange={e => setPreviewSongId(e.target.value)}>
+                       {demos.map((d: any) => (
+                           <option key={d.id} value={d.id}>{d.title}</option>
+                       ))}
+                    </select>
+                 </div>
+
+                 <div className={`space-y-4 pt-4 border-t border-stone-200 ${isPCPreviewMode ? 'text-sm' : ''}`}>
+                    <div>
+                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Tên hiển thị</label>
+                        <input value={name} onChange={e => setName(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: Mặc định 1" />
+                    </div>
+                    <div>
+                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Màu nền tùy chỉnh</label>
+                        <input value={bgColor} onChange={e => setBgColor(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: #111827" />
+                    </div>
+                    <div>
+                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Màu chữ tiêu đề</label>
+                        <input value={titleColor} onChange={e => setTitleColor(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: #ffffff" />
+                    </div>
+                    <div>
+                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Màu lời bài hát</label>
+                        <input value={lyricsColor} onChange={e => setLyricsColor(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: #eeeeee" />
+                    </div>
+                 </div>
+             </div>
+             <div className="flex-1 w-full min-h-[700px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0">
+                {previewSongId ? (
+                   <div className={`w-full bg-black relative overflow-hidden transition-all duration-500 ease-in-out transform transform-gpu ${
+                       isPCPreviewMode 
+                           ? 'h-full border-0 rounded-none shadow-none scale-100 min-w-[700px] xl:min-w-[1024px]'
+                           : 'md:w-[375px] h-full md:h-[812px] shadow-2xl md:rounded-[3rem] md:border-[12px] border-stone-800 shrink-0 md:scale-[0.80] lg:scale-[0.80] xl:scale-[0.80] 2xl:scale-[0.95] origin-center no-scrollbar'
+                   }`}>
+                      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden no-scrollbar custom-scrollbar">
+                        <DemoPlayer songIdP={previewSongId} previewConfig={{...currentConfig, isPCPreviewMode}} />
+                      </div>
+                   </div>
+                ) : (
+                    <div className="text-stone-500 bg-stone-900 h-full w-full flex items-center justify-center font-medium">Hãy chọn bài hát để xem.</div>
+                )}
+             </div>
+         </div>
+      </div>
+    );
+}
+
 function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
-  const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'>('demos');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'|'security'|'templates'>('demos');
   const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'playlists' | 'trash'>('released');
   const [draggedItemIdx, setDraggedItemIdx] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -2693,6 +3175,19 @@ function AdminDashboard() {
   const [homeCoverUrlPreview, setHomeCoverUrlPreview] = useState('');
   const [faviconUrlPreview, setFaviconUrlPreview] = useState('');
   const [ogImageUrlPreview, setOgImageUrlPreview] = useState('');
+
+  // Passwords Tab States
+  const [oldAdminPass, setOldAdminPass] = useState('');
+  const [newAdminPass, setNewAdminPass] = useState('');
+  const [confirmAdminPass, setConfirmAdminPass] = useState('');
+  const [adminPassError, setAdminPassError] = useState('');
+  const [adminPassSuccess, setAdminPassSuccess] = useState('');
+
+  const [memberPassInput, setMemberPassInput] = useState('');
+  const [memberPassError, setMemberPassError] = useState('');
+  const [memberPassSuccess, setMemberPassSuccess] = useState('');
+  
+  const [isPCPreviewMode, setIsPCPreviewMode] = useState(false);
   
   const navigate = useNavigate();
 
@@ -2718,6 +3213,9 @@ function AdminDashboard() {
         if (resData.homeCoverUrl) setHomeCoverUrlPreview(resData.homeCoverUrl);
         if (resData.faviconUrl) setFaviconUrlPreview(resData.faviconUrl);
         if (resData.ogImageUrl) setOgImageUrlPreview(resData.ogImageUrl);
+        if (resData.memberPassword) {
+          setMemberPassInput(resData.memberPassword);
+        }
       })
       .catch(err => {
         console.error("Lỗi tải thông tin quản trị:", err);
@@ -2841,6 +3339,89 @@ function AdminDashboard() {
     setTimeout(() => setToast(''), 3000);
   };
 
+  const handleAdminPasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminPassError('');
+    setAdminPassSuccess('');
+
+    if (!oldAdminPass || !newAdminPass || !confirmAdminPass) {
+      setAdminPassError('Vui lòng điền đầy đủ các trường!');
+      return;
+    }
+    if (newAdminPass !== confirmAdminPass) {
+      setAdminPassError('Xác nhận mật khẩu mới không khớp!');
+      return;
+    }
+    if (newAdminPass.length < 4) {
+      setAdminPassError('Mật khẩu mới phải từ 4 ký tự trở lên!');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+        },
+        body: JSON.stringify({
+          oldPassword: oldAdminPass,
+          newPassword: newAdminPass,
+          confirmPassword: confirmAdminPass
+        })
+      });
+
+      const resData = await res.json();
+      if (res.ok) {
+        localStorage.setItem('adminToken', resData.token);
+        setAdminPassSuccess('Đổi mật khẩu quản trị thành công!');
+        setOldAdminPass('');
+        setNewAdminPass('');
+        setConfirmAdminPass('');
+        setToast('Đổi mật khẩu quản trị thành công!');
+        setTimeout(() => setToast(''), 3000);
+      } else {
+        setAdminPassError(resData.error || 'Đã có lỗi xảy ra!');
+      }
+    } catch (err) {
+      setAdminPassError('Lỗi kết nối máy chủ!');
+    }
+  };
+
+  const handleMemberPasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMemberPassError('');
+    setMemberPassSuccess('');
+
+    if (!memberPassInput || memberPassInput.length < 4) {
+      setMemberPassError('Mật khẩu thành viên tối thiểu phải từ 4 ký tự!');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/set-member-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+        },
+        body: JSON.stringify({ memberPassword: memberPassInput })
+      });
+
+      const resData = await res.json();
+      if (res.ok) {
+        setMemberPassSuccess('Cập nhật mật khẩu thành viên thành công!');
+        setToast('Đã cập nhật mật khẩu thành viên!');
+        setTimeout(() => setToast(''), 3000);
+        loadData();
+      } else {
+        setMemberPassError(resData.error || 'Đã có lỗi xảy ra!');
+      }
+    } catch (err) {
+      setMemberPassError('Lỗi kết nối máy chủ!');
+    }
+  };
+
   if (!data) return <div className="min-h-screen bg-stone-100 flex items-center justify-center text-stone-500">Đang tải AdminCP...</div>;
 
   return (
@@ -2862,39 +3443,68 @@ function AdminDashboard() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
-        <aside className="w-full md:w-64 shrink-0">
-          <div className="mb-6 space-y-1">
-            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Quản lý</h3>
+      <div className={`mx-auto ${isPCPreviewMode ? 'w-full px-0 py-0 flex-1 flex overflow-hidden' : 'w-full px-4 md:px-8 py-8 flex flex-col md:flex-row gap-8'}`}>
+        <aside className={`${isSidebarCollapsed ? 'hidden md:flex flex-col w-16 bg-white border-r border-stone-200 shrink-0 py-4 items-center space-y-4 relative' : 'w-full md:w-64 shrink-0 flex flex-col md:sticky md:top-[88px] self-start relative'}`}>
+          {!isSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4 hidden md:block">Quản lý</h3>}
+          {!isPCPreviewMode && (
+             <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className={`hidden md:flex absolute ${isSidebarCollapsed ? '-top-2 left-1/2 -translate-x-1/2 z-10' : '-top-2 right-2 z-10'} items-center justify-center p-1 text-stone-400 hover:text-stone-900 transition-colors bg-white rounded-md border border-stone-100 shadow-sm`}
+             >
+                {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+             </button>
+          )}
+          <div className={`${isSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
             <button
               onClick={() => { setActiveTab('demos'); setDemosSubTab('released'); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+              className={`flex items-center transition-colors ${
+                isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              } ${
                 activeTab === 'demos' && demosSubTab !== 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
               }`}
+              title="Bài Hát"
             >
-              <Disc3 className="w-5 h-5" /> Bài Hát
+              <Disc3 className="w-5 h-5" /> {!isSidebarCollapsed && <span>Bài Hát</span>}
             </button>
             <button
               onClick={() => { setActiveTab('demos'); setDemosSubTab('playlists'); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+              className={`flex items-center transition-colors ${
+                isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              } ${
                 activeTab === 'demos' && demosSubTab === 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
               }`}
+              title="Playlist"
             >
-              <ListMusic className="w-5 h-5" /> Playlist
+              <ListMusic className="w-5 h-5" /> {!isSidebarCollapsed && <span>Playlist</span>}
             </button>
           </div>
-          <div className="mb-6 space-y-1">
-            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Hồ sơ & Mở rộng</h3>
-            <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
-              <Settings className="w-5 h-5" /> Cài Đặt
+          
+          <div className={`${isSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
+            {!isSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Hồ sơ & Mở rộng</h3>}
+            <button onClick={() => setActiveTab('templates')} className={`flex items-center transition-colors ${
+              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+            } ${activeTab === 'templates' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Giao Diện">
+              <Camera className="w-5 h-5" /> {!isSidebarCollapsed && <span>Giao Diện</span>}
             </button>
-            <button onClick={() => setActiveTab('socials')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'socials' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`}>
-              <Globe className="w-5 h-5" /> Mạng Xã Hội
+            <button onClick={() => setActiveTab('profile')} className={`flex items-center transition-colors ${
+              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+            } ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Cài Đặt">
+              <Settings className="w-5 h-5" /> {!isSidebarCollapsed && <span>Cài Đặt</span>}
+            </button>
+            <button onClick={() => setActiveTab('socials')} className={`flex items-center transition-colors ${
+              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+            } ${activeTab === 'socials' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Mạng Xã Hội">
+              <Globe className="w-5 h-5" /> {!isSidebarCollapsed && <span>Mạng Xã Hội</span>}
+            </button>
+            <button onClick={() => setActiveTab('security')} className={`flex items-center transition-colors ${
+              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+            } ${activeTab === 'security' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Bảo Mật">
+              <Lock className="w-5 h-5" /> {!isSidebarCollapsed && <span>Bảo Mật</span>}
             </button>
           </div>
         </aside>
 
-        <main className="flex-1 bg-white rounded-3xl border border-stone-200 shadow-sm p-8">
+        <main className={`flex-1 bg-white flex flex-col ${isPCPreviewMode ? 'rounded-none border-0 shadow-none min-h-0 h-[calc(100vh-64px)] overflow-hidden' : 'rounded-none md:rounded-3xl border-0 md:border md:border-stone-200 shadow-none md:shadow-sm p-4 md:p-8 min-h-[calc(100vh-64px)]'}`}>
           {activeTab === 'demos' && (
             <div>
               {/* Header with Sub-tabs and Create button */}
@@ -3512,6 +4122,94 @@ function AdminDashboard() {
               </form>
             </div>
           )}
+
+          {activeTab === 'templates' && (
+            <AdminTemplatesSettings isPCPreviewMode={isPCPreviewMode} setIsPCPreviewMode={setIsPCPreviewMode} />
+          )}
+
+          {activeTab === 'security' && (
+            <div className="max-w-2xl space-y-12">
+              <div>
+                <h2 className="text-2xl font-bold mb-2 text-stone-900">Đổi Mật Khẩu Quản Trị (Admin)</h2>
+                <p className="text-sm text-stone-500 mb-6">Bạn sẽ dùng mật khẩu này để đăng nhập vào trang quản trị AdminCP này.</p>
+                
+                <form onSubmit={handleAdminPasswordChange} className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu cũ</label>
+                    <input 
+                      type="password"
+                      value={oldAdminPass}
+                      onChange={(e) => setOldAdminPass(e.target.value)}
+                      className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono"
+                      placeholder="Nhập mật khẩu hiện tại"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu mới</label>
+                    <input 
+                      type="password"
+                      value={newAdminPass}
+                      onChange={(e) => setNewAdminPass(e.target.value)}
+                      className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono"
+                      placeholder="Mật khẩu mới (tối thiểu 4 ký tự)"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Xác nhận mật khẩu mới</label>
+                    <input 
+                      type="password"
+                      value={confirmAdminPass}
+                      onChange={(e) => setConfirmAdminPass(e.target.value)}
+                      className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono"
+                      placeholder="Nhập lại mật khẩu mới"
+                    />
+                  </div>
+
+                  {adminPassError && (
+                    <p className="text-red-500 text-sm font-bold bg-red-50 border border-red-200 rounded-xl px-4 py-2">{adminPassError}</p>
+                  )}
+                  {adminPassSuccess && (
+                    <p className="text-emerald-600 text-sm font-bold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">{adminPassSuccess}</p>
+                  )}
+
+                  <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">
+                    Đổi mật khẩu Admin
+                  </button>
+                </form>
+              </div>
+
+              <hr className="border-stone-200" />
+
+              <div>
+                <h2 className="text-2xl font-bold mb-2 text-stone-900">Thiết Lập Mật Khẩu Thành Viên (VIP VIP)</h2>
+                <p className="text-sm text-stone-500 mb-6">Người dùng nhập mật khẩu này tại trang <code className="bg-stone-100 px-1.5 py-0.5 rounded font-mono text-red-650">/mem</code> để nghe tự do mọi album/bài hát có passcode mà không cần nhập code riêng biệt.</p>
+                
+                <form onSubmit={handleMemberPasswordChange} className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu thành viên hiện tại hoặc mới</label>
+                    <input 
+                      type="text"
+                      value={memberPassInput}
+                      onChange={(e) => setMemberPassInput(e.target.value)}
+                      className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono"
+                      placeholder="Mật khẩu thành viên"
+                    />
+                  </div>
+
+                  {memberPassError && (
+                    <p className="text-red-500 text-sm font-bold bg-red-50 border border-red-200 rounded-xl px-4 py-2">{memberPassError}</p>
+                  )}
+                  {memberPassSuccess && (
+                    <p className="text-emerald-600 text-sm font-bold bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">{memberPassSuccess}</p>
+                  )}
+
+                  <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">
+                    Cập nhật mật khẩu Thành viên
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -3560,6 +4258,8 @@ function AdminDashboard() {
 function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onChange: (ids: string[]) => void }) {
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [newTitle, setNewTitle] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     fetch('/api/admin/data', {
@@ -3569,6 +4269,16 @@ function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onCh
     .then(data => {
       setPlaylists(data.playlists || []);
     });
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleCreate = async () => {
@@ -3589,7 +4299,8 @@ function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onCh
     }
   };
 
-  const toggle = (id: string) => {
+  const toggle = (id: string, e: React.ChangeEvent) => {
+    e.stopPropagation();
     if (selectedIds.includes(id)) {
       onChange(selectedIds.filter(x => x !== id));
     } else {
@@ -3598,41 +4309,90 @@ function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onCh
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative" ref={dropdownRef}>
       <label className="block text-sm font-bold text-stone-700">Thêm vào Playlist</label>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {playlists.map(p => (
-          <div key={p.id} className="flex items-center gap-2 text-sm p-2 border rounded-xl hover:bg-stone-50">
-            <input 
-              type="checkbox" 
-              checked={selectedIds.includes(p.id)} 
-              onChange={() => toggle(p.id)} 
-              className="rounded text-stone-900 border-stone-300 focus:ring-stone-900 cursor-pointer"
-            />
-            <Link to={`/admin/playlist/${p.id}`} target="_blank" className="truncate flex-1 hover:text-blue-600 hover:underline cursor-pointer" title="Quản lý Playlist (mở tab mới)">
-               {p.title}
-            </Link>
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <input 
-          type="text" 
-          value={newTitle} 
-          onChange={e => setNewTitle(e.target.value)}
-          placeholder="Tên Playlist mới..." 
-          className="flex-1 px-4 py-2 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent text-sm font-medium"
-        />
-        <button 
-          type="button" 
-          onClick={handleCreate}
-          className="px-4 py-2 bg-stone-900 text-white rounded-xl text-sm font-bold hover:bg-stone-800"
-        >
-          Tạo mới
-        </button>
+      <div className="relative">
+         <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow text-left">
+           <span className="truncate">{selectedIds.length > 0 ? `${selectedIds.length} playlist được chọn` : 'Chọn Playlist'}</span>
+           <svg className={`w-5 h-5 text-stone-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+           </svg>
+         </button>
+         
+         {isOpen && (
+           <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-stone-200 rounded-xl shadow-2xl z-[100] p-2 space-y-1 max-h-80 overflow-y-auto custom-scrollbar">
+              {playlists.map(p => (
+                 <label className="flex items-center gap-3 px-3 py-2.5 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors" key={p.id}>
+                    <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={(e) => toggle(p.id, e)} className="w-[18px] h-[18px] rounded border-stone-300 text-stone-900 focus:ring-stone-900" />
+                    <span className="flex-1 truncate text-sm font-medium text-stone-800">{p.title}</span>
+                 </label>
+              ))}
+              <div className="border-t border-stone-100 pt-2 mt-2 sticky bottom-0 bg-white pb-1 flex gap-2">
+                 <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleCreate())} placeholder="Tên Playlist mới..." className="flex-1 px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-stone-900" />
+                 <button type="button" onClick={handleCreate} disabled={!newTitle.trim()} className="px-4 py-2 bg-stone-900 text-white rounded-lg text-sm font-bold hover:bg-stone-800 disabled:opacity-50">Tạo mới</button>
+              </div>
+           </div>
+         )}
       </div>
     </div>
   );
+}
+
+function TemplatePickerModal({ 
+  configs, 
+  onSelect, 
+  onClose, 
+  previewSongId 
+}: { 
+  configs: any[], 
+  onSelect: (id: string) => void, 
+  onClose: () => void, 
+  previewSongId: string 
+}) {
+  const [selectedId, setSelectedId] = useState(configs[0]?.id || '1');
+  const [isPCPreviewMode, setIsPCPreviewMode] = useState(false);
+
+  const selectedConfig = configs.find(c => c.id === selectedId) || configs[0];
+
+  return (
+    <div className={`fixed inset-0 bg-zinc-900 z-[9999] flex flex-col md:flex-row overflow-hidden`}>
+      <div className={`w-full h-auto md:h-full ${isPCPreviewMode ? 'md:w-[260px] p-4 space-y-4' : 'md:w-[400px] p-6 md:p-8 space-y-6'} bg-white flex-shrink-0 border-b md:border-b-0 md:border-r overflow-visible md:overflow-y-auto custom-scrollbar flex flex-col`}>
+         <div className="flex justify-between items-center shrink-0 mb-4">
+             <button onClick={onClose} className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-medium font-sans"><ArrowLeft className="w-5 h-5"/> Trở về</button>
+             <button onClick={() => onSelect(selectedId)} className="bg-stone-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow hover:bg-stone-800">Chọn Giao Diện</button>
+         </div>
+         <div>
+            <h3 className="text-xl font-black mb-4">Chọn Template</h3>
+            <div className="space-y-2">
+               {configs.map(c => (
+                  <button key={c.id} onClick={() => setSelectedId(c.id)} className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${selectedId === c.id ? 'border-stone-900 bg-stone-50 font-bold' : 'border-transparent bg-white hover:bg-stone-100'}`}>
+                      {c.name}
+                  </button>
+               ))}
+            </div>
+         </div>
+      </div>
+      <div className="flex-1 w-full min-h-[700px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0">
+         <div className="absolute top-4 right-4 z-[100] flex gap-2">
+            <button onClick={() => setIsPCPreviewMode(false)} className={`flex items-center justify-center p-2 rounded-lg transition-colors ${!isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} shadow-sm`}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></button>
+            <button onClick={() => setIsPCPreviewMode(true)} className={`hidden md:flex items-center justify-center p-2 rounded-lg transition-colors ${isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} shadow-sm`}><Monitor className="w-5 h-5"/></button>
+         </div>
+         {previewSongId ? (
+             <div className={`w-full bg-black relative overflow-hidden transition-all duration-500 ease-in-out transform transform-gpu ${
+                 isPCPreviewMode 
+                     ? 'h-full border-0 rounded-none shadow-none scale-100 min-w-[700px] xl:min-w-[1024px]'
+                     : 'md:w-[375px] h-full md:h-[812px] shadow-2xl md:rounded-[3rem] md:border-[12px] border-stone-800 shrink-0 md:scale-[0.80] lg:scale-[0.80] xl:scale-[0.80] 2xl:scale-[0.95] origin-center no-scrollbar'
+             }`}>
+                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden no-scrollbar custom-scrollbar">
+                  <DemoPlayer songIdP={previewSongId} previewConfig={{...selectedConfig, isPCPreviewMode}} />
+                </div>
+             </div>
+         ) : (
+              <div className="text-stone-500 bg-stone-900 h-full w-full flex items-center justify-center font-medium">Đang tải...</div>
+         )}
+      </div>
+    </div>
+  )
 }
 
 // ---- ADMIN CREATE DEMO ----
@@ -3643,6 +4403,7 @@ function AdminCreateDemo() {
   const [slug, setSlug] = useState('');
   const [isSlugEdited, setIsSlugEdited] = useState(false);
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
+  const [templateConfigs, setTemplateConfigs] = useState<any[]>([]);
 
   const [audioUploadProgress, setAudioUploadProgress] = useState(0);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState('');
@@ -3650,6 +4411,9 @@ function AdminCreateDemo() {
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState('');
   const [bgUploadProgress, setBgUploadProgress] = useState(0);
   const [uploadedBgUrl, setUploadedBgUrl] = useState('');
+
+  const [template, setTemplate] = useState('1');
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
   const generateSlug = (text: string) => {
     return text.toString()
@@ -3666,6 +4430,42 @@ function AdminCreateDemo() {
       setSlug(generateSlug(title));
     }
   }, [title, isSlugEdited]);
+
+  useEffect(() => {
+    fetch('/api/admin/data', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.templateConfigs && data.templateConfigs.length > 0) {
+          const sorted = [...data.templateConfigs].sort((a: any, b: any) => a.order - b.order);
+          setTemplateConfigs(sorted);
+        } else {
+          // Fallback static
+          setTemplateConfigs([
+            { id: '1', name: 'Vui vẻ (Ấm áp)' },
+            { id: '2', name: 'Căng Cực (Sôi động)' },
+            { id: '3', name: 'Buồn (Sâu lắng)' },
+            { id: '4', name: 'Thư giãn (Nhẹ nhàng)' },
+            { id: '5', name: 'Đáng yêu (Đỏ, Nhảy múa)' },
+            { id: '6', name: 'Hạnh Phúc (Hồng, Hoa rơi)' },
+            { id: '7', name: 'Học Đường (Trắng, Lá vàng rơi)' },
+            { id: '8', name: 'Tổ Quốc (Đỏ, Cờ phấp phới)' },
+            { id: '9', name: 'Bầu trời xanh (Mây trắng)' },
+            { id: '10', name: 'Hip Hop (Đường phố)' },
+            { id: '11', name: 'Kỳ bí (Đen vàng, Trăng khói mưa)' },
+            { id: '12', name: 'Cổ điển (Nâu, retro)' },
+            { id: '13', name: 'Hoàng hôn (Cam đỏ trời chiều)' },
+            { id: '14', name: 'Đại Dương (Sóng biển)' },
+            { id: '15', name: 'Retro 8-Bit (Game)' },
+            { id: '16', name: 'Xếp hình Puzzle' },
+            { id: '17', name: 'Cổ vũ (Mây, mặt trời)' },
+            { id: '18', name: 'Pháo hoa (Năm mới)' }
+          ]);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover' | 'background') => {
     const file = e.target.files?.[0];
@@ -3851,58 +4651,50 @@ function AdminCreateDemo() {
               <textarea name="lyrics" rows={6} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-stone-100">
+            <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
+              <div className="w-full">
+                <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 min-w-0">
+                  <select name="template" value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full min-w-0 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white shadow-sm">
+                    {templateConfigs.map((tc: any) => (
+                      <option key={tc.id} value={tc.id}>{tc.name}</option>
+                    ))}
+                  </select>
+                  <button type="button" onClick={() => setShowTemplatePicker(true)} className="px-6 py-3 border border-transparent shrink-0 bg-indigo-600 hover:bg-indigo-700 shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all">
+                    <Eye className="w-5 h-5" /> Xem trước giao diện
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái</label>
-                <select name="status" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
+                <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu bảo vệ (tùy chọn)</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
+                  <input name="password" placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                </div>
+              </div>
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Hiển thị (Trạng thái phát hành)</label>
+                 <select name="status" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
                   <option value="public">Công khai</option>
                   <option value="hidden">Ẩn</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
-                <select name="template" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
-                  <option value="1">Vui vẻ (Ấm áp)</option>
-                  <option value="2">Căng Cực (Sôi động)</option>
-                  <option value="3">Buồn (Sâu lắng)</option>
-                  <option value="4">Thư giãn (Nhẹ nhàng)</option>
-                  <option value="5">Đáng yêu (Đỏ, Nhảy múa)</option>
-                  <option value="6">Hạnh Phúc (Hồng, Hoa rơi)</option>
-                  <option value="7">Học Đường (Trắng, Lá vàng rơi)</option>
-                  <option value="8">Tổ Quốc (Đỏ, Cờ phấp phới)</option>
-                  <option value="9">Bầu trời xanh (Mây trắng)</option>
-                  <option value="10">Hip Hop (Đường phố)</option>
-                  <option value="11">Kỳ bí (Đen vàng, Trăng khói mưa)</option>
-                  <option value="12">Cổ điển (Nâu, retro đĩa than quay)</option>
-                  <option value="13">Hoàng hôn (Cam đỏ trời chiều, lá rụng)</option>
-                  <option value="14">Đại Dương (Sóng biển dập dồn, vỏ sò rơi)</option>
-                  <option value="15">Retro 8-Bit (Game Nhật Bản, tay cầm rơi)</option>
-                  <option value="16">Xếp hình Puzzle (Nhiều sắc màu, mảnh ghép rơi)</option>
-                </select>
-              </div>
-
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu (tùy chọn)</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
-                  <input name="password" placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
-                </div>
-              </div>
-              
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái bài hát</label>
-                <label className="flex items-center gap-3 cursor-pointer mt-3">
-                  <div className="relative">
-                    <input type="checkbox" name="isReleased" value="true" className="w-6 h-6 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer" />
-                  </div>
-                  <span className="font-medium text-stone-900 border border-stone-300 px-3 py-1 rounded-lg">Đã phát hành</span>
-                </label>
-              </div>
             </div>
 
-            <div className="pt-4 border-t border-stone-100">
-              <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
+                <label className="inline-flex items-center gap-3 cursor-pointer mt-1">
+                  <input type="checkbox" name="isReleased" value="true" className="w-6 h-6 rounded border-stone-300 text-stone-900 focus:ring-stone-900 transition-all cursor-pointer" />
+                </label>
+              </div>
+
+               <div>
+                 <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+               </div>
             </div>
 
             <button disabled={loading} type="submit" className="w-full bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1 mt-8">
@@ -3927,6 +4719,7 @@ function AdminEditDemo() {
   const [slug, setSlug] = useState('');
   const [isSlugEdited, setIsSlugEdited] = useState(false);
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
+  const [templateConfigs, setTemplateConfigs] = useState<any[]>([]);
   
   const [audioUploadProgress, setAudioUploadProgress] = useState(0);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState('');
@@ -3934,6 +4727,9 @@ function AdminEditDemo() {
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState('');
   const [bgUploadProgress, setBgUploadProgress] = useState(0);
   const [uploadedBgUrl, setUploadedBgUrl] = useState('');
+
+  const [template, setTemplate] = useState('1');
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
@@ -3961,6 +4757,31 @@ function AdminEditDemo() {
       })
       .then(data => {
         setAppData(data);
+        if (data.templateConfigs && data.templateConfigs.length > 0) {
+          const sorted = [...data.templateConfigs].sort((a: any, b: any) => a.order - b.order);
+          setTemplateConfigs(sorted);
+        } else {
+          setTemplateConfigs([
+            { id: '1', name: 'Vui vẻ (Ấm áp)' },
+            { id: '2', name: 'Căng Cực (Sôi động)' },
+            { id: '3', name: 'Buồn (Sâu lắng)' },
+            { id: '4', name: 'Thư giãn (Nhẹ nhàng)' },
+            { id: '5', name: 'Đáng yêu (Đỏ, Nhảy múa)' },
+            { id: '6', name: 'Hạnh Phúc (Hồng, Hoa rơi)' },
+            { id: '7', name: 'Học Đường (Trắng, Lá vàng rơi)' },
+            { id: '8', name: 'Tổ Quốc (Đỏ, Cờ phấp phới)' },
+            { id: '9', name: 'Bầu trời xanh (Mây trắng)' },
+            { id: '10', name: 'Hip Hop (Đường phố)' },
+            { id: '11', name: 'Kỳ bí (Đen vàng, Trăng khói mưa)' },
+            { id: '12', name: 'Cổ điển (Nâu, retro)' },
+            { id: '13', name: 'Hoàng hôn (Cam đỏ trời chiều)' },
+            { id: '14', name: 'Đại Dương (Sóng biển)' },
+            { id: '15', name: 'Retro 8-Bit (Game)' },
+            { id: '16', name: 'Xếp hình Puzzle' },
+            { id: '17', name: 'Cổ vũ (Mây, mặt trời)' },
+            { id: '18', name: 'Pháo hoa (Năm mới)' }
+          ]);
+        }
         const found = data.demos.find((d: any) => d.id === id);
         if (found) {
           setDemo(found);
@@ -3970,6 +4791,7 @@ function AdminEditDemo() {
           setUploadedCoverUrl(found.coverUrl || '');
           setUploadedBgUrl(found.backgroundUrl || '');
           setPlaylistIds(found.playlistIds || []);
+          setTemplate(found.template || '1');
         }
       })
       .catch(err => {
@@ -4162,7 +4984,7 @@ function AdminEditDemo() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền Mới (Tùy chọn)</label>
                 <div className="flex flex-wrap gap-4 items-center">
@@ -4183,58 +5005,50 @@ function AdminEditDemo() {
               <textarea name="lyrics" rows={6} defaultValue={demo.lyrics} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-stone-100">
+            <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
+              <div className="w-full">
+                <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 min-w-0">
+                  <select name="template" value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full min-w-0 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white shadow-sm">
+                    {templateConfigs.map((tc: any) => (
+                      <option key={tc.id} value={tc.id}>{tc.name}</option>
+                    ))}
+                  </select>
+                  <button type="button" onClick={() => setShowTemplatePicker(true)} className="px-6 py-3 border border-transparent shrink-0 bg-indigo-600 hover:bg-indigo-700 shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all">
+                    <Eye className="w-5 h-5" /> Xem trước giao diện
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái</label>
-                <select name="status" defaultValue={demo.status} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
+                <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu bảo vệ (tùy chọn)</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
+                  <input name="password" defaultValue={demo.passwordValue || demo.password as any} placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                </div>
+              </div>
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Hiển thị (Trạng thái phát hành)</label>
+                 <select name="status" defaultValue={demo.status} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
                   <option value="public">Công khai</option>
                   <option value="hidden">Ẩn</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
-                <select name="template" defaultValue={demo.template} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
-                  <option value="1">Vui vẻ (Ấm áp)</option>
-                  <option value="2">Căng Cực (Sôi động)</option>
-                  <option value="3">Buồn (Sâu lắng)</option>
-                  <option value="4">Thư giãn (Nhẹ nhàng)</option>
-                  <option value="5">Đáng yêu (Đỏ, Nhảy múa)</option>
-                  <option value="6">Hạnh Phúc (Hồng, Hoa rơi)</option>
-                  <option value="7">Học Đường (Trắng, Lá vàng rơi)</option>
-                  <option value="8">Tổ Quốc (Đỏ, Cờ phấp phới)</option>
-                  <option value="9">Bầu trời xanh (Mây trắng)</option>
-                  <option value="10">Hip Hop (Đường phố)</option>
-                  <option value="11">Kỳ bí (Đen vàng, Trăng khói mưa)</option>
-                  <option value="12">Cổ điển (Nâu, retro đĩa than quay)</option>
-                  <option value="13">Hoàng hôn (Cam đỏ trời chiều, lá rụng)</option>
-                  <option value="14">Đại Dương (Sóng biển dập dồn, vỏ sò rơi)</option>
-                  <option value="15">Retro 8-Bit (Game Nhật Bản, tay cầm rơi)</option>
-                  <option value="16">Xếp hình Puzzle (Nhiều sắc màu, mảnh ghép rơi)</option>
-                </select>
-              </div>
-
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu (tùy chọn)</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
-                  <input name="password" defaultValue={demo.passwordValue || demo.password as any} placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
-                </div>
-              </div>
-              
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái bài hát</label>
-                <label className="flex items-center gap-3 cursor-pointer mt-3">
-                  <div className="relative">
-                    <input type="checkbox" name="isReleased" value="true" defaultChecked={demo.isReleased} className="w-6 h-6 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer" />
-                  </div>
-                  <span className="font-medium text-stone-900 border border-stone-300 px-3 py-1 rounded-lg">Đã phát hành</span>
-                </label>
-              </div>
             </div>
 
-            <div className="pt-4 border-t border-stone-100">
-              <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
+               <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
+                <label className="inline-flex items-center gap-3 cursor-pointer mt-1">
+                  <input type="checkbox" name="isReleased" value="true" defaultChecked={demo.isReleased} className="w-6 h-6 rounded border-stone-300 text-stone-900 focus:ring-stone-900 transition-all cursor-pointer" />
+                </label>
+              </div>
+
+               <div>
+                 <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+               </div>
             </div>
 
             <div className="flex flex-col md:flex-row gap-4 mt-8">
@@ -4259,6 +5073,17 @@ function AdminEditDemo() {
           </form>
         </div>
       </div>
+      {showTemplatePicker && (
+         <TemplatePickerModal 
+            configs={templateConfigs} 
+            previewSongId={id || ''}
+            onSelect={(id) => {
+               setTemplate(id);
+               setShowTemplatePicker(false);
+            }} 
+            onClose={() => setShowTemplatePicker(false)}
+         />
+      )}
     </div>
   );
 }

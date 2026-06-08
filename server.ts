@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs/promises';
+import crypto from 'crypto';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
@@ -46,11 +47,26 @@ const upload = multer({
   limits: { fileSize: 30 * 1024 * 1024 } 
 });
 
+let currentAdminPassword = 'MatKhauDay123';
+let currentMemberPassword = 'XuanTaiDepTrai';
+
 async function loadData() {
   try {
     const docSnap = await getDoc(DOC_REF);
     if (docSnap.exists()) {
       const data = docSnap.data();
+      
+      if (data.adminPassword) {
+        currentAdminPassword = data.adminPassword;
+      } else {
+        data.adminPassword = currentAdminPassword;
+      }
+      if (data.memberPassword) {
+        currentMemberPassword = data.memberPassword;
+      } else {
+        data.memberPassword = currentMemberPassword;
+      }
+
       const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
       const now = Date.now();
       let changed = false;
@@ -93,6 +109,18 @@ async function loadData() {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
     const parsedData = JSON.parse(data);
+    
+    if (parsedData.adminPassword) {
+      currentAdminPassword = parsedData.adminPassword;
+    } else {
+      parsedData.adminPassword = currentAdminPassword;
+    }
+    if (parsedData.memberPassword) {
+      currentMemberPassword = parsedData.memberPassword;
+    } else {
+      parsedData.memberPassword = currentMemberPassword;
+    }
+
     await setDoc(DOC_REF, parsedData); // upload to firebase for next time
     return parsedData;
   } catch (error) {}
@@ -109,7 +137,9 @@ async function loadData() {
     spotifyUrl: '',
     releasedSongs: [],
     demos: [],
-    playlists: []
+    playlists: [],
+    adminPassword: currentAdminPassword,
+    memberPassword: currentMemberPassword
   };
 }
 
@@ -137,7 +167,7 @@ async function startServer() {
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
   // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=3333
   // hoặc thiết lập App Port: 3333 trực tiếp trên giao diện CloudPanel.
-  const PORT = Number(process.env.PORT || 3000);
+  const PORT = 3000;
 
   app.use(express.json());
 
@@ -149,7 +179,7 @@ async function startServer() {
         ? authHeader.slice(7) 
         : String(authHeader);
       
-      if (token === 'MatKhauDay123') return true;
+      if (token === currentAdminPassword) return true;
     }
 
     // 2. Check cookies
@@ -164,7 +194,7 @@ async function startServer() {
       }
     });
     
-    return cookies['adminToken'] === 'MatKhauDay123';
+    return cookies['adminToken'] === currentAdminPassword;
   };
 
   const isRequestMember = (req: express.Request): boolean => {
@@ -177,7 +207,7 @@ async function startServer() {
         ? authHeader.slice(7) 
         : String(authHeader);
       
-      if (token === 'XuanTaiDepTrai') return true;
+      if (token === currentMemberPassword) return true;
     }
 
     // 2. Check cookies
@@ -192,7 +222,7 @@ async function startServer() {
       }
     });
     
-    return cookies['memberToken'] === 'XuanTaiDepTrai';
+    return cookies['memberToken'] === currentMemberPassword;
   };
 
   // API Routes
@@ -324,9 +354,9 @@ async function startServer() {
   // Admin authentication endpoints
   app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
-    if (password === 'MatKhauDay123') {
-      res.setHeader('Set-Cookie', 'adminToken=MatKhauDay123; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000'); // 30 days
-      res.json({ success: true, token: 'MatKhauDay123' });
+    if (password === currentAdminPassword) {
+      res.setHeader('Set-Cookie', `adminToken=${currentAdminPassword}; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000`); // 30 days
+      res.json({ success: true, token: currentAdminPassword });
     } else {
       res.status(401).json({ error: 'Sai mật khẩu!' });
     }
@@ -342,18 +372,64 @@ async function startServer() {
 
   app.get('/api/admin/check', (req, res) => {
     if (isRequestAdmin(req)) {
-      res.json({ isAdmin: true });
+      res.json({ isAdmin: true, memberPassword: currentMemberPassword });
     } else {
       res.json({ isAdmin: false });
     }
   });
 
+  // Admin changing admin password
+  app.post('/api/admin/change-password', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ thông tin!' });
+    }
+    if (oldPassword !== currentAdminPassword) {
+      return res.status(400).json({ error: 'Mật khẩu cũ không chính xác!' });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: 'Xác nhận mật khẩu mới không khớp!' });
+    }
+    if (newPassword.length < 4) {
+      return res.status(400).json({ error: 'Mật khẩu mới phải từ 4 ký tự trở lên!' });
+    }
+
+    const data = await loadData();
+    data.adminPassword = newPassword;
+    await saveData(data);
+    currentAdminPassword = newPassword;
+    
+    // Update cookies
+    res.setHeader('Set-Cookie', `adminToken=${newPassword}; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000`); // 30 days
+    res.json({ success: true, token: newPassword });
+  });
+
+  // Admin setting member password
+  app.post('/api/admin/set-member-password', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { memberPassword } = req.body;
+    if (!memberPassword || memberPassword.length < 4) {
+      return res.status(400).json({ error: 'Mật khẩu thành viên tối thiểu 4 ký tự!' });
+    }
+
+    const data = await loadData();
+    data.memberPassword = memberPassword;
+    await saveData(data);
+    currentMemberPassword = memberPassword;
+    res.json({ success: true });
+  });
+
   // Member authentication endpoints
   app.post('/api/member/login', (req, res) => {
     const { password } = req.body;
-    if (password === 'XuanTaiDepTrai') {
-      res.setHeader('Set-Cookie', 'memberToken=XuanTaiDepTrai; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000'); // 30 days
-      res.json({ success: true, token: 'XuanTaiDepTrai' });
+    if (password === currentMemberPassword) {
+      res.setHeader('Set-Cookie', `memberToken=${currentMemberPassword}; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=2592000`); // 30 days
+      res.json({ success: true, token: currentMemberPassword });
     } else {
       res.status(401).json({ error: 'Mật khẩu thành viên không chính xác!' });
     }
@@ -381,7 +457,7 @@ async function startServer() {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     const data = await loadData();
-    res.json(data);
+    res.json({ ...data, memberPassword: currentMemberPassword });
   });
 
   app.post('/api/profile', async (req, res) => {
@@ -563,7 +639,7 @@ async function startServer() {
       author: req.body.author || '',
       audioUrl: audioFile ? `/uploads/${audioFile.filename}` : (req.body.audioUrl || ''),
       coverUrl: coverFile ? `/uploads/${coverFile.filename}` : processDriveLink(req.body.coverUrl || ''),
-      secretKey: require('crypto').randomBytes(8).toString('hex'),
+      secretKey: crypto.randomBytes(8).toString('hex'),
       backgroundUrl: processDriveLink(req.body.backgroundUrl || ''),
       lyrics: req.body.lyrics || '',
       template: req.body.template || '1',
@@ -620,8 +696,6 @@ async function startServer() {
         res.status(404).json({ error: 'Not found' });
      }
   });
-  
-  const crypto = require('crypto');
   
   app.post('/api/admin/reset-secret-links', express.json(), async (req, res) => {
      if (!isRequestAdmin(req)) {
@@ -814,6 +888,21 @@ async function startServer() {
     res.json({ success: true, playlists: data.playlists });
   });
 
+  app.post('/api/admin/save-templates', express.json(), async (req, res) => {
+    if (!isRequestAdmin(req)) {
+       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { configs } = req.body;
+    if (!Array.isArray(configs)) {
+       return res.status(400).json({ error: 'Invalid payload' });
+    }
+    
+    const data = await loadData();
+    data.templateConfigs = configs;
+    await saveData(data);
+    res.json({ success: true });
+  });
+
   app.post('/api/demos/:id/verify', async (req, res) => {
     const data = await loadData();
     let demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
@@ -898,7 +987,8 @@ async function startServer() {
         ...demo,
         audioUrl: formatUrl(demo.audioUrl, data.globalBaseUrl),
         coverUrl: formatUrl(demo.coverUrl, data.globalBaseUrl),
-        backgroundUrl: formatUrl(demo.backgroundUrl, data.globalBaseUrl)
+        backgroundUrl: formatUrl(demo.backgroundUrl, data.globalBaseUrl),
+        templateConfigs: data.templateConfigs || []
       };
 
       const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);

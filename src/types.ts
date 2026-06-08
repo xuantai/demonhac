@@ -22,7 +22,7 @@ export interface DemoSong {
   globalCoverUrl?: string;
   backgroundUrl?: string;
   lyrics: string;
-  template: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15';
+  template: string;
   status: 'public' | 'hidden';
   password?: boolean; // From public API
   passwordValue?: string; // From admin API
@@ -31,6 +31,15 @@ export interface DemoSong {
   playlistIds?: string[];
   createdAt: number;
   secretKey?: string;
+}
+
+export interface TemplateConfig {
+  id: string;
+  name: string;
+  order: number;
+  bgColor?: string;
+  titleColor?: string;
+  lyricsColor?: string;
 }
 
 export interface AppData {
@@ -52,4 +61,7 @@ export interface AppData {
   releasedSongs: ReleasedSong[];
   demos: DemoSong[];
   playlists?: Playlist[];
+  adminPassword?: string;
+  memberPassword?: string;
+  templateConfigs?: TemplateConfig[];
 }

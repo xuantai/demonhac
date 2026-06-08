@@ -202,4 +202,79 @@
   animation: heartbeat 1.5s ease-in-out infinite;
 }
 
+@layer base {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+@keyframes confetti-right {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
+  45% { transform: translate(30vw, -70vh) rotate(180deg); opacity: 1; animation-timing-function: ease-in; }
+  100% { transform: translate(45vw, 100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes confetti-left {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
+  45% { transform: translate(-30vw, -70vh) rotate(-180deg); opacity: 1; animation-timing-function: ease-in; }
+  100% { transform: translate(-45vw, 100vh) rotate(-720deg); opacity: 0; }
+}
+
+@keyframes hat-toss {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.8); opacity: 1; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
+  45% { transform: translate(var(--tx), -70vh) rotate(180deg) scale(1.2); opacity: 1; animation-timing-function: ease-in; }
+  100% { transform: translate(calc(var(--tx) * 1.5), 100vh) rotate(360deg) scale(1); opacity: 0; }
+}
+
+@keyframes cloud-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(5px, -5px) rotate(1deg); }
+  50% { transform: translate(-2px, 3px) rotate(-1deg); }
+  75% { transform: translate(-5px, -2px) rotate(0deg); }
+}
+
+@keyframes cute-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes shootUp {
+  0% { transform: translateY(0); opacity: 1; height: 10px; }
+  50% { transform: translateY(-30vh); opacity: 1; height: 2px; }
+  100% { transform: translateY(-60vh); opacity: 0; height: 0; }
+}
+
+@keyframes blowUp {
+  0% { transform: scale(0); opacity: 0; }
+  20% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+
 
