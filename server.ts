@@ -165,9 +165,11 @@ async function startServer() {
   app.use(cors());
   
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
-  // Khi chạy trên VPS CloudPanel của bạn, bạn có thể truyền biến PORT=3333
+  // Khi chạy trên VPS CloudPanel của bạn, mặc định sẽ dùng port 3333
   // hoặc thiết lập App Port: 3333 trực tiếp trên giao diện CloudPanel.
-  const PORT = 3000;
+  const PORT = process.env.NODE_ENV === 'production' 
+    ? (process.env.PORT ? parseInt(process.env.PORT) : 3333) 
+    : 3000;
 
   app.use(express.json());
 

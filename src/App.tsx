@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong, TemplateConfig } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -187,7 +187,7 @@ function MemberLogin() {
           <div className="space-y-3">
             <Link 
               to="/" 
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-rose-650 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:scale-[1.02] transition-all duration-300"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-rose-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:scale-[1.02] transition-all duration-300"
             >
               <Play className="w-4 h-4 fill-white" /> Khám phá & Nghe nhạc ngay
             </Link>
@@ -291,26 +291,26 @@ function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
        {isAdminPage ? (
          <a 
            href="/"
-           className="flex items-center justify-center p-3 rounded-full bg-stone-900/80 text-white backdrop-blur-md shadow-lg hover:bg-stone-800 transition-colors hover:scale-110"
+           className="flex items-center justify-center p-3 rounded-full bg-neutral-800 text-white border border-white/10 shadow-xl hover:bg-neutral-700 transition-all duration-300 hover:scale-115"
            title="Trang chủ"
          >
-           <HomeIcon className="w-5 h-5" />
+           <HomeIcon className="w-5 h-5 stroke-[1.5]" />
          </a>
        ) : (
          <a 
            href="/admin"
-           className="flex items-center justify-center p-3 rounded-full bg-stone-800/80 text-white backdrop-blur-md shadow-lg hover:bg-stone-700 transition-colors hover:scale-110 cursor-pointer"
+           className="flex items-center justify-center p-3 rounded-full bg-neutral-800 text-white border border-white/10 shadow-xl hover:bg-neutral-700 transition-all duration-300 hover:scale-115 cursor-pointer"
            title="Cài đặt (Admin)"
          >
-           <Settings className="w-5 h-5" />
+           <Settings className="w-5 h-5 stroke-[1.5]" />
          </a>
        )}
        <button 
          onClick={onLogout}
-         className="flex items-center justify-center p-3 rounded-full bg-red-500/80 text-white backdrop-blur-md shadow-lg hover:bg-red-600 transition-colors hover:scale-110 cursor-pointer"
+         className="flex items-center justify-center p-3 rounded-full bg-[#f05656] text-white border border-red-500/10 shadow-xl hover:bg-red-600 transition-all duration-300 hover:scale-115 cursor-pointer"
          title="Đăng xuất"
        >
-         <LogOut className="w-5 h-5" />
+         <LogOut className="w-5 h-5 stroke-[1.5]" />
        </button>
     </div>
   );
@@ -704,7 +704,7 @@ function Home() {
                 
                 {/* Glow ring Play button in middle */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center select-none z-10 gap-3 sm:gap-4">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-650 rounded-full flex items-center justify-center text-white shadow-[0_0_30px_rgba(239,68,68,0.6)] transition-all duration-350 sm:group-hover:scale-110 sm:group-active:scale-95 border border-white/20 relative">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-600 rounded-full flex items-center justify-center text-white shadow-[0_0_30px_rgba(239,68,68,0.6)] transition-all duration-350 sm:group-hover:scale-110 sm:group-active:scale-95 border border-white/20 relative">
                     <span className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping opacity-35"></span>
                     <Play className="w-8 h-8 sm:w-9 sm:h-9 text-white fill-white translate-x-0.5" />
                   </div>
@@ -1733,28 +1733,20 @@ function PuzzleEffect() {
 function CheeringEffect() {
   const items = Array.from({ length: 40 });
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-20">
-      {/* Sun */}
-      <div className="absolute top-10 right-10 text-[80px] drop-shadow-[0_0_40px_rgba(255,255,255,0.8)] animate-[cute-spin_8s_ease-in-out_infinite]">
-        ☀️
-      </div>
-      {/* Clouds */}
-      <div className="absolute top-20 left-5 text-[60px] animate-[cloud-drift_6s_ease-in-out_infinite] opacity-90 drop-shadow-lg">☁️</div>
-      <div className="absolute top-10 left-[30%] text-[70px] animate-[cloud-drift_8s_ease-in-out_infinite] opacity-80 drop-shadow-lg" style={{ animationDelay: '1s' }}>☁️</div>
-      <div className="absolute top-32 right-32 text-[50px] animate-[cloud-drift_7s_ease-in-out_infinite] opacity-90 drop-shadow-md" style={{ animationDelay: '2s' }}>☁️</div>
-      <div className="absolute top-16 right-[45%] text-[55px] animate-[cloud-drift_9s_ease-in-out_infinite] opacity-70 drop-shadow-sm" style={{ animationDelay: '3s' }}>☁️</div>
-      
-      {/* Confetti and caps shooting from sides */}
-      {items.map((_, i) => {
-        const isLeft = i % 2 === 0;
-        const isCap = i % 8 === 0;
-        const tx = (Math.random() * 40 - 20) + 'vw';
-        
-        if (isCap) {
-          // Hats thrown from bottom
+    <>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-[5]">
+        {/* Sun */}
+        <div className="absolute top-10 right-10 text-[80px] drop-shadow-[0_0_40px_rgba(255,255,255,0.8)] animate-[cute-spin_8s_ease-in-out_infinite]">
+          ☀️
+        </div>
+        {/* Hats thrown from bottom */}
+        {items.map((_, i) => {
+          const isCap = i % 8 === 0;
+          const tx = (Math.random() * 40 - 20) + 'vw';
+          if (!isCap) return null;
           return (
             <div
-              key={i}
+              key={`hat-${i}`}
               className="absolute text-5xl md:text-6xl drop-shadow-xl"
               style={{
                 left: `${10 + Math.random() * 80}%`,
@@ -1767,28 +1759,40 @@ function CheeringEffect() {
               🎓
             </div>
           );
-        }
-
-        // Confetti shooting from sides
-        const colors = ['bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-yellow-400', 'bg-purple-500', 'bg-pink-500'];
-        const isSquare = Math.random() > 0.5;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        return (
-          <div
-            key={i}
-            className={`absolute ${color} ${isSquare ? 'w-2 h-2' : 'w-1.5 h-3'} opacity-80`}
-            style={{
-              left: isLeft ? '-10%' : '110%',
-              bottom: `${10 + Math.random() * 30}%`,
-              animation: isLeft 
-                ? `confetti-right ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite` 
-                : `confetti-left ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
-              animationDelay: `${Math.random() * 3}s`,
-            }}
-          />
-        );
-      })}
-    </div>
+        })}
+      </div>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-[20]">
+        {/* Clouds */}
+        <div className="absolute top-20 left-5 text-[60px] animate-[cloud-drift_6s_ease-in-out_infinite] opacity-90 drop-shadow-lg">☁️</div>
+        <div className="absolute top-10 left-[30%] text-[70px] animate-[cloud-drift_8s_ease-in-out_infinite] opacity-80 drop-shadow-lg" style={{ animationDelay: '1s' }}>☁️</div>
+        <div className="absolute top-32 right-32 text-[50px] animate-[cloud-drift_7s_ease-in-out_infinite] opacity-90 drop-shadow-md" style={{ animationDelay: '2s' }}>☁️</div>
+        <div className="absolute top-16 right-[45%] text-[55px] animate-[cloud-drift_9s_ease-in-out_infinite] opacity-70 drop-shadow-sm" style={{ animationDelay: '3s' }}>☁️</div>
+        
+        {/* Confetti shooting from sides */}
+        {items.map((_, i) => {
+          const isLeft = i % 2 === 0;
+          const isCap = i % 8 === 0;
+          if (isCap) return null;
+          const colors = ['bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-yellow-400', 'bg-purple-500', 'bg-pink-500'];
+          const isSquare = Math.random() > 0.5;
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          return (
+            <div
+              key={`confetti-${i}`}
+              className={`absolute ${color} ${isSquare ? 'w-2 h-2' : 'w-1.5 h-3'} opacity-80`}
+              style={{
+                left: isLeft ? '-10%' : '110%',
+                bottom: `${10 + Math.random() * 30}%`,
+                animation: isLeft 
+                  ? `confetti-right ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite` 
+                  : `confetti-left ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
+                animationDelay: `${Math.random() * 3}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -2565,10 +2569,10 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
       )}
 
       <div 
-        className={`max-w-5xl mx-auto w-full relative z-10 ${forceMobile ? 'block pb-16 pt-8' : forcePC ? 'flex flex-row gap-8 items-stretch pt-16' : 'block md:flex md:flex-row md:gap-8 md:items-stretch pb-16 md:pb-0 pt-8 md:pt-16'}`}
+        className={`max-w-5xl mx-auto w-full relative ${forceMobile ? 'block pb-16 pt-8' : forcePC ? 'flex flex-row gap-8 items-stretch pt-16' : 'block md:flex md:flex-row md:gap-8 md:items-stretch pb-16 md:pb-0 pt-8 md:pt-16'}`}
       >
         {/* Left: Player */}
-        <div className={`w-full max-w-md mx-auto block ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
+        <div className={`w-full max-w-md mx-auto block relative z-10 ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
           <div className={`${forceMobile ? '' : forcePC ? 'flex flex-col items-center flex-1 text-left' : 'flex flex-col items-center md:items-start flex-1'}`}>
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -2749,7 +2753,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`flex-1 w-full ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
+          className={`flex-1 w-full relative z-30 ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
         >
           <h3 className={`text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>{t.lyric}</h3>
           <div className="pr-4">
@@ -2949,8 +2953,14 @@ function AdminTemplatesSettings({ isPCPreviewMode, setIsPCPreviewMode }: { isPCP
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([]);
 
   const [demos, setDemos] = useState<any[]>([]);
+
+  const toggleExpand = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setExpandedTemplateIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
 
   useEffect(() => {
     fetch('/api/admin/data', {
@@ -3044,9 +3054,12 @@ function AdminTemplatesSettings({ isPCPreviewMode, setIsPCPreviewMode }: { isPCP
       <p className="text-stone-500 mb-6 text-sm">Kéo thả để sắp xếp lại thứ tự hiển thị của giao diện khi chọn. Nhấn vào Giao Diện để chỉnh sửa chi tiết.</p>
       
       <div className="space-y-3">
-        {templateConfigs.map(config => (
+        {templateConfigs.map(config => {
+          const isExpanded = expandedTemplateIds.includes(config.id);
+          const activeDemos = demos.filter(d => (d.template || '1') === config.id);
+          return (
+          <div key={config.id} className="space-y-1">
           <div 
-            key={config.id}
             draggable
             onDragStart={(e) => handleDragStart(e, config.id)}
             onDragOver={(e) => e.preventDefault()}
@@ -3058,12 +3071,33 @@ function AdminTemplatesSettings({ isPCPreviewMode, setIsPCPreviewMode }: { isPCP
                <div className="cursor-grab text-stone-400 hover:text-stone-600 p-1 -m-1 shrink-0" onClick={e => e.stopPropagation()}>
                  <GripVertical className="w-5 h-5" />
                </div>
-               <span className="text-stone-550 font-mono font-bold text-xs sm:text-sm w-6 sm:w-7 tracking-tight flex items-center justify-center bg-stone-200/80 rounded-md h-6 sm:h-7 shrink-0">#{config.id}</span>
+               <span className="text-stone-500 font-mono font-bold text-xs sm:text-sm w-6 sm:w-7 tracking-tight flex items-center justify-center bg-stone-200/80 rounded-md h-6 sm:h-7 shrink-0">#{config.id}</span>
                <span className="text-sm sm:text-base font-bold truncate">{config.name}</span>
             </div>
-            <ChevronRight className="w-5 h-5 text-stone-400 shrink-0" />
+            <div 
+              className="p-2 -mr-2 text-stone-400 hover:text-stone-800 transition-colors" 
+              onClick={(e) => toggleExpand(e, config.id)}
+            >
+              {isExpanded ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </div>
           </div>
-        ))}
+          {isExpanded && activeDemos.length > 0 && (
+            <div className="pl-14 pr-4 py-2 bg-stone-50/50 rounded-xl border border-stone-100 space-y-1">
+               {activeDemos.map(d => (
+                 <div key={d.id} className="text-sm font-medium text-stone-600 flex items-center gap-2 truncate">
+                   <span className="w-1.5 h-1.5 rounded-full bg-stone-300 shrink-0"></span>
+                   <span className="truncate">{d.title}</span>
+                 </div>
+               ))}
+            </div>
+          )}
+          {isExpanded && activeDemos.length === 0 && (
+            <div className="pl-14 pr-4 py-2 bg-stone-50/50 rounded-xl border border-stone-100 text-sm italic text-stone-400">
+               Chưa có bài hát nào dùng giao diện này
+            </div>
+          )}
+          </div>
+        )})}
       </div>
     </div>
   );
@@ -3139,7 +3173,7 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
                            ? 'h-full border-0 rounded-none shadow-none scale-100 min-w-[700px] xl:min-w-[1024px]'
                            : 'md:w-[375px] h-full md:h-[812px] shadow-2xl md:rounded-[3rem] md:border-[12px] border-stone-800 shrink-0 md:scale-[0.80] lg:scale-[0.80] xl:scale-[0.80] 2xl:scale-[0.95] origin-center no-scrollbar'
                    }`}>
-                      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden no-scrollbar custom-scrollbar">
+                      <div className="absolute inset-0 overflow-y-auto  no-scrollbar custom-scrollbar">
                         <DemoPlayer songIdP={previewSongId} previewConfig={{...currentConfig, isPCPreviewMode}} />
                       </div>
                    </div>
@@ -3188,6 +3222,7 @@ function AdminDashboard() {
   const [memberPassSuccess, setMemberPassSuccess] = useState('');
   
   const [isPCPreviewMode, setIsPCPreviewMode] = useState(false);
+  const effectiveSidebarCollapsed = isSidebarCollapsed || isPCPreviewMode;
   
   const navigate = useNavigate();
 
@@ -3444,8 +3479,14 @@ function AdminDashboard() {
       </header>
 
       <div className={`mx-auto ${isPCPreviewMode ? 'w-full px-0 py-0 flex-1 flex overflow-hidden' : 'w-full px-4 md:px-8 py-8 flex flex-col md:flex-row gap-8'}`}>
-        <aside className={`${isSidebarCollapsed ? 'hidden md:flex flex-col w-16 bg-white border-r border-stone-200 shrink-0 py-4 items-center space-y-4 relative' : 'w-full md:w-64 shrink-0 flex flex-col md:sticky md:top-[88px] self-start relative'}`}>
-          {!isSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4 hidden md:block">Quản lý</h3>}
+        <aside className={`${
+          effectiveSidebarCollapsed 
+            ? (isPCPreviewMode 
+                ? 'flex flex-col w-16 bg-white border-r border-stone-200 shrink-0 py-4 items-center space-y-4 relative' 
+                : 'hidden md:flex flex-col w-16 bg-white border-r border-stone-200 shrink-0 py-4 items-center space-y-4 relative')
+            : 'w-full md:w-64 shrink-0 flex flex-col md:sticky md:top-[88px] self-start relative'
+        }`}>
+          {!effectiveSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4 hidden md:block">Quản lý</h3>}
           {!isPCPreviewMode && (
              <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -3454,52 +3495,52 @@ function AdminDashboard() {
                 {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
              </button>
           )}
-          <div className={`${isSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
+          <div className={`${effectiveSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
             <button
               onClick={() => { setActiveTab('demos'); setDemosSubTab('released'); }}
               className={`flex items-center transition-colors ${
-                isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+                effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
               } ${
                 activeTab === 'demos' && demosSubTab !== 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
               }`}
               title="Bài Hát"
             >
-              <Disc3 className="w-5 h-5" /> {!isSidebarCollapsed && <span>Bài Hát</span>}
+              <Disc3 className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Bài Hát</span>}
             </button>
             <button
               onClick={() => { setActiveTab('demos'); setDemosSubTab('playlists'); }}
               className={`flex items-center transition-colors ${
-                isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+                effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
               } ${
                 activeTab === 'demos' && demosSubTab === 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
               }`}
               title="Playlist"
             >
-              <ListMusic className="w-5 h-5" /> {!isSidebarCollapsed && <span>Playlist</span>}
+              <ListMusic className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Playlist</span>}
             </button>
           </div>
           
-          <div className={`${isSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
-            {!isSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Hồ sơ & Mở rộng</h3>}
+          <div className={`${effectiveSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
+            {!effectiveSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Hồ sơ & Mở rộng</h3>}
             <button onClick={() => setActiveTab('templates')} className={`flex items-center transition-colors ${
-              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
             } ${activeTab === 'templates' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Giao Diện">
-              <Camera className="w-5 h-5" /> {!isSidebarCollapsed && <span>Giao Diện</span>}
+              <Camera className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Giao Diện</span>}
             </button>
             <button onClick={() => setActiveTab('profile')} className={`flex items-center transition-colors ${
-              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
             } ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Cài Đặt">
-              <Settings className="w-5 h-5" /> {!isSidebarCollapsed && <span>Cài Đặt</span>}
+              <Settings className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Cài Đặt</span>}
             </button>
             <button onClick={() => setActiveTab('socials')} className={`flex items-center transition-colors ${
-              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
             } ${activeTab === 'socials' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Mạng Xã Hội">
-              <Globe className="w-5 h-5" /> {!isSidebarCollapsed && <span>Mạng Xã Hội</span>}
+              <Globe className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Mạng Xã Hội</span>}
             </button>
             <button onClick={() => setActiveTab('security')} className={`flex items-center transition-colors ${
-              isSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
             } ${activeTab === 'security' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Bảo Mật">
-              <Lock className="w-5 h-5" /> {!isSidebarCollapsed && <span>Bảo Mật</span>}
+              <Lock className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Bảo Mật</span>}
             </button>
           </div>
         </aside>
@@ -3650,7 +3691,7 @@ function AdminDashboard() {
                           className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="text-stone-550 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                            <span className="text-stone-500 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
                             <div className="flex flex-col gap-1 flex-1 min-w-0">
                               <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 font-bold text-stone-850 text-sm md:text-base block truncate">
                                 {demo.title}
@@ -3723,7 +3764,7 @@ function AdminDashboard() {
                           className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="text-stone-550 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                            <span className="text-stone-500 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
                             <div className="flex flex-col gap-1 flex-1 min-w-0">
                               <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-blue-600 font-bold text-stone-850 text-sm md:text-base block truncate">
                                 {demo.title}
@@ -3806,7 +3847,7 @@ function AdminDashboard() {
                             className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <span className="text-stone-550 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                              <span className="text-stone-500 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
                               <div className="flex flex-col flex-1 min-w-0">
                                 <h4 className="font-bold text-stone-850 text-base">{pl.title}</h4>
                                 <span className="text-xs text-stone-400 mt-0.5">{songCount} bài nhạc</span>
@@ -4182,7 +4223,7 @@ function AdminDashboard() {
 
               <div>
                 <h2 className="text-2xl font-bold mb-2 text-stone-900">Thiết Lập Mật Khẩu Thành Viên (VIP VIP)</h2>
-                <p className="text-sm text-stone-500 mb-6">Người dùng nhập mật khẩu này tại trang <code className="bg-stone-100 px-1.5 py-0.5 rounded font-mono text-red-650">/mem</code> để nghe tự do mọi album/bài hát có passcode mà không cần nhập code riêng biệt.</p>
+                <p className="text-sm text-stone-500 mb-6">Người dùng nhập mật khẩu này tại trang <code className="bg-stone-100 px-1.5 py-0.5 rounded font-mono text-red-600">/mem</code> để nghe tự do mọi album/bài hát có passcode mà không cần nhập code riêng biệt.</p>
                 
                 <form onSubmit={handleMemberPasswordChange} className="space-y-4 max-w-md">
                   <div>
@@ -4217,7 +4258,7 @@ function AdminDashboard() {
       {deleteConfirm?.isOpen && (
         <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-150 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center gap-3 text-red-650 mb-3">
+            <div className="flex items-center gap-3 text-red-600 mb-3">
               <div className="p-2.5 bg-red-50 rounded-xl">
                 <Trash2 className="w-6 h-6 text-red-500" />
               </div>
@@ -4243,7 +4284,7 @@ function AdminDashboard() {
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 rounded-xl font-bold bg-red-550 text-white hover:bg-red-650 active:scale-95 text-sm transition-all"
+                className="px-4 py-2 rounded-xl font-bold bg-red-600 text-white hover:bg-red-700 active:scale-95 text-sm transition-all"
               >
                 Đồng ý xóa
               </button>
@@ -4355,24 +4396,24 @@ function TemplatePickerModal({
   const selectedConfig = configs.find(c => c.id === selectedId) || configs[0];
 
   return (
-    <div className={`fixed inset-0 bg-zinc-900 z-[9999] flex flex-col md:flex-row overflow-hidden`}>
-      <div className={`w-full h-auto md:h-full ${isPCPreviewMode ? 'md:w-[260px] p-4 space-y-4' : 'md:w-[400px] p-6 md:p-8 space-y-6'} bg-white flex-shrink-0 border-b md:border-b-0 md:border-r overflow-visible md:overflow-y-auto custom-scrollbar flex flex-col`}>
-         <div className="flex justify-between items-center shrink-0 mb-4">
-             <button onClick={onClose} className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-medium font-sans"><ArrowLeft className="w-5 h-5"/> Trở về</button>
-             <button onClick={() => onSelect(selectedId)} className="bg-stone-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow hover:bg-stone-800">Chọn Giao Diện</button>
+    <div className={`fixed inset-0 bg-zinc-900 z-[9999] flex flex-col md:flex-row overflow-y-auto md:overflow-hidden`}>
+      <div className={`w-full h-[40vh] md:h-full ${isPCPreviewMode ? 'md:w-[260px] p-4 space-y-4' : 'md:w-[400px] p-6 md:p-8 space-y-6'} bg-white flex-shrink-0 border-b md:border-b-0 md:border-r overflow-y-auto custom-scrollbar flex flex-col`}>
+         <div className="flex justify-between items-center shrink-0 mb-4 sticky top-0 bg-white z-[10] pb-2">
+             <button type="button" onClick={onClose} className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-medium font-sans"><ArrowLeft className="w-5 h-5"/> Trở về</button>
+             <button type="button" onClick={() => onSelect(selectedId)} className="bg-stone-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow hover:bg-stone-800">Chọn Giao Diện</button>
          </div>
          <div>
             <h3 className="text-xl font-black mb-4">Chọn Template</h3>
-            <div className="space-y-2">
+            <div className="space-y-2 pb-6">
                {configs.map(c => (
-                  <button key={c.id} onClick={() => setSelectedId(c.id)} className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${selectedId === c.id ? 'border-stone-900 bg-stone-50 font-bold' : 'border-transparent bg-white hover:bg-stone-100'}`}>
+                  <button type="button" key={c.id} onClick={() => setSelectedId(c.id)} className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${selectedId === c.id ? 'border-stone-900 bg-stone-50 font-bold' : 'border-transparent bg-white hover:bg-stone-100'}`}>
                       {c.name}
                   </button>
                ))}
             </div>
          </div>
       </div>
-      <div className="flex-1 w-full min-h-[700px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0">
+      <div className="flex-1 w-full min-h-[750px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0 shrink-0">
          <div className="absolute top-4 right-4 z-[100] flex gap-2">
             <button onClick={() => setIsPCPreviewMode(false)} className={`flex items-center justify-center p-2 rounded-lg transition-colors ${!isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} shadow-sm`}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></button>
             <button onClick={() => setIsPCPreviewMode(true)} className={`hidden md:flex items-center justify-center p-2 rounded-lg transition-colors ${isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} shadow-sm`}><Monitor className="w-5 h-5"/></button>
@@ -4383,7 +4424,7 @@ function TemplatePickerModal({
                      ? 'h-full border-0 rounded-none shadow-none scale-100 min-w-[700px] xl:min-w-[1024px]'
                      : 'md:w-[375px] h-full md:h-[812px] shadow-2xl md:rounded-[3rem] md:border-[12px] border-stone-800 shrink-0 md:scale-[0.80] lg:scale-[0.80] xl:scale-[0.80] 2xl:scale-[0.95] origin-center no-scrollbar'
              }`}>
-                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden no-scrollbar custom-scrollbar">
+                <div className="absolute inset-0 overflow-y-auto  no-scrollbar custom-scrollbar">
                   <DemoPlayer songIdP={previewSongId} previewConfig={{...selectedConfig, isPCPreviewMode}} />
                 </div>
              </div>

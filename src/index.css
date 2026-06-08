@@ -247,7 +247,7 @@
 
 @keyframes hat-toss {
   0% { transform: translate(0, 0) rotate(0deg) scale(0.8); opacity: 1; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
-  45% { transform: translate(var(--tx), -70vh) rotate(180deg) scale(1.2); opacity: 1; animation-timing-function: ease-in; }
+  45% { transform: translate(var(--tx), -35vh) rotate(180deg) scale(1.2); opacity: 1; animation-timing-function: ease-in; }
   100% { transform: translate(calc(var(--tx) * 1.5), 100vh) rotate(360deg) scale(1); opacity: 0; }
 }
 
