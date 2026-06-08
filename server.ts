@@ -229,12 +229,14 @@ async function startServer() {
 
   // API Routes
   const injectCoverUrl = (demos: any[], slideshowImages?: string[]) => {
-      if (!slideshowImages || slideshowImages.length === 0) return demos;
+      const imagesToUse = (slideshowImages && slideshowImages.length > 0) 
+          ? slideshowImages 
+          : ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80"];
       return demos.map(d => {
          if (!d.coverUrl) {
             const idStr = String(d.id || '');
             const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
-            return { ...d, coverUrl: slideshowImages[hash % slideshowImages.length] };
+            return { ...d, coverUrl: imagesToUse[hash % imagesToUse.length] };
          }
          return d;
       });
@@ -911,10 +913,13 @@ async function startServer() {
     if (!demo) return res.status(404).json({ error: 'Not found' });
     const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
     if (expectedPassword && expectedPassword === req.body.password) {
-      if (!demo.coverUrl && data.slideshowImages && data.slideshowImages.length > 0) {
+      if (!demo.coverUrl) {
+          const imagesToUse = (data.slideshowImages && data.slideshowImages.length > 0)
+              ? data.slideshowImages
+              : ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80"];
           const idStr = String(demo.id || '');
           const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
-          demo = { ...demo, coverUrl: data.slideshowImages[hash % data.slideshowImages.length] };
+          demo = { ...demo, coverUrl: imagesToUse[hash % imagesToUse.length] };
       }
       
       const formattedDemo = {
@@ -979,10 +984,13 @@ async function startServer() {
       if (!demo) return res.status(404).json({ error: 'Not found' });
       
       // Inject random cover if missing
-      if (!demo.coverUrl && data.slideshowImages && data.slideshowImages.length > 0) {
+      if (!demo.coverUrl) {
+          const imagesToUse = (data.slideshowImages && data.slideshowImages.length > 0)
+              ? data.slideshowImages
+              : ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80"];
           const idStr = String(demo.id || '');
           const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
-          demo = { ...demo, coverUrl: data.slideshowImages[hash % data.slideshowImages.length] };
+          demo = { ...demo, coverUrl: imagesToUse[hash % imagesToUse.length] };
       }
       
       demo = {

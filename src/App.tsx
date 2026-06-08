@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong, TemplateConfig } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -285,13 +285,20 @@ function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
   if (!isAdmin) return null;
 
   const isAdminPage = location.pathname.startsWith('/admin');
+  const isListeningPage = location.pathname.startsWith('/demo/') || 
+                          location.pathname.startsWith('/song/') || 
+                          location.pathname.startsWith('/playlist/');
 
   return (
-    <div className="fixed left-6 top-1/2 -translate-y-1/2 z-[100] flex flex-col gap-4">
+    <div className={
+      isListeningPage
+        ? "hidden md:flex md:fixed md:left-6 md:top-1/2 md:-translate-y-1/2 z-[100] md:flex-col md:gap-4 md:translate-x-0"
+        : "fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-row gap-4"
+    }>
        {isAdminPage ? (
          <a 
            href="/"
-           className="flex items-center justify-center p-3 rounded-full bg-neutral-800 text-white border border-white/10 shadow-xl hover:bg-neutral-700 transition-all duration-300 hover:scale-115"
+           className="flex items-center justify-center p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-115"
            title="Trang chủ"
          >
            <HomeIcon className="w-5 h-5 stroke-[1.5]" />
@@ -299,7 +306,7 @@ function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
        ) : (
          <a 
            href="/admin"
-           className="flex items-center justify-center p-3 rounded-full bg-neutral-800 text-white border border-white/10 shadow-xl hover:bg-neutral-700 transition-all duration-300 hover:scale-115 cursor-pointer"
+           className="flex items-center justify-center p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-115 cursor-pointer"
            title="Cài đặt (Admin)"
          >
            <Settings className="w-5 h-5 stroke-[1.5]" />
@@ -307,7 +314,7 @@ function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
        )}
        <button 
          onClick={onLogout}
-         className="flex items-center justify-center p-3 rounded-full bg-[#f05656] text-white border border-red-500/10 shadow-xl hover:bg-red-600 transition-all duration-300 hover:scale-115 cursor-pointer"
+         className="flex items-center justify-center p-3 rounded-full bg-red-500/10 hover:bg-red-500/25 backdrop-blur-md text-red-400 border border-red-500/40 shadow-[0_4px_12px_rgba(239,68,68,0.15)] transition-all duration-300 hover:scale-115 cursor-pointer"
          title="Đăng xuất"
        >
          <LogOut className="w-5 h-5 stroke-[1.5]" />
@@ -853,24 +860,70 @@ function Home() {
         
         {/* Demos Section */}
         <section id="music-tabs-section" className="scroll-mt-24">
-          <div className="flex items-center gap-1 sm:gap-2 mb-8 bg-neutral-900/50 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-white/5 w-full flex-nowrap overflow-x-auto custom-scrollbar">
-             <button onClick={() => setActiveListTab('released')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)] border border-emerald-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                <Music className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-500'}`} />
-                <span className="whitespace-nowrap">{t.lReleasedMobile || t.lReleased}</span>
+          <div className="relative flex items-center gap-1 sm:gap-2 mb-8 bg-neutral-900/50 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-white/5 w-full flex-nowrap overflow-x-auto custom-scrollbar">
+             <button 
+               onClick={() => setActiveListTab('released')} 
+               className={`relative flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-white/60 hover:text-white'}`}
+             >
+                {activeListTab === 'released' && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-emerald-500/20 border border-emerald-500/20 rounded-lg sm:rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <Music className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 relative z-10 ${activeListTab === 'released' ? 'text-emerald-400' : 'text-neutral-400'}`} />
+                <span className="whitespace-nowrap relative z-10">{t.lReleasedMobile || t.lReleased}</span>
              </button>
-             <button onClick={() => setActiveListTab('demos')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)] border border-rose-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                <Disc3 className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-500'}`} />
-                <span className="whitespace-nowrap">{t.lDemosMobile || t.lDemos}</span>
+             
+             <button 
+               onClick={() => setActiveListTab('demos')} 
+               className={`relative flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-white/60 hover:text-white'}`}
+             >
+                {activeListTab === 'demos' && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-rose-500/20 border border-rose-500/20 rounded-lg sm:rounded-xl shadow-[0_0_20px_-5px_rgba(244,63,94,0.3)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <Disc3 className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 relative z-10 ${activeListTab === 'demos' ? 'text-rose-400' : 'text-neutral-400'}`} />
+                <span className="whitespace-nowrap relative z-10">{t.lDemosMobile || t.lDemos}</span>
              </button>
+             
              {data?.playlists && data.playlists.length > 0 && (
-               <button onClick={() => setActiveListTab('albums')} className={`flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'albums' ? 'bg-purple-500/20 text-purple-400 shadow-[0_0_20px_-5px_rgba(168,85,247,0.3)] border border-purple-500/20' : 'text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
-                  <ListMusic className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeListTab === 'albums' ? 'text-purple-400' : 'text-neutral-500'}`} />
-                  <span className="whitespace-nowrap">Album/EP</span>
+               <button 
+                 onClick={() => setActiveListTab('albums')} 
+                 className={`relative flex items-center justify-center flex-1 sm:flex-none gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-base md:text-xl font-bold tracking-tight transition-all duration-300 ${activeListTab === 'albums' ? 'text-purple-400' : 'text-white/60 hover:text-white'}`}
+               >
+                  {activeListTab === 'albums' && (
+                    <motion.div
+                      layoutId="activeTabBg"
+                      className="absolute inset-0 bg-purple-500/20 border border-purple-500/20 rounded-lg sm:rounded-xl shadow-[0_0_20px_-5px_rgba(168,85,247,0.3)]"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <ListMusic className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 relative z-10 ${activeListTab === 'albums' ? 'text-purple-400' : 'text-neutral-400'}`} />
+                  <span className="whitespace-nowrap relative z-10">Album/EP</span>
                </button>
              )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div 
+            key={activeListTab}
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.04
+                }
+              }
+            }}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             {activeListTab === 'albums' ? (
               data.playlists?.map((playlist: any) => {
                 const songsInPlaylist = data.demos.filter(d => d.status === 'public' && d.playlistIds && d.playlistIds.includes(playlist.id));
@@ -883,127 +936,153 @@ function Home() {
                 }
 
                 return (
-                  <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-purple-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 transition-all duration-500"></div>
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-purple-500/30 transition-colors">
-                      {coverUrl ? (
-                         <img src={coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={playlist.title} />
+                  <motion.div
+                    key={playlist.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 15 },
+                      show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+                    }}
+                  >
+                    <Link to={`/playlist/${playlist.id}`} className="group relative bg-neutral-900/50 border border-white/5 hover:border-purple-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4 w-full">
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 transition-all duration-500"></div>
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-purple-500/30 transition-colors">
+                        {coverUrl ? (
+                           <img src={coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={playlist.title} />
+                        ) : (
+                           <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-purple-500 transition-colors">
+                             <ListMusic className="w-6 h-6 sm:w-8 sm:h-8" />
+                           </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
+                            <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 relative z-10 pr-12">
+                        <h3 className="text-base sm:text-lg font-bold group-hover:text-purple-400 transition-colors truncate">
+                          {playlist.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-neutral-400 mt-1">{songsInPlaylist.length} bài hát</p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          let url = `${window.location.origin}/playlist/${playlist.id}`;
+                          if (url.includes('xn--ti-jia.com')) {
+                            url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                          }
+                          navigator.clipboard.writeText(url);
+                          setToast('Đã copy link playlist!');
+                          setTimeout(() => setToast(''), 3000);
+                        }}
+                        className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
+                        title="Chia sẻ playlist"
+                      >
+                        <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
+                      </button>
+                    </Link>
+                  </motion.div>
+                );
+              })
+            ) : (
+              data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
+                <motion.div
+                  key={demo.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 15 },
+                    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+                  }}
+                >
+                  <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4 w-full">
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
+                      {demo.coverUrl ? (
+                         <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
                       ) : (
-                         <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-purple-500 transition-colors">
-                           <ListMusic className="w-6 h-6 sm:w-8 sm:h-8" />
+                         <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
+                            <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
                          </div>
                       )}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
+                        <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
                           <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
                         </div>
                       </div>
                     </div>
                     <div className="flex-1 min-w-0 relative z-10 pr-12">
-                      <h3 className="text-base sm:text-lg font-bold group-hover:text-purple-400 transition-colors truncate">
-                        {playlist.title}
+                      <h3 className="text-base sm:text-lg font-bold group-hover:text-rose-400 transition-colors">
+                        <div className="w-full break-words">
+                          <HoverTranslate text={demo.title} format={true} />
+                        </div>
                       </h3>
-                      <p className="text-xs sm:text-sm text-neutral-400 mt-1">{songsInPlaylist.length} bài hát</p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        let url = `${window.location.origin}/playlist/${playlist.id}`;
-                        if (url.includes('xn--ti-jia.com')) {
-                          url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                        }
-                        navigator.clipboard.writeText(url);
-                        setToast('Đã copy link playlist!');
-                        setTimeout(() => setToast(''), 3000);
-                      }}
-                      className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
-                      title="Chia sẻ playlist"
-                    >
-                      <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
-                    </button>
-                  </Link>
-                );
-              })
-            ) : (
-              data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
-                <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} key={demo.id} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4">
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
-                    {demo.coverUrl ? (
-                       <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
-                    ) : (
-                       <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
-                          <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
-                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
-                        <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0 relative z-10 pr-12">
-                    <h3 className="text-base sm:text-lg font-bold group-hover:text-rose-400 transition-colors">
-                      <div className="w-full break-words">
-                        <HoverTranslate text={demo.title} format={true} />
-                      </div>
-                    </h3>
-                    {(demo.singer || demo.author) && (
                       <p className="text-xs text-neutral-400 mt-1 truncate">
-                        {formatText(demo.singer || demo.author, true)}
+                        {formatText(demo.singer || demo.author || 'A.C Xuân Tài', true)}
                       </p>
-                    )}
-                  </div>
-                  {demo.isReleased ? (
-                    <>
-                      <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
-                        {t.lReleasedMark || 'RELEASED'}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          let url = `${window.location.origin}/song/${demo.slug || demo.id}`;
-                          if (url.includes('xn--ti-jia.com')) {
-                            url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                          }
-                          navigator.clipboard.writeText(url);
-                          setToast('Đã copy link bài hát!');
-                          setTimeout(() => setToast(''), 3000);
-                        }}
-                        className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
-                        title="Chia sẻ bài hát"
-                      >
-                        <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
-                        {t.lDemoMark || 'DEMO'}
-                      </span>
-                    </>
-                  )}
-                  {demo.password && !demo.isReleased && (
-                    <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
-                       <Lock className="w-3.5 h-3.5 text-yellow-500" />
                     </div>
-                  )}
-                </Link>
+                    {demo.isReleased ? (
+                      <>
+                        <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
+                          {t.lReleasedMark || 'RELEASED'}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            let url = `${window.location.origin}/song/${demo.slug || demo.id}`;
+                            if (url.includes('xn--ti-jia.com')) {
+                              url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                            }
+                            navigator.clipboard.writeText(url);
+                            setToast('Đã copy link bài hát!');
+                            setTimeout(() => setToast(''), 3000);
+                          }}
+                          className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/70 text-white/80 hover:text-white p-2 rounded-full border border-white/10 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 active:scale-90"
+                          title="Chia sẻ bài hát"
+                        >
+                          <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
+                          {t.lDemoMark || 'DEMO'}
+                        </span>
+                      </>
+                    )}
+                    {demo.password && !demo.isReleased && (
+                      <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
+                         <Lock className="w-3.5 h-3.5 text-yellow-500" />
+                      </div>
+                    )}
+                  </Link>
+                </motion.div>
               ))
             )}
             {activeListTab !== 'albums' && data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).length === 0 && (
-              <div className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl">
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: { opacity: 1 }
+                }}
+                className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl"
+              >
                 {activeListTab === 'demos' ? t.nDemo : 'Chưa có bài hát phát hành nào.'}
-              </div>
+              </motion.div>
             )}
             {activeListTab === 'albums' && data.playlists?.filter(p => data.demos.some(d => d.status === 'public' && d.playlistIds && d.playlistIds.includes(p.id))).length === 0 && (
-              <div className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl">
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: { opacity: 1 }
+                }}
+                className="col-span-full py-12 text-center text-neutral-600 border border-dashed border-white/10 rounded-2xl"
+              >
                 Chưa có album/EP nào.
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </section>
 
         {/* Released Songs Section */}
@@ -1050,7 +1129,7 @@ function Home() {
   );
 }
 
-function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext, isPreview }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any, isPreview?: boolean }) {
+function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext, isPreview, lyricsColor }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any, isPreview?: boolean, lyricsColor?: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(!isPreview);
   const [currentTime, setCurrentTime] = useState(0);
@@ -1127,7 +1206,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
 
   const waves = Array.from({ length: 32 });
 
-  const isLight = ['1', '4', '6', '7', '17'].includes(template);
+  const isLight = ['1', '4', '6', '7', '9', '17'].includes(template);
   let waveColor = "bg-white";
   if (template === '1') waveColor = "bg-orange-500";
   if (template === '2') waveColor = "bg-fuchsia-300";
@@ -1137,7 +1216,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
   if (template === '6') waveColor = "bg-pink-600";
   if (template === '7') waveColor = "bg-stone-800";
   if (template === '8') waveColor = "bg-yellow-400";
-  if (template === '9') waveColor = "bg-white";
+  if (template === '9') waveColor = "bg-sky-600";
   if (template === '10') waveColor = "bg-yellow-400";
   if (template === '11') waveColor = "bg-[#d4af37]";
   if (template === '12') waveColor = "bg-[#d97706]";
@@ -1149,7 +1228,10 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
   if (template === '18') waveColor = "bg-amber-300";
 
   return (
-    <div className={`flex flex-col w-full gap-2 md:gap-4 ${isLight ? 'text-stone-900 font-extrabold drop-shadow-sm' : 'text-white font-extrabold drop-shadow-md'}`}>
+    <div 
+      className={`flex flex-col w-full gap-2 md:gap-4 ${isLight ? 'text-stone-900 font-extrabold drop-shadow-sm' : 'text-white font-extrabold drop-shadow-md'}`}
+      style={lyricsColor ? { color: lyricsColor } : undefined}
+    >
       <audio 
         ref={audioRef} 
         src={src} 
@@ -1174,6 +1256,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
               style={{
                 height: isPlaying ? '100%' : '15%',
                 animation: isPlaying ? `pulse-wave ${randDur}s ease-in-out infinite alternate` : 'none',
+                backgroundColor: lyricsColor || undefined,
               }}
             ></div>
           );
@@ -1489,21 +1572,105 @@ function FlagEffect() {
   )
 }
 
-function RainEffect() {
+function RainbowEffect() {
+  const cloudsData = [
+    { top: '12%', left: '-10%', size: 'scale-[0.6]', duration: '85s', delay: '0s', opacity: 'opacity-80' },
+    { top: '24%', left: '-15%', size: 'scale-[0.8]', duration: '65s', delay: '-15s', opacity: 'opacity-70' },
+    { top: '38%', left: '-8%', size: 'scale-[0.55]', duration: '110s', delay: '-40s', opacity: 'opacity-85' },
+    { top: '55%', left: '-22%', size: 'scale-[0.95]', duration: '50s', delay: '-20s', opacity: 'opacity-65' },
+    { top: '70%', left: '-12%', size: 'scale-[0.7]', duration: '95s', delay: '-30s', opacity: 'opacity-75' },
+    { top: '8%', left: '-30%', size: 'scale-[0.5]', duration: '130s', delay: '-50s', opacity: 'opacity-90' },
+    { top: '48%', left: '-18%', size: 'scale-[0.85]', duration: '75s', delay: '-10s', opacity: 'opacity-75' },
+    { top: '62%', left: '-25%', size: 'scale-[1.1]', duration: '45s', delay: '-5s', opacity: 'opacity-60' }
+  ];
+
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50">
-      {Array.from({ length: 40 }).map((_, i) => (
-        <div 
-          key={i} 
-          className="absolute bg-white/70 rounded-full animate-rain"
-          style={{
-            left: `${Math.random() * 100}%`,
-            width: '2px',
-            height: `${Math.random() * 40 + 10}px`,
-            animationDuration: `${Math.random() * 1 + 0.5}s`,
-            animationDelay: `${Math.random() * -2}s`,
-          }}
-        ></div>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50">
+      <style>{`
+        @keyframes rainbow-cycle {
+          0%, 5% { opacity: 0; transform: translate(-50%, 80px) scale(0.9); }
+          15%, 85% { opacity: 0.65; transform: translate(-50%, 0) scale(1); }
+          95%, 100% { opacity: 0; transform: translate(-50%, -50px) scale(1.05); }
+        }
+        @keyframes cloud-swim {
+          0% { transform: translateX(-150px); }
+          100% { transform: translateX(calc(100vw + 150px)); }
+        }
+        @keyframes sun-pulsate {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 35px rgba(253, 224, 71, 0.6)); }
+          50% { transform: scale(1.08); filter: drop-shadow(0 0 65px rgba(253, 224, 71, 0.9)); }
+        }
+        @keyframes sun-rays-spin {
+          0% { transform: rotate(0deg); opacity: 0.3; }
+          50% { opacity: 0.5; }
+          100% { transform: rotate(360deg); opacity: 0.3; }
+        }
+        .animate-rainbow-slow {
+          animation: rainbow-cycle 16s ease-in-out infinite;
+        }
+        .animate-cloud-slow {
+          animation: cloud-swim linear infinite;
+        }
+        .animate-sun-pulsate {
+          animation: sun-pulsate 6s ease-in-out infinite;
+        }
+        .animate-sun-rays-spin {
+          animation: sun-rays-spin 30s linear infinite;
+        }
+      `}</style>
+
+      {/* Sun backdrop glow & Sun rays */}
+      <div className="absolute top-[8%] right-[10%] w-28 h-28 md:w-36 md:h-36 pointer-events-none z-0 opacity-80">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(253,224,71,0.25)_0%,transparent_70%)] animate-sun-rays-spin" style={{ transformOrigin: 'center' }}>
+          <svg className="w-full h-full text-yellow-300 opacity-30" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="10" />
+            {Array.from({ length: 12 }).map((_, idx) => {
+              const angle = (idx * 360) / 12;
+              return (
+                <line
+                  key={idx}
+                  x1="50"
+                  y1="50"
+                  x2={50 + 42 * Math.cos((angle * Math.PI) / 180)}
+                  y2={50 + 42 * Math.sin((angle * Math.PI) / 180)}
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeDasharray="2,2"
+                />
+              );
+            })}
+          </svg>
+        </div>
+        <div className="absolute inset-3 rounded-full bg-gradient-to-br from-yellow-200 via-yellow-400 to-amber-500 shadow-[0_0_50px_rgba(253,224,71,0.7)] animate-sun-pulsate" />
+      </div>
+
+      {/* Gigantic Beautiful Rainbow SVG Backdrop behind the elements */}
+      <svg className="absolute bottom-[-50px] left-1/2 -translate-x-1/2 w-[650px] md:w-[950px] h-[325px] md:h-[475px] animate-rainbow-slow origin-bottom z-0" viewBox="0 0 200 100">
+        <path d="M 12,100 A 88,88 0 0,1 188,100" fill="none" stroke="#FF4D4D" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+        <path d="M 20,100 A 80,80 0 0,1 180,100" fill="none" stroke="#FF9E3b" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+        <path d="M 28,100 A 72,72 0 0,1 172,100" fill="none" stroke="#FFEF3b" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+        <path d="M 36,100 A 64,64 0 0,1 164,100" fill="none" stroke="#4DFF4D" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+        <path d="M 44,100 A 56,56 0 0,1 156,100" fill="none" stroke="#4D9EFF" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+        <path d="M 52,100 A 48,48 0 0,1 148,100" fill="none" stroke="#7A4DFF" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+        <path d="M 60,100 A 40,40 0 0,1 140,100" fill="none" stroke="#D74DFF" strokeWidth="8" strokeLinecap="round" opacity="0.65"/>
+      </svg>
+
+      {/* Floating clouds looping left to right */}
+      {cloudsData.map((cloud, idx) => (
+        <svg 
+          key={idx}
+          className={`absolute ${cloud.size} ${cloud.opacity} animate-cloud-slow pointer-events-none z-10 w-28 md:w-36`} 
+          style={{ 
+            top: cloud.top, 
+            left: cloud.left, 
+            animationDuration: cloud.duration, 
+            animationDelay: cloud.delay 
+          }} 
+          viewBox="0 0 120 70" 
+          fill="white"
+        >
+          <path d="M 20 50 A 20 20 0 0 1 40 20 A 25 25 0 0 1 80 20 A 20 20 0 0 1 100 50 A 15 15 0 0 1 80 65 L 30 65 A 15 15 0 0 1 20 50 Z" />
+        </svg>
       ))}
     </div>
   );
@@ -1731,7 +1898,127 @@ function PuzzleEffect() {
 }
 
 function CheeringEffect() {
-  const items = Array.from({ length: 40 });
+  const [confettiBursts, setConfettiBursts] = useState<{ id: number; items: any[] }[]>([]);
+  const [hatWaves, setHatWaves] = useState<{ id: number; items: any[] }[]>([]);
+
+  const generateConfettiBurst = () => {
+    const items = Array.from({ length: 24 }).map((_, i) => {
+      const isLeft = i % 2 === 0;
+      const colors = ['bg-red-400', 'bg-blue-400', 'bg-emerald-400', 'bg-yellow-300', 'bg-purple-300', 'bg-pink-400'];
+      const isSquare = Math.random() > 0.5;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const duration = 2.8 + Math.random() * 1.8; // 2.8s to 4.6s max duration
+      const bottom = `${10 + Math.random() * 30}%`;
+      return {
+        isLeft,
+        color,
+        isSquare,
+        duration,
+        bottom,
+      };
+    });
+    return {
+      id: Date.now() + Math.random(),
+      items
+    };
+  };
+
+  const generateHatWave = () => {
+    const items = Array.from({ length: 12 }).map((_, i) => {
+      const tx = (Math.random() * 40 - 20) + 'vw';
+      const left = `${10 + Math.random() * 80}%`;
+      const duration = 4.0 + Math.random() * 2.0; // 4.0s to 6.0s max duration
+      return {
+        tx,
+        left,
+        duration,
+      };
+    });
+    return {
+      id: Date.now() + Math.random(),
+      items
+    };
+  };
+
+  useEffect(() => {
+    let confettiTimer1: any;
+    let confettiTimer2: any;
+    let confettiInterval: any;
+
+    const runConfettiCycle = () => {
+      // Wave 1: instant
+      const burst1 = generateConfettiBurst();
+      setConfettiBursts(prev => [...prev, burst1]);
+      confettiTimer1 = setTimeout(() => {
+        setConfettiBursts(prev => prev.filter(b => b.id !== burst1.id));
+      }, 5500); // Clean after 5.5s (longer than max duration of 4.6s)
+
+      // Wave 2: after 1.2s
+      confettiTimer2 = setTimeout(() => {
+        const burst2 = generateConfettiBurst();
+        setConfettiBursts(prev => [...prev, burst2]);
+        setTimeout(() => {
+          setConfettiBursts(prev => prev.filter(b => b.id !== burst2.id));
+        }, 5500);
+      }, 1200);
+    };
+
+    runConfettiCycle();
+    // 1.2s delay + 4.8s fall time + 5s wait time = 11s cycle!
+    confettiInterval = setInterval(runConfettiCycle, 11000);
+
+    return () => {
+      clearTimeout(confettiTimer1);
+      clearTimeout(confettiTimer2);
+      clearInterval(confettiInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    let hatTimer1: any;
+    let hatTimer2: any;
+    let hatTimer3: any;
+    let hatInterval: any;
+
+    const runHatCycle = () => {
+      // Wave 1 immediately
+      const wave1 = generateHatWave();
+      setHatWaves(prev => [...prev, wave1]);
+      hatTimer1 = setTimeout(() => {
+        setHatWaves(prev => prev.filter(w => w.id !== wave1.id));
+      }, 6500); // Clean after 6.5s (longer than max duration of 6s)
+
+      // Wave 2 after 1.5s
+      hatTimer2 = setTimeout(() => {
+        const wave2 = generateHatWave();
+        setHatWaves(prev => [...prev, wave2]);
+        setTimeout(() => {
+          setHatWaves(prev => prev.filter(w => w.id !== wave2.id));
+        }, 6500);
+      }, 1500);
+
+      // Wave 3 after 3.0s
+      hatTimer3 = setTimeout(() => {
+        const wave3 = generateHatWave();
+        setHatWaves(prev => [...prev, wave3]);
+        setTimeout(() => {
+          setHatWaves(prev => prev.filter(w => w.id !== wave3.id));
+        }, 6500);
+      }, 3000);
+    };
+
+    runHatCycle();
+    // 3.0s delay + 6.5s fall time + 5s wait time = 14.5s cycle!
+    hatInterval = setInterval(runHatCycle, 14500);
+
+    return () => {
+      clearTimeout(hatTimer1);
+      clearTimeout(hatTimer2);
+      clearTimeout(hatTimer3);
+      clearInterval(hatInterval);
+    };
+  }, []);
+
   return (
     <>
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-[5]">
@@ -1740,26 +2027,24 @@ function CheeringEffect() {
           ☀️
         </div>
         {/* Hats thrown from bottom */}
-        {items.map((_, i) => {
-          const isCap = i % 8 === 0;
-          const tx = (Math.random() * 40 - 20) + 'vw';
-          if (!isCap) return null;
-          return (
+        {hatWaves.map(wave => 
+          wave.items.map((hat, i) => (
             <div
-              key={`hat-${i}`}
+              key={`${wave.id}-${i}`}
               className="absolute text-5xl md:text-6xl drop-shadow-xl"
               style={{
-                left: `${10 + Math.random() * 80}%`,
+                left: hat.left,
                 bottom: '-20%',
-                '--tx': tx,
-                animation: `hat-toss ${4 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
-                animationDelay: `${Math.random() * 5}s`,
+                '--tx': hat.tx,
+                animation: `hat-toss ${hat.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`,
+                opacity: 0.7,
+                filter: 'brightness(1.5)',
               } as React.CSSProperties}
             >
               🎓
             </div>
-          );
-        })}
+          ))
+        )}
       </div>
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-[20]">
         {/* Clouds */}
@@ -1768,29 +2053,24 @@ function CheeringEffect() {
         <div className="absolute top-32 right-32 text-[50px] animate-[cloud-drift_7s_ease-in-out_infinite] opacity-90 drop-shadow-md" style={{ animationDelay: '2s' }}>☁️</div>
         <div className="absolute top-16 right-[45%] text-[55px] animate-[cloud-drift_9s_ease-in-out_infinite] opacity-70 drop-shadow-sm" style={{ animationDelay: '3s' }}>☁️</div>
         
-        {/* Confetti shooting from sides */}
-        {items.map((_, i) => {
-          const isLeft = i % 2 === 0;
-          const isCap = i % 8 === 0;
-          if (isCap) return null;
-          const colors = ['bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-yellow-400', 'bg-purple-500', 'bg-pink-500'];
-          const isSquare = Math.random() > 0.5;
-          const color = colors[Math.floor(Math.random() * colors.length)];
-          return (
+        {/* Rhythmic Burst Confetti */}
+        {confettiBursts.map(burst => 
+          burst.items.map((conf, i) => (
             <div
-              key={`confetti-${i}`}
-              className={`absolute ${color} ${isSquare ? 'w-2 h-2' : 'w-1.5 h-3'} opacity-80`}
+              key={`${burst.id}-${i}`}
+              className={`absolute ${conf.color} ${conf.isSquare ? 'w-2 h-2' : 'w-1.5 h-3'}`}
               style={{
-                left: isLeft ? '-10%' : '110%',
-                bottom: `${10 + Math.random() * 30}%`,
-                animation: isLeft 
-                  ? `confetti-right ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite` 
-                  : `confetti-left ${3 + Math.random() * 2}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
-                animationDelay: `${Math.random() * 3}s`,
+                left: conf.isLeft ? '-10%' : '110%',
+                bottom: conf.bottom,
+                animation: conf.isLeft 
+                  ? `confetti-right ${conf.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards` 
+                  : `confetti-left ${conf.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`,
+                opacity: 0.7,
+                filter: 'brightness(1.5)',
               }}
             />
-          );
-        })}
+          ))
+        )}
       </div>
     </>
   );
@@ -2129,7 +2409,7 @@ function PlaylistPlayer() {
   );
 }
 
-function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext, previewConfig }: any = {}) {
+function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext, previewConfig, previewData }: any = {}) {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
   const paramsId = useParams().id;
@@ -2145,6 +2425,106 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
+
+  const parseLyricsToElements = (rawLyrics: string) => {
+    if (!rawLyrics) return null;
+    const lines = rawLyrics.split(/\r?\n/);
+    
+    // Clean up lines: ignore all blank lines immediately following an annotation
+    const cleanedLines: { text: string; origIdx: number }[] = [];
+    let skipBlank = false;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      const lower = trimmed.toLowerCase();
+      
+      const isAnn = lower.includes("pre") || 
+                    lower.includes("chorus") || 
+                    lower.includes("verse") || 
+                    lower.includes("bridge") || 
+                    lower.includes("drop") ||
+                    lower.includes("ending") ||
+                    lower.includes("coda");
+                    
+      if (isAnn) {
+        cleanedLines.push({ text: line, origIdx: i });
+        skipBlank = true;
+      } else {
+        if (trimmed === "") {
+          if (skipBlank) {
+            continue; // Skip blank line immediately following annotation
+          }
+          cleanedLines.push({ text: line, origIdx: i });
+        } else {
+          cleanedLines.push({ text: line, origIdx: i });
+          skipBlank = false;
+        }
+      }
+    }
+    
+    return (
+      <div 
+        className={`font-sans pb-24 pl-4 border-l ${isLight ? 'border-black/20 text-black/90' : 'border-white/20 text-white/95'} drop-shadow-md space-y-4`}
+        style={{ color: customConfig?.lyricsColor || undefined }}
+      >
+        {cleanedLines.map(({ text, origIdx }) => {
+          const trimmed = text.trim();
+          const lower = trimmed.toLowerCase();
+          
+          let annotation = "";
+          let badgeClass = "";
+          
+          if (lower.includes("pre")) {
+            annotation = "Pre-Chorus";
+            badgeClass = "bg-[#f59e0b]/20 text-[#f59e0b] border border-[#f59e0b]/30 shadow-sm";
+          } else if (lower.includes("chorus")) {
+            annotation = "Chorus";
+            badgeClass = "bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30 shadow-sm";
+          } else if (lower.includes("verse")) {
+            annotation = "Verse";
+            badgeClass = "bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/30 shadow-sm";
+          } else if (lower.includes("bridge")) {
+            annotation = "Bridge";
+            badgeClass = "bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30 shadow-sm";
+          } else if (lower.includes("drop")) {
+            annotation = "Drop";
+            badgeClass = "bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30 shadow-sm";
+          } else if (lower.includes("ending")) {
+            annotation = "Ending";
+            badgeClass = "bg-[#ec4899]/20 text-[#ec4899] border border-[#ec4899]/30 shadow-sm";
+          } else if (lower.includes("coda")) {
+            annotation = "Coda";
+            badgeClass = "bg-[#14b8a6]/20 text-[#14b8a6] border border-[#14b8a6]/30 shadow-sm";
+          }
+          
+          if (annotation) {
+            return (
+              <div key={origIdx} className="flex items-center my-6 select-none animate-fade-in">
+                <span className={`text-[10px] md:text-sm font-black tracking-widest uppercase px-3 py-1 rounded-full ${badgeClass}`}>
+                  {annotation}
+                </span>
+                <div className={`flex-1 border-t border-dashed ${isLight ? 'border-neutral-400/20' : 'border-neutral-500/25'} ml-3 opacity-30`} />
+              </div>
+            );
+          }
+          
+          if (trimmed === "") {
+            return <div key={origIdx} className="h-4" />;
+          }
+          
+          return (
+            <div 
+              key={origIdx} 
+              className="text-lg/relaxed sm:text-xl/loose font-semibold opacity-95 hover:opacity-100 transition-opacity"
+            >
+              <HoverTranslate text={trimmed} format={false} />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const pwdTouchedRef = useRef(false);
   const pwdRef = useRef(password);
@@ -2180,6 +2560,14 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   }, [loading, unlocked, isAdmin, playlistSongs, id, onEnd]);
 
   useEffect(() => {
+    if (previewData) {
+      setDemo(previewData);
+      setUnlocked(true);
+      setLoading(false);
+      setError('');
+      return;
+    }
+
     setLoading(true);
     setUnlocked(false);
     setPassword('');
@@ -2200,7 +2588,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         if (!data.requiresPassword || isAdmin || isMember) setUnlocked(true);
         setLoading(false);
       });
-  }, [id, isAdmin, playlistSongs]);
+  }, [id, isAdmin, playlistSongs, previewData]);
 
   useEffect(() => {
     if (unlocked && window.innerWidth < 768) {
@@ -2239,7 +2627,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
 
   useEffect(() => {
      if (demo) {
-        let titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
+        let titleSuffix = demo.singer || demo.author || demo.composer || 'A.C Xuân Tài';
         if (demo.secretKey && /secret/i.test(titleSuffix)) {
           titleSuffix = titleSuffix.replace(/secret/gi, 'Ca sĩ Bí Mật');
         }
@@ -2277,7 +2665,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   const isPreview = !!previewConfig;
   const forceMobile = isPreview && !previewConfig.isPCPreviewMode;
   const forcePC = isPreview && previewConfig.isPCPreviewMode;
-  const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7' || templateType === '17';
+  const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7' || templateType === '9' || templateType === '17';
   const displayCoverUrl = demo.coverUrl || demo.globalCoverUrl || '';
   const pageBgUrl = demo.backgroundUrl || displayCoverUrl;
   let themeClasses = "";
@@ -2308,8 +2696,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     themeClasses = "bg-red-600 text-yellow-50 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-600 via-red-500 to-red-700 [text-shadow:0_2px_4px_rgba(153,27,27,0.8)]";
     accentClass = "bg-yellow-400 text-red-900 font-bold shadow-[0_0_15px_rgba(250,204,21,0.5)]";
   } else if (templateType === '9') {
-    themeClasses = "bg-sky-100 text-sky-900 drop-shadow-sm bg-[linear-gradient(to_bottom,_var(--tw-gradient-stops))] from-sky-400 via-sky-200 to-white";
-    accentClass = "bg-white/80 backdrop-blur text-sky-700 shadow-xl shadow-sky-200/50 outline outline-2 outline-white";
+    themeClasses = "bg-transparent text-sky-950 drop-shadow-sm";
+    accentClass = "bg-white/85 backdrop-blur text-sky-800 shadow-xl shadow-sky-200/50 outline outline-2 outline-white font-bold";
   } else if (templateType === '10') {
     themeClasses = "bg-neutral-900/80 bg-[url('/hiphop-bg.png')] bg-cover bg-center bg-fixed text-white bg-blend-multiply";
     accentClass = "bg-yellow-400 text-black font-black uppercase shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wide transform hover:scale-105 hover:-rotate-2 transition-transform";
@@ -2360,7 +2748,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         {templateType === '6' && <><BlossomEffect /><EightBitEffect /></>}
         {templateType === '7' && <LeavesEffect />}
         {templateType === '8' && <FlagEffect />}
-        {templateType === '9' && <RainEffect />}
+        {templateType === '9' && <RainbowEffect />}
         {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
         {templateType === '11' && <MysteriousEffect />}
         {templateType === '12' && <RetroNotesEffect />}
@@ -2371,7 +2759,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         {templateType === '17' && <CheeringEffect />}
         {templateType === '18' && <FireworksEffect />}
         
-        {pageBgUrl && (
+        {pageBgUrl && templateType !== '9' && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20 blur-md scale-105"
             style={{ backgroundImage: `url(${pageBgUrl})` }}
@@ -2401,12 +2789,10 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           <h2 className={`text-2xl font-black text-center mb-1 drop-shadow-sm`}>
             <HoverTranslate text={demo.title} />
           </h2>
-          {(demo.composer || demo.singer || demo.author) && (
-            <p className="text-sm font-medium text-center mb-6 opacity-80">
-               {formatText(demo.singer || demo.author, !!playlistSongs)}
-               {demo.composer && <span className="block text-xs mt-1 opacity-70">Sáng tác: {formatText(demo.composer, !!playlistSongs)}</span>}
-            </p>
-          )}
+          <p className="text-sm font-medium text-center mb-6 opacity-80">
+             {formatText(demo.singer || demo.author || 'A.C Xuân Tài', !!playlistSongs)}
+             <span className="block text-xs mt-1 opacity-70">Sáng tác: {formatText(demo.composer || 'A.C Xuân Tài', !!playlistSongs)}</span>
+          </p>
           
           <p className="text-center mb-6 text-sm font-semibold opacity-70">
              {t.pPrompt2}
@@ -2485,7 +2871,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
       {templateType === '6' && <><BlossomEffect /><EightBitEffect /></>}
       {templateType === '7' && <LeavesEffect />}
       {templateType === '8' && <FlagEffect />}
-      {templateType === '9' && <RainEffect />}
+      {templateType === '9' && <RainbowEffect />}
       {templateType === '10' && <><StreetLightEffect /><ChainEffect /></>}
       {templateType === '11' && <MysteriousEffect />}
       {templateType === '12' && <RetroNotesEffect />}
@@ -2496,7 +2882,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
       {templateType === '17' && <CheeringEffect />}
       {templateType === '18' && <FireworksEffect />}
       
-      {pageBgUrl && (
+      {pageBgUrl && templateType !== '9' && (
         <div 
           className="fixed inset-0 bg-cover bg-center opacity-20 blur-md scale-105 pointer-events-none z-0"
           style={{ backgroundImage: `url(${pageBgUrl})` }}
@@ -2572,7 +2958,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         className={`max-w-5xl mx-auto w-full relative ${forceMobile ? 'block pb-16 pt-8' : forcePC ? 'flex flex-row gap-8 items-stretch pt-16' : 'block md:flex md:flex-row md:gap-8 md:items-stretch pb-16 md:pb-0 pt-8 md:pt-16'}`}
       >
         {/* Left: Player */}
-        <div className={`w-full max-w-md mx-auto block relative z-10 ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
+        <div className={`w-full max-w-md mx-auto block relative z-40 ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
           <div className={`${forceMobile ? '' : forcePC ? 'flex flex-col items-center flex-1 text-left' : 'flex flex-col items-center md:items-start flex-1'}`}>
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -2641,7 +3027,9 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               </div>
             ) : (
               /* ALL OTHER TEMPLATES */
-              <div className={`w-full max-w-[260px] md:max-w-[320px] aspect-square overflow-hidden mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
+              <div className={`w-full max-w-[260px] md:max-w-[320px] aspect-square mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
+                (templateType === '9' || templateType === '16') ? 'overflow-visible' : 'overflow-hidden'
+              } ${
                 templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
                 templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
                 templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
@@ -2662,12 +3050,12 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               }`}>
                 {templateType === '9' && (
                   <>
-                    <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-10 drop-shadow-md">☁️</div>
-                    <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-10 drop-shadow-md" style={{animationDelay: '1s'}}>☁️</div>
+                    <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-40 drop-shadow-md select-none">☁️</div>
+                    <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-40 drop-shadow-md select-none" style={{animationDelay: '1s'}}>☁️</div>
                   </>
                 )}
                 {templateType === '16' ? (
-                  <div className="relative w-full aspect-square p-2">
+                  <div className="relative w-full aspect-square p-2 border-0">
                     {/* Colorful neon/gradient outer backdrop offset shadows */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-yellow-400 via-emerald-400 to-indigo-500 opacity-95 blur-[3px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.06)' }}></div>
                     <div className="absolute inset-0 bg-gradient-to-bl from-yellow-400 via-orange-500 via-red-500 to-purple-600 opacity-70 blur-[1px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.03)' }}></div>
@@ -2692,15 +3080,15 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                   <img 
                     src={displayCoverUrl} 
                     alt="Cover" 
-                    className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'}`}
+                    className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'} ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}
                   />
                 ) : (
-                  <div className="w-full h-full bg-black/30 flex flex-col justify-center items-center">
+                  <div className={`w-full h-full bg-black/30 flex flex-col justify-center items-center ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}>
                     <Music className="w-24 h-24 opacity-20" />
                   </div>
                 )}
                 <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' || templateType === '18' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '9' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' || templateType === '18' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
               </div>
             )}
           <h1 
@@ -2720,9 +3108,12 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               )}
             </span>
           </h1>
-          {(demo.singer || demo.author) && <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">{formatText(demo.singer || demo.author, !!playlistSongs)}</p>}
-          {demo.composer && <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">{t.sAuth} {formatText(demo.composer, !!playlistSongs)}</p>}
-          {!demo.singer && !demo.author && !demo.composer && <div className="mb-0 md:mb-6"></div>}
+          <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">
+            {formatText(demo.singer || demo.author || 'A.C Xuân Tài', !!playlistSongs)}
+          </p>
+          <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">
+            {t.sAuth} {formatText(demo.composer || 'A.C Xuân Tài', !!playlistSongs)}
+          </p>
           </motion.div>
           
           <div 
@@ -2742,7 +3133,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               )}
             </div>
             <div className="relative z-10 px-4 pt-2 pb-3 md:px-5 md:pt-3 md:pb-4">
-               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} isPreview={isPreview} />
+               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} isPreview={isPreview} lyricsColor={customConfig?.lyricsColor} />
             </div>
           </div>
           </div>
@@ -2758,12 +3149,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           <h3 className={`text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>{t.lyric}</h3>
           <div className="pr-4">
             {demo.lyrics ? (
-              <pre 
-                className={`whitespace-pre-wrap font-sans text-lg/relaxed sm:text-xl/loose font-semibold opacity-100 pb-20 pl-4 border-l ${isLight ? 'border-black/20 text-black/90' : 'border-white/20 text-white/95'} drop-shadow-md`}
-                style={{ color: customConfig?.lyricsColor || undefined }}
-              >
-                {demo.lyrics}
-              </pre>
+              parseLyricsToElements(demo.lyrics)
             ) : (
               <div className="flex items-center justify-center opacity-30 italic py-20">
                 {t.nLyric}
@@ -2939,7 +3325,7 @@ function AdminTemplatesSettings({ isPCPreviewMode, setIsPCPreviewMode }: { isPCP
     { id: '6', name: 'Hạnh Phúc (Hồng, Hoa rơi)', order: 6 },
     { id: '7', name: 'Học Đường (Trắng, Lá vàng rơi)', order: 7 },
     { id: '8', name: 'Tổ Quốc (Đỏ, Cờ phấp phới)', order: 8 },
-    { id: '9', name: 'Bầu trời xanh (Mây trắng)', order: 9 },
+    { id: '9', name: 'Cầu Vồng', order: 9 },
     { id: '10', name: 'Hip Hop (Đường phố)', order: 10 },
     { id: '11', name: 'Kỳ bí (Đen vàng, Trăng khói mưa)', order: 11 },
     { id: '12', name: 'Cổ điển (Nâu, retro)', order: 12 },
@@ -2969,11 +3355,11 @@ function AdminTemplatesSettings({ isPCPreviewMode, setIsPCPreviewMode }: { isPCP
       .then(res => res.json())
       .then(data => {
         if (data.templateConfigs && data.templateConfigs.length > 0) {
-          const merged = [...data.templateConfigs];
+          const merged = data.templateConfigs.map((c: any) => c.id === '9' ? { ...c, name: 'Cầu Vồng' } : c);
           const defaultNames = [
             'Vui vẻ (Ấm áp)', 'Căng Cực (Sôi động)', 'Buồn (Sâu lắng)', 'Thư giãn (Nhẹ nhàng)',
             'Đáng yêu (Đỏ, Nhảy múa)', 'Hạnh Phúc (Hồng, Hoa rơi)', 'Học Đường (Trắng, Lá vàng rơi)',
-            'Tổ Quốc (Đỏ, Cờ phấp phới)', 'Bầu trời xanh (Mây trắng)', 'Hip Hop (Đường phố)',
+            'Tổ Quốc (Đỏ, Cờ phấp phới)', 'Cầu Vồng', 'Hip Hop (Đường phố)',
             'Kỳ bí (Đen vàng, Trăng khói mưa)', 'Cổ điển (Nâu, retro)', 'Hoàng hôn (Cam đỏ trời chiều)',
             'Đại Dương (Sóng biển)', 'Retro 8-Bit (Game)', 'Xếp hình Puzzle', 'Cổ vũ (Mây, mặt trời)', 'Pháo hoa (Năm mới)'
           ];
@@ -3112,6 +3498,39 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
 
     const currentConfig = { ...config, name, bgColor, titleColor, lyricsColor };
 
+    const renderColorPickerField = (
+      label: string, 
+      value: string, 
+      setValue: (v: string) => void, 
+      placeholder: string
+    ) => {
+      const isValidHex = /^#([0-9A-F]{3}){1,2}$/i.test(value);
+      const pickerVal = isValidHex ? (value.length === 4 ? '#' + value[1] + value[1] + value[2] + value[2] + value[3] + value[3] : value) : '#ffffff';
+
+      return (
+        <div>
+          <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>{label}</label>
+          <div className="flex gap-2 items-center animate-fade-in">
+            <input 
+              value={value} 
+              onChange={e => setValue(e.target.value)} 
+              className={`flex-1 border border-stone-200 rounded-xl px-4 ${isPCPreviewMode ? 'py-2 text-sm' : 'py-3 text-base'} bg-stone-50/50 hover:bg-stone-50 outline-none focus:ring-2 focus:ring-emerald-500/25 transition-all`} 
+              placeholder={placeholder} 
+            />
+            <div className="relative w-10 h-10 md:w-12 md:h-12 border border-stone-200 rounded-xl overflow-hidden shrink-0 cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:scale-105 transition-transform flex items-center justify-center bg-stone-50">
+              <div className="absolute inset-1 rounded-lg border border-black/5" style={{ backgroundColor: value || 'transparent' }} />
+              <input 
+                type="color" 
+                value={pickerVal} 
+                onChange={e => setValue(e.target.value)} 
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" 
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div className={`flex flex-col fixed inset-0 md:relative md:inset-auto bg-zinc-900 z-50 ${isPCPreviewMode ? 'w-full h-full' : 'md:h-[calc(100vh-128px)] md:-m-8'}`}>
          <div className="bg-white p-4 border-b flex justify-between items-center z-10 shrink-0">
@@ -3121,10 +3540,10 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
              <div className="flex items-center gap-4">
                  <button 
                      onClick={() => setIsPCPreviewMode && setIsPCPreviewMode(!isPCPreviewMode)} 
-                     className={`hidden md:flex items-center justify-center p-2 rounded-lg transition-colors ${isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-100 text-stone-500 hover:text-stone-900'} shadow-sm`}
+                     className={`hidden md:flex items-center justify-center p-2 rounded-lg border transition-all duration-300 ${isPCPreviewMode ? 'border-stone-800 bg-stone-100 text-stone-900' : 'border-stone-200 bg-transparent text-stone-450 hover:text-stone-700 hover:border-stone-400'} shadow-sm`}
                      title="Giao diện xem trên máy tính"
                  >
-                     <Monitor className="w-5 h-5" />
+                     <Monitor className="w-5 h-5 stroke-[1.5]" />
                  </button>
                  <button onClick={() => onSave(currentConfig)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-xl text-sm transition-colors shadow">
                      Lưu cài đặt
@@ -3152,18 +3571,9 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
                         <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Tên hiển thị</label>
                         <input value={name} onChange={e => setName(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: Mặc định 1" />
                     </div>
-                    <div>
-                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Màu nền tùy chỉnh</label>
-                        <input value={bgColor} onChange={e => setBgColor(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: #111827" />
-                    </div>
-                    <div>
-                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Màu chữ tiêu đề</label>
-                        <input value={titleColor} onChange={e => setTitleColor(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: #ffffff" />
-                    </div>
-                    <div>
-                        <label className={`block font-bold text-stone-700 mb-1 ${isPCPreviewMode ? 'text-xs' : 'text-sm'}`}>Màu lời bài hát</label>
-                        <input value={lyricsColor} onChange={e => setLyricsColor(e.target.value)} className={`w-full border border-stone-300 rounded-xl px-4 ${isPCPreviewMode ? 'py-2' : 'py-3'}`} placeholder="VD: #eeeeee" />
-                    </div>
+                    {renderColorPickerField("Màu nền tùy chỉnh", bgColor, setBgColor, "VD: #111827")}
+                    {renderColorPickerField("Màu chữ tiêu đề", titleColor, setTitleColor, "VD: #ffffff")}
+                    {renderColorPickerField("Màu lời bài hát", lyricsColor, setLyricsColor, "VD: #eeeeee")}
                  </div>
              </div>
              <div className="flex-1 w-full min-h-[700px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0">
@@ -3190,7 +3600,7 @@ function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'|'security'|'templates'>('demos');
-  const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'playlists' | 'trash'>('released');
+  const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'drafts' | 'playlists' | 'trash'>('released');
   const [draggedItemIdx, setDraggedItemIdx] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
@@ -3501,11 +3911,22 @@ function AdminDashboard() {
               className={`flex items-center transition-colors ${
                 effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
               } ${
-                activeTab === 'demos' && demosSubTab !== 'playlists' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
+                activeTab === 'demos' && demosSubTab !== 'playlists' && demosSubTab !== 'drafts' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
               }`}
               title="Bài Hát"
             >
               <Disc3 className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Bài Hát</span>}
+            </button>
+            <button
+              onClick={() => { setActiveTab('demos'); setDemosSubTab('drafts'); }}
+              className={`flex items-center transition-colors ${
+                effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              } ${
+                activeTab === 'demos' && demosSubTab === 'drafts' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
+              }`}
+              title="Nháp"
+            >
+              <FileText className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Nháp</span>}
             </button>
             <button
               onClick={() => { setActiveTab('demos'); setDemosSubTab('playlists'); }}
@@ -3518,15 +3939,21 @@ function AdminDashboard() {
             >
               <ListMusic className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Playlist</span>}
             </button>
+            <button 
+              onClick={() => setActiveTab('templates')} 
+              className={`flex items-center transition-colors ${
+                effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+              } ${
+                activeTab === 'templates' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'
+              }`} 
+              title="Giao Diện"
+            >
+              <Camera className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Giao Diện</span>}
+            </button>
           </div>
           
           <div className={`${effectiveSidebarCollapsed ? 'flex flex-col gap-2 w-full px-2' : 'mb-6 space-y-1'}`}>
             {!effectiveSidebarCollapsed && <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-4">Hồ sơ & Mở rộng</h3>}
-            <button onClick={() => setActiveTab('templates')} className={`flex items-center transition-colors ${
-              effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
-            } ${activeTab === 'templates' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Giao Diện">
-              <Camera className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Giao Diện</span>}
-            </button>
             <button onClick={() => setActiveTab('profile')} className={`flex items-center transition-colors ${
               effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
             } ${activeTab === 'profile' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Cài Đặt">
@@ -3563,7 +3990,7 @@ function AdminDashboard() {
                     <Music className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
                     <span>Ra rồi</span>
                     <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-xs">
-                      {data.demos?.filter(d => d.isReleased && !d.deleted).length || 0}
+                      {data.demos?.filter(d => d.isReleased && !d.deleted && !d.isDraft).length || 0}
                     </span>
                   </button>
                   <button
@@ -3578,7 +4005,22 @@ function AdminDashboard() {
                     <Disc3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500" />
                     <span>Đề Mô</span>
                     <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded text-xs">
-                      {data.demos?.filter(d => !d.isReleased && !d.deleted).length || 0}
+                      {data.demos?.filter(d => !d.isReleased && !d.deleted && !d.isDraft).length || 0}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDemosSubTab('drafts')}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all relative ${
+                      demosSubTab === 'drafts'
+                        ? 'bg-white text-stone-900 shadow-sm'
+                        : 'text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+                    <span>Nháp</span>
+                    <span className="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded text-xs">
+                      {data.demos?.filter(d => d.isDraft && !d.deleted).length || 0}
                     </span>
                   </button>
                   <button
@@ -3649,9 +4091,9 @@ function AdminDashboard() {
               {/* Action area for selected subtab */}
               <div className="overflow-x-auto min-h-[300px]">
                 {demosSubTab === 'released' && (() => {
-                  const releasedList = data.demos?.filter(d => d.isReleased && !d.deleted) || [];
+                  const releasedList = data.demos?.filter(d => d.isReleased && !d.deleted && !d.isDraft) || [];
                   if (releasedList.length === 0) {
-                    return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát đã phát hành nào. Hãy tạo mới và đặt trạng thái "Ra rồi"!</div>;
+                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát đã phát hành nào. Hãy tạo mới và đặt trạng thái "Ra rồi"!</div>;
                   }
                   return (
                     <div className="flex flex-col gap-2">
@@ -3674,7 +4116,7 @@ function AdminDashboard() {
                             setDraggedItemIdx(idx);
                             
                             // Reassemble
-                            const remaining = (data.demos || []).filter(d => !d.isReleased || d.deleted);
+                            const remaining = (data.demos || []).filter(d => !d.isReleased || d.deleted || d.isDraft);
                             const merged = [...items, ...remaining];
                             setData({ ...data, demos: merged });
                             
@@ -3685,7 +4127,7 @@ function AdminDashboard() {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                               },
-                              body: JSON.stringify({ demoIds: [...items, ...((data.demos || []).filter(d => !d.isReleased && !d.deleted))].map(d => d.id) })
+                              body: JSON.stringify({ demoIds: [...items, ...((data.demos || []).filter(d => (!d.isReleased || d.isDraft) && !d.deleted))].map(d => d.id) })
                             });
                           }}
                           className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
@@ -3722,7 +4164,7 @@ function AdminDashboard() {
                 })()}
 
                 {demosSubTab === 'demos' && (() => {
-                  const demoList = data.demos?.filter(d => !d.isReleased && !d.deleted) || [];
+                  const demoList = data.demos?.filter(d => !d.isReleased && !d.deleted && !d.isDraft) || [];
                   if (demoList.length === 0) {
                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát demo nào. Hãy tạo mới và đặt trạng thái "Đề mô"!</div>;
                   }
@@ -3747,7 +4189,7 @@ function AdminDashboard() {
                             setDraggedItemIdx(idx);
                             
                             // Reassemble
-                            const remaining = (data.demos || []).filter(d => d.isReleased || d.deleted);
+                            const remaining = (data.demos || []).filter(d => d.isReleased || d.deleted || d.isDraft);
                             const merged = [...remaining, ...items];
                             setData({ ...data, demos: merged });
                             
@@ -3758,7 +4200,7 @@ function AdminDashboard() {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                               },
-                              body: JSON.stringify({ demoIds: [...((data.demos || []).filter(d => d.isReleased && !d.deleted)), ...items].map(d => d.id) })
+                              body: JSON.stringify({ demoIds: [...((data.demos || []).filter(d => (d.isReleased || d.isDraft) && !d.deleted)), ...items].map(d => d.id) })
                             });
                           }}
                           className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
@@ -3789,6 +4231,74 @@ function AdminDashboard() {
                                <Edit3 className="w-4 h-4" />
                             </Link>
                             <button type="button" onClick={() => handleDeleteClick('song', demo.id, demo.title)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold text-lg" title="Xóa">
+                              <X className="w-4 h-4 text-red-500 stroke-[3]" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {demosSubTab === 'drafts' && (() => {
+                  const draftList = data.demos?.filter(d => d.isDraft && !d.deleted) || [];
+                  if (draftList.length === 0) {
+                    return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bản nháp nào. Bản nháp được lưu từ màn hình tạo hoặc chỉnh sửa bài hát!</div>;
+                  }
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
+                        <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả để sắp xếp thứ tự hiển thị bản nháp
+                      </div>
+                      {draftList.map((demo, idx) => (
+                        <div
+                          key={demo.id}
+                          draggable
+                          onDragStart={() => setDraggedItemIdx(idx)}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDragEnd={() => setDraggedItemIdx(null)}
+                          onDragEnter={(e) => {
+                            e.preventDefault();
+                            if (draggedItemIdx === null || draggedItemIdx === idx) return;
+                            const items = [...draftList];
+                            const draggedItem = items.splice(draggedItemIdx, 1)[0];
+                            items.splice(idx, 0, draggedItem);
+                            setDraggedItemIdx(idx);
+                            
+                            // Reassemble
+                            const remaining = (data.demos || []).filter(d => !d.isDraft || d.deleted);
+                            const merged = [...items, ...remaining];
+                            setData({ ...data, demos: merged });
+                            
+                            // Call api to persist order
+                            fetch('/api/admin/reorder-demos', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                              },
+                              body: JSON.stringify({ demoIds: [...items, ...((data.demos || []).filter(d => !d.isDraft && !d.deleted))].map(d => d.id) })
+                            });
+                          }}
+                          className={`border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all cursor-move select-none ${draggedItemIdx === idx ? 'opacity-40 border-dashed border-stone-300 bg-stone-50' : 'shadow-sm'}`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-stone-500 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <Link to={`/admin/edit/${demo.id}`} className="hover:text-amber-600 font-bold text-stone-850 text-sm md:text-base block truncate">
+                                {demo.title || '(Chưa đặt tiêu đề)'}
+                              </Link>
+                              <div className="flex items-center flex-wrap gap-2 text-[10px] md:text-xs">
+                                <span className="px-1.5 py-0.5 rounded font-semibold bg-amber-50 text-amber-600 text-[10px]">Bản nháp</span>
+                                {demo.singer && <span className="text-stone-500 font-medium">Ca sĩ: {demo.singer}</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+                            <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
+                               <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <button type="button" onClick={() => handleDeleteClick('song', demo.id, demo.title || 'Bản nháp')} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold text-lg" title="Xóa">
                               <X className="w-4 h-4 text-red-500 stroke-[3]" />
                             </button>
                           </div>
@@ -4308,7 +4818,7 @@ function PlaylistSelect({ selectedIds, onChange }: { selectedIds: string[], onCh
     })
     .then(res => res.json())
     .then(data => {
-      setPlaylists(data.playlists || []);
+      setPlaylists((data.playlists || []).filter((p: any) => !p.deleted));
     });
   }, []);
 
@@ -4383,26 +4893,40 @@ function TemplatePickerModal({
   configs, 
   onSelect, 
   onClose, 
-  previewSongId 
+  previewSongId,
+  previewData,
+  defaultTemplateId
 }: { 
   configs: any[], 
   onSelect: (id: string) => void, 
   onClose: () => void, 
-  previewSongId: string 
+  previewSongId: string,
+  previewData?: any,
+  defaultTemplateId?: string
 }) {
-  const [selectedId, setSelectedId] = useState(configs[0]?.id || '1');
+  const [selectedId, setSelectedId] = useState(defaultTemplateId || configs[0]?.id || '1');
   const [isPCPreviewMode, setIsPCPreviewMode] = useState(false);
 
   const selectedConfig = configs.find(c => c.id === selectedId) || configs[0];
 
   return (
-    <div className={`fixed inset-0 bg-zinc-900 z-[9999] flex flex-col md:flex-row overflow-y-auto md:overflow-hidden`}>
-      <div className={`w-full h-[40vh] md:h-full ${isPCPreviewMode ? 'md:w-[260px] p-4 space-y-4' : 'md:w-[400px] p-6 md:p-8 space-y-6'} bg-white flex-shrink-0 border-b md:border-b-0 md:border-r overflow-y-auto custom-scrollbar flex flex-col`}>
-         <div className="flex justify-between items-center shrink-0 mb-4 sticky top-0 bg-white z-[10] pb-2">
-             <button type="button" onClick={onClose} className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-medium font-sans"><ArrowLeft className="w-5 h-5"/> Trở về</button>
-             <button type="button" onClick={() => onSelect(selectedId)} className="bg-stone-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow hover:bg-stone-800">Chọn Giao Diện</button>
-         </div>
-         <div>
+    <div className="flex flex-col fixed inset-0 bg-zinc-900 z-[9999]">
+      <div className="bg-white p-4 border-b border-stone-200 flex justify-between items-center z-10 shrink-0">
+          <button type="button" onClick={onClose} className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-medium font-sans">
+              <ArrowLeft className="w-5 h-5"/> Trở về
+          </button>
+          <div className="flex items-center gap-4">
+              <button onClick={() => setIsPCPreviewMode(false)} className={`flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${!isPCPreviewMode ? 'border-2 border-stone-850 bg-transparent text-stone-900' : 'border border-stone-200 bg-transparent text-stone-400 hover:text-stone-700 hover:border-stone-400'} shadow-sm`} title="Xem giao diện điện thoại">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+              </button>
+              <button onClick={() => setIsPCPreviewMode(true)} className={`hidden md:flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${isPCPreviewMode ? 'border-2 border-stone-850 bg-transparent text-stone-900' : 'border border-stone-200 bg-transparent text-stone-400 hover:text-stone-700 hover:border-stone-400'} shadow-sm`} title="Xem giao diện máy tính">
+                <Monitor className="w-5 h-5 stroke-[1.5]"/>
+              </button>
+              <button type="button" onClick={() => onSelect(selectedId)} className="bg-stone-900 text-white px-5 py-2 rounded-xl text-sm font-bold shadow hover:bg-stone-800">Chọn Giao Diện</button>
+          </div>
+      </div>
+      <div className="flex flex-1 flex-col md:flex-row overflow-y-auto md:overflow-hidden relative border-t-0">
+         <div className={`w-full h-auto md:h-full ${isPCPreviewMode ? 'md:w-[260px] p-4 space-y-4' : 'md:w-[400px] p-6 md:p-8 space-y-6'} bg-white flex-shrink-0 border-b md:border-b-0 md:border-r overflow-visible md:overflow-y-auto custom-scrollbar`}>
             <h3 className="text-xl font-black mb-4">Chọn Template</h3>
             <div className="space-y-2 pb-6">
                {configs.map(c => (
@@ -4412,25 +4936,29 @@ function TemplatePickerModal({
                ))}
             </div>
          </div>
-      </div>
-      <div className="flex-1 w-full min-h-[750px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0 shrink-0">
-         <div className="absolute top-4 right-4 z-[100] flex gap-2">
-            <button onClick={() => setIsPCPreviewMode(false)} className={`flex items-center justify-center p-2 rounded-lg transition-colors ${!isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} shadow-sm`}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></button>
-            <button onClick={() => setIsPCPreviewMode(true)} className={`hidden md:flex items-center justify-center p-2 rounded-lg transition-colors ${isPCPreviewMode ? 'bg-indigo-100 text-indigo-700' : 'bg-stone-800 text-stone-400 hover:text-stone-200'} shadow-sm`}><Monitor className="w-5 h-5"/></button>
-         </div>
-         {previewSongId ? (
-             <div className={`w-full bg-black relative overflow-hidden transition-all duration-500 ease-in-out transform transform-gpu ${
-                 isPCPreviewMode 
-                     ? 'h-full border-0 rounded-none shadow-none scale-100 min-w-[700px] xl:min-w-[1024px]'
-                     : 'md:w-[375px] h-full md:h-[812px] shadow-2xl md:rounded-[3rem] md:border-[12px] border-stone-800 shrink-0 md:scale-[0.80] lg:scale-[0.80] xl:scale-[0.80] 2xl:scale-[0.95] origin-center no-scrollbar'
-             }`}>
-                <div className="absolute inset-0 overflow-y-auto  no-scrollbar custom-scrollbar">
-                  <DemoPlayer songIdP={previewSongId} previewConfig={{...selectedConfig, isPCPreviewMode}} />
+         <div className="flex-1 w-full min-h-[500px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0 shrink-0">
+            <div className="absolute top-4 right-4 z-[100] flex gap-2">
+               <button onClick={() => setIsPCPreviewMode(false)} className={`flex items-center justify-center p-2 rounded-lg border transition-all duration-300 ${!isPCPreviewMode ? 'border-white/60 bg-transparent text-white' : 'border-white/20 bg-transparent text-white/40 hover:text-white/60 hover:border-white/40'} shadow-sm`} title="Xem giao diện điện thoại">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+               </button>
+               <button onClick={() => setIsPCPreviewMode(true)} className={`hidden md:flex items-center justify-center p-2 rounded-lg border transition-all duration-300 ${isPCPreviewMode ? 'border-white/60 bg-transparent text-white' : 'border-white/20 bg-transparent text-white/40 hover:text-white/60 hover:border-white/40'} shadow-sm`} title="Xem giao diện máy tính">
+                  <Monitor className="w-5 h-5 stroke-[1.5]"/>
+               </button>
+            </div>
+            {previewSongId ? (
+                <div className={`w-full bg-black relative overflow-hidden transition-all duration-500 ease-in-out ${
+                    isPCPreviewMode 
+                        ? 'h-full border-0 rounded-none shadow-none scale-100 min-w-[700px] xl:min-w-[1024px]'
+                        : 'w-full h-full md:w-[375px] md:h-[812px] shadow-2xl md:rounded-[3rem] md:border-[12px] border-stone-800 shrink-0 md:transform md:transform-gpu md:scale-[0.80] lg:scale-[0.80] xl:scale-[0.80] 2xl:scale-[0.95] origin-center no-scrollbar'
+                }`}>
+                   <div className="absolute inset-0 overflow-y-auto no-scrollbar custom-scrollbar">
+                     <DemoPlayer songIdP={previewSongId} previewConfig={{...selectedConfig, isPCPreviewMode}} previewData={previewData} />
+                   </div>
                 </div>
-             </div>
-         ) : (
-              <div className="text-stone-500 bg-stone-900 h-full w-full flex items-center justify-center font-medium">Đang tải...</div>
-         )}
+            ) : (
+                 <div className="text-stone-500 bg-stone-900 h-full w-full flex items-center justify-center font-medium">Đang tải...</div>
+            )}
+         </div>
       </div>
     </div>
   )
@@ -4452,6 +4980,12 @@ function AdminCreateDemo() {
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState('');
   const [bgUploadProgress, setBgUploadProgress] = useState(0);
   const [uploadedBgUrl, setUploadedBgUrl] = useState('');
+
+  const [composer, setComposer] = useState('');
+  const [singer, setSinger] = useState('');
+  const [lyrics, setLyrics] = useState('');
+  const [slideshowImages, setSlideshowImages] = useState<string[]>([]);
+  const [randomSlideUrl, setRandomSlideUrl] = useState<string>('');
 
   const [template, setTemplate] = useState('1');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
@@ -4478,8 +5012,15 @@ function AdminCreateDemo() {
     })
       .then(res => res.json())
       .then(data => {
+        if (data.slideshowImages) {
+          setSlideshowImages(data.slideshowImages);
+          if (data.slideshowImages.length > 0) {
+            const randomIndex = Math.floor(Math.random() * data.slideshowImages.length);
+            setRandomSlideUrl(data.slideshowImages[randomIndex]);
+          }
+        }
         if (data.templateConfigs && data.templateConfigs.length > 0) {
-          const sorted = [...data.templateConfigs].sort((a: any, b: any) => a.order - b.order);
+          const sorted = data.templateConfigs.map((c: any) => c.id === '9' ? { ...c, name: 'Cầu Vồng' } : c).sort((a: any, b: any) => a.order - b.order);
           setTemplateConfigs(sorted);
         } else {
           // Fallback static
@@ -4492,7 +5033,7 @@ function AdminCreateDemo() {
             { id: '6', name: 'Hạnh Phúc (Hồng, Hoa rơi)' },
             { id: '7', name: 'Học Đường (Trắng, Lá vàng rơi)' },
             { id: '8', name: 'Tổ Quốc (Đỏ, Cờ phấp phới)' },
-            { id: '9', name: 'Bầu trời xanh (Mây trắng)' },
+            { id: '9', name: 'Cầu Vồng' },
             { id: '10', name: 'Hip Hop (Đường phố)' },
             { id: '11', name: 'Kỳ bí (Đen vàng, Trăng khói mưa)' },
             { id: '12', name: 'Cổ điển (Nâu, retro)' },
@@ -4566,27 +5107,33 @@ function AdminCreateDemo() {
     xhr.send(formData);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!uploadedAudioUrl) return alert("Vui lòng tải lên file nhạc!");
+  const saveDemo = async (isDraft: boolean) => {
+    if (!isDraft && !uploadedAudioUrl) return alert("Vui lòng tải lên file nhạc!");
     if (audioUploadProgress > 0 && audioUploadProgress < 100) return alert("Vui lòng đợi file nhạc tải lên xong!");
     if (coverUploadProgress > 0 && coverUploadProgress < 100) return alert("Vui lòng đợi ảnh bìa tải lên xong!");
     if (bgUploadProgress > 0 && bgUploadProgress < 100) return alert("Vui lòng đợi ảnh nền tải lên xong!");
 
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    formData.delete('audio'); // remove raw files from submit
-    formData.delete('cover');
-    formData.delete('background');
-    
+    const formData = new FormData();
+    formData.set('title', title);
+    formData.set('slug', slug);
+    formData.set('composer', composer);
+    formData.set('singer', singer);
+    formData.set('lyrics', lyrics);
+    formData.set('template', template);
     formData.set('audioUrl', uploadedAudioUrl);
     formData.set('coverUrl', uploadedCoverUrl);
     formData.set('backgroundUrl', uploadedBgUrl);
-    formData.append('playlistIds', JSON.stringify(playlistIds));
-    
-    if (!formData.get('slug')) {
-        formData.set('slug', slug);
-    }
+    formData.set('playlistIds', JSON.stringify(playlistIds));
+
+    const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
+    const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
+    const isReleasedEl = document.querySelector('input[name="isReleased"]') as HTMLInputElement;
+
+    formData.set('password', passwordEl?.value || '');
+    formData.set('status', statusEl?.value || 'public');
+    formData.set('isReleased', isReleasedEl?.checked ? 'true' : 'false');
+    formData.set('isDraft', isDraft ? 'true' : 'false');
     
     try {
         const res = await fetch('/api/demos', {
@@ -4597,13 +5144,24 @@ function AdminCreateDemo() {
             body: formData
         });
         if (res.ok) {
-            alert('Đăng demo thành công!');
-            navigate('/admin');
-        } else alert('Lỗi đăng bài!');
+            const newDemo = await res.json();
+            if (isDraft) {
+               alert('Đã lưu bản nháp thành công!');
+               navigate(`/admin/edit/${newDemo.id}`);
+            } else {
+               alert('Đăng bài hát thành công!');
+               navigate('/admin');
+            }
+        } else alert('Lỗi tải lên bài hát!');
     } catch (err) {
         alert('Lỗi mạng!');
     }
     setLoading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    saveDemo(false);
   };
 
   return (
@@ -4634,11 +5192,11 @@ function AdminCreateDemo() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Sáng tác</label>
-                <input name="composer" placeholder="Sáng tác (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                <input name="composer" value={composer} onChange={e => setComposer(e.target.value)} placeholder="Sáng tác (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ca sĩ thể hiện</label>
-                <input name="singer" placeholder="Ca sĩ (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                <input name="singer" value={singer} onChange={e => setSinger(e.target.value)} placeholder="Ca sĩ (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 
@@ -4689,7 +5247,7 @@ function AdminCreateDemo() {
 
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
-              <textarea name="lyrics" rows={6} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
+              <textarea name="lyrics" rows={6} value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
             </div>
 
             <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
@@ -4701,7 +5259,12 @@ function AdminCreateDemo() {
                       <option key={tc.id} value={tc.id}>{tc.name}</option>
                     ))}
                   </select>
-                  <button type="button" onClick={() => setShowTemplatePicker(true)} className="px-6 py-3 border border-transparent shrink-0 bg-indigo-600 hover:bg-indigo-700 shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all">
+                  <button 
+                    type="button" 
+                    disabled={!title.trim()}
+                    onClick={() => setShowTemplatePicker(true)} 
+                    className={`px-6 py-3 border border-transparent shrink-0 shadow-sm text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all ${(!title.trim()) ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10'}`}
+                  >
                     <Eye className="w-5 h-5" /> Xem trước giao diện
                   </button>
                 </div>
@@ -4738,12 +5301,57 @@ function AdminCreateDemo() {
                </div>
             </div>
 
-            <button disabled={loading} type="submit" className="w-full bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1 mt-8">
-              {loading ? 'Đang xuất bản...' : 'Xuất Bản Demo'}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <button 
+                disabled={loading} 
+                type="button" 
+                onClick={() => saveDemo(true)}
+                className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-900 border border-stone-300 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2"
+              >
+                <FileText className="w-5 h-5 text-amber-500" />
+                {loading ? 'Đang lưu...' : 'Lưu Bản Nháp'}
+              </button>
+              
+              <button 
+                disabled={loading} 
+                type="button" 
+                onClick={() => saveDemo(false)}
+                className="flex-1 bg-stone-900 hover:bg-stone-800 text-white text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2"
+              >
+                <Sparkles className="w-5 h-5 text-yellow-400" />
+                {loading ? 'Đang xuất bản...' : 'Xuất Bản Demo'}
+              </button>
+            </div>
           </form>
         </div>
       </div>
+       {showTemplatePicker && (
+         <TemplatePickerModal 
+            configs={templateConfigs} 
+            previewSongId="preview"
+            defaultTemplateId={template}
+            previewData={{
+              id: 'preview',
+              title: title,
+              singer: singer || 'A.C Xuân Tài',
+              composer: composer || 'A.C Xuân Tài',
+              audioUrl: uploadedAudioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+              coverUrl: uploadedCoverUrl || randomSlideUrl || (slideshowImages && slideshowImages.length > 0 ? slideshowImages[0] : '') || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80",
+              backgroundUrl: uploadedBgUrl,
+              lyrics: lyrics,
+              template: template,
+              status: 'public',
+              isReleased: false,
+              playlistIds: playlistIds,
+              requiresPassword: false
+            }}
+            onSelect={(id) => {
+               setTemplate(id);
+               setShowTemplatePicker(false);
+            }} 
+            onClose={() => setShowTemplatePicker(false)}
+         />
+      )}
     </div>
   );
 }
@@ -4772,6 +5380,11 @@ function AdminEditDemo() {
   const [template, setTemplate] = useState('1');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
+  const [composer, setComposer] = useState('');
+  const [singer, setSinger] = useState('');
+  const [lyrics, setLyrics] = useState('');
+  const [randomSlideUrl, setRandomSlideUrl] = useState<string>('');
+
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
@@ -4798,8 +5411,12 @@ function AdminEditDemo() {
       })
       .then(data => {
         setAppData(data);
+        if (data.slideshowImages && data.slideshowImages.length > 0) {
+          const randomIndex = Math.floor(Math.random() * data.slideshowImages.length);
+          setRandomSlideUrl(data.slideshowImages[randomIndex]);
+        }
         if (data.templateConfigs && data.templateConfigs.length > 0) {
-          const sorted = [...data.templateConfigs].sort((a: any, b: any) => a.order - b.order);
+          const sorted = data.templateConfigs.map((c: any) => c.id === '9' ? { ...c, name: 'Cầu Vồng' } : c).sort((a: any, b: any) => a.order - b.order);
           setTemplateConfigs(sorted);
         } else {
           setTemplateConfigs([
@@ -4811,7 +5428,7 @@ function AdminEditDemo() {
             { id: '6', name: 'Hạnh Phúc (Hồng, Hoa rơi)' },
             { id: '7', name: 'Học Đường (Trắng, Lá vàng rơi)' },
             { id: '8', name: 'Tổ Quốc (Đỏ, Cờ phấp phới)' },
-            { id: '9', name: 'Bầu trời xanh (Mây trắng)' },
+            { id: '9', name: 'Cầu Vồng' },
             { id: '10', name: 'Hip Hop (Đường phố)' },
             { id: '11', name: 'Kỳ bí (Đen vàng, Trăng khói mưa)' },
             { id: '12', name: 'Cổ điển (Nâu, retro)' },
@@ -4833,6 +5450,9 @@ function AdminEditDemo() {
           setUploadedBgUrl(found.backgroundUrl || '');
           setPlaylistIds(found.playlistIds || []);
           setTemplate(found.template || '1');
+          setComposer(found.composer || '');
+          setSinger(found.singer || '');
+          setLyrics(found.lyrics || '');
         }
       })
       .catch(err => {
@@ -4914,32 +5534,36 @@ function AdminEditDemo() {
     xhr.send(formData);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (audioUploadProgress > 0 && audioUploadProgress < 100) {
-        return alert("Vui lòng đợi file nhạc tải lên xong!");
-    }
-    if (coverUploadProgress > 0 && coverUploadProgress < 100) {
-        return alert("Vui lòng đợi ảnh bìa tải lên xong!");
-    }
-    if (bgUploadProgress > 0 && bgUploadProgress < 100) {
-        return alert("Vui lòng đợi ảnh nền tải lên xong!");
-    }
-    
+  const saveDemo = async (isDraft: boolean) => {
+    if (audioUploadProgress > 0 && audioUploadProgress < 100) return alert("Vui lòng đợi file nhạc tải lên xong!");
+    if (coverUploadProgress > 0 && coverUploadProgress < 100) return alert("Vui lòng đợi ảnh bìa tải lên xong!");
+    if (bgUploadProgress > 0 && bgUploadProgress < 100) return alert("Vui lòng đợi ảnh nền tải lên xong!");
+
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    formData.delete('audio'); // not sending file binary in this request
-    formData.delete('cover');
-    formData.delete('background');
-    
-    if (uploadedAudioUrl) formData.set('audioUrl', uploadedAudioUrl);
+    const formData = new FormData();
+    formData.set('title', title);
+    formData.set('slug', slug);
+    formData.set('composer', composer);
+    formData.set('singer', singer);
+    formData.set('lyrics', lyrics);
+    formData.set('template', template);
+    if (uploadedAudioUrl) {
+      formData.set('audioUrl', uploadedAudioUrl);
+    } else {
+      formData.set('audioUrl', demo?.audioUrl || '');
+    }
     formData.set('coverUrl', uploadedCoverUrl);
     formData.set('backgroundUrl', uploadedBgUrl);
+    formData.set('playlistIds', JSON.stringify(playlistIds));
 
-    if (!formData.get('slug')) {
-        formData.set('slug', slug);
-    }
-    formData.append('playlistIds', JSON.stringify(playlistIds));
+    const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
+    const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
+    const isReleasedEl = document.querySelector('input[name="isReleased"]') as HTMLInputElement;
+
+    formData.set('password', passwordEl?.value || '');
+    formData.set('status', statusEl?.value || 'public');
+    formData.set('isReleased', isReleasedEl?.checked ? 'true' : 'false');
+    formData.set('isDraft', isDraft ? 'true' : 'false');
     
     try {
         const res = await fetch(`/api/demos/${id}/update`, {
@@ -4950,13 +5574,18 @@ function AdminEditDemo() {
             body: formData
         });
         if (res.ok) {
-            alert('Cập nhật thành công!');
+            alert(isDraft ? 'Cập nhật bản nháp thành công!' : 'Cập nhật thành công!');
             navigate('/admin');
         } else alert('Lỗi cập nhật. Thử tải lại trang và làm lại!');
     } catch(err) {
         alert('Lỗi mạng!');
     }
     setLoading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    saveDemo(demo?.isDraft ? true : false);
   };
 
   if (!demo) return <div className="min-h-screen bg-stone-100 flex items-center justify-center">Đang tải...</div>;
@@ -4988,11 +5617,11 @@ function AdminEditDemo() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Sáng tác</label>
-                <input name="composer" defaultValue={demo.composer} placeholder="Sáng tác (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                <input name="composer" value={composer} onChange={e => setComposer(e.target.value)} placeholder="Sáng tác (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ca sĩ thể hiện</label>
-                <input name="singer" defaultValue={demo.singer} placeholder="Ca sĩ (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                <input name="singer" value={singer} onChange={e => setSinger(e.target.value)} placeholder="Ca sĩ (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 
@@ -5043,7 +5672,7 @@ function AdminEditDemo() {
 
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
-              <textarea name="lyrics" rows={6} defaultValue={demo.lyrics} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
+              <textarea name="lyrics" rows={6} value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
             </div>
 
             <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
@@ -5055,7 +5684,12 @@ function AdminEditDemo() {
                       <option key={tc.id} value={tc.id}>{tc.name}</option>
                     ))}
                   </select>
-                  <button type="button" onClick={() => setShowTemplatePicker(true)} className="px-6 py-3 border border-transparent shrink-0 bg-indigo-600 hover:bg-indigo-700 shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all">
+                  <button 
+                    type="button" 
+                    disabled={!title.trim()}
+                    onClick={() => setShowTemplatePicker(true)} 
+                    className={`px-6 py-3 border border-transparent shrink-0 shadow-sm text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all ${(!title.trim()) ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10'}`}
+                  >
                     <Eye className="w-5 h-5" /> Xem trước giao diện
                   </button>
                 </div>
@@ -5092,24 +5726,60 @@ function AdminEditDemo() {
                </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4 mt-8">
-              <button disabled={loading} type="submit" className="flex-1 bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1">
-                {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
-              </button>
-              <button disabled={loading} type="button" onClick={async () => {
-                if (!confirm("Bạn có chắc muốn làm mới Secret Link của bài này? Secret Link cũ sẽ không còn hoạt động, tự động chuyển về đường dẫn gốc yêu cầu mật khẩu.")) return;
-                const res = await fetch(`/api/demos/${demo.id}/reset-secret`, {
-                  method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
-                  }
-                });
-                if (res.ok) {
-                  alert("Đã reset Secret Link thành công!");
-                }
-              }} className="flex-1 border-2 border-red-200 text-red-500 hover:bg-red-50 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1">
-                Làm mới Secret Link
-              </button>
+            <div className="flex flex-col gap-4 mt-8">
+              {demo.isDraft ? (
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <button 
+                    disabled={loading} 
+                    type="button" 
+                    onClick={() => saveDemo(true)}
+                    className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-900 border border-stone-300 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2"
+                  >
+                    <FileText className="w-5 h-5 text-amber-500" />
+                    {loading ? 'Đang lưu...' : 'Lưu Bản Nháp'}
+                  </button>
+                  
+                  <button 
+                    disabled={loading} 
+                    type="button" 
+                    onClick={() => saveDemo(false)}
+                    className="flex-1 bg-stone-900 hover:bg-stone-800 text-white text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2"
+                  >
+                    <Sparkles className="w-5 h-5 text-yellow-400" />
+                    {loading ? 'Đang xuất bản...' : 'Xuất Bản Demo'}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <button 
+                    disabled={loading} 
+                    type="button" 
+                    onClick={() => saveDemo(false)}
+                    className="flex-1 bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1"
+                  >
+                    {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
+                  </button>
+                  <button 
+                    disabled={loading} 
+                    type="button" 
+                    onClick={async () => {
+                      if (!confirm("Bạn có chắc muốn làm mới Secret Link của bài này? Secret Link cũ sẽ không còn hoạt động, tự động chuyển về đường dẫn gốc yêu cầu mật khẩu.")) return;
+                      const res = await fetch(`/api/demos/${demo.id}/reset-secret`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                        }
+                      });
+                      if (res.ok) {
+                        alert("Đã reset Secret Link thành công!");
+                      }
+                    }} 
+                    className="flex-1 border-2 border-red-200 text-red-500 hover:bg-red-50 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1"
+                  >
+                    Làm mới Secret Link
+                  </button>
+                </div>
+              )}
             </div>
           </form>
         </div>
@@ -5117,7 +5787,23 @@ function AdminEditDemo() {
       {showTemplatePicker && (
          <TemplatePickerModal 
             configs={templateConfigs} 
-            previewSongId={id || ''}
+            previewSongId={id || 'preview'}
+            defaultTemplateId={template}
+            previewData={{
+              id: id || 'preview',
+              title: title,
+              singer: singer || 'A.C Xuân Tài',
+              composer: composer || 'A.C Xuân Tài',
+              audioUrl: uploadedAudioUrl || demo?.audioUrl,
+              coverUrl: uploadedCoverUrl || demo?.coverUrl || randomSlideUrl || (appData?.slideshowImages && appData.slideshowImages.length > 0 ? appData.slideshowImages[0] : '') || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80",
+              backgroundUrl: uploadedBgUrl || demo?.backgroundUrl,
+              lyrics: lyrics,
+              template: template,
+              status: 'public',
+              isReleased: false,
+              playlistIds: playlistIds,
+              requiresPassword: false
+            }}
             onSelect={(id) => {
                setTemplate(id);
                setShowTemplatePicker(false);
