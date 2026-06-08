@@ -656,13 +656,32 @@ async function startServer() {
     let existingSlug = data.demos.find((d: any) => d.slug === slug);
     if (existingSlug) slug = slug + '-' + Date.now().toString().slice(-4);
 
+    let coverUrl = '';
+    if (coverFile) {
+      coverUrl = `/uploads/${coverFile.filename}`;
+    } else {
+      const inputCover = req.body.coverUrl ? processDriveLink(req.body.coverUrl) : '';
+      if (inputCover) {
+        coverUrl = inputCover;
+      } else if (data.slideshowImages && data.slideshowImages.length > 0) {
+        const hashSource = req.body.title || Date.now().toString();
+        let hash = 0;
+        for (let i = 0; i < hashSource.length; i++) {
+          hash += hashSource.charCodeAt(i);
+        }
+        coverUrl = data.slideshowImages[hash % data.slideshowImages.length];
+      } else {
+        coverUrl = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80";
+      }
+    }
+
     const newDemo = {
       id: Date.now().toString(),
       slug: slug,
       title: req.body.title,
       author: req.body.author || '',
       audioUrl: audioFile ? `/uploads/${audioFile.filename}` : (req.body.audioUrl || ''),
-      coverUrl: coverFile ? `/uploads/${coverFile.filename}` : processDriveLink(req.body.coverUrl || ''),
+      coverUrl: coverUrl,
       secretKey: crypto.randomBytes(8).toString('hex'),
       backgroundUrl: processDriveLink(req.body.backgroundUrl || ''),
       lyrics: req.body.lyrics || '',
@@ -697,7 +716,21 @@ async function startServer() {
         if (coverFile) {
             updatedData.coverUrl = `/uploads/${coverFile.filename}`;
         } else if (req.body.coverUrl !== undefined) {
-            updatedData.coverUrl = processDriveLink(req.body.coverUrl);
+            const inputCover = processDriveLink(req.body.coverUrl);
+            if (!inputCover) {
+                if (data.slideshowImages && data.slideshowImages.length > 0) {
+                     const hashSource = (req.body.title || data.demos[idx].title || Date.now().toString());
+                     let hash = 0;
+                     for (let i = 0; i < hashSource.length; i++) {
+                       hash += hashSource.charCodeAt(i);
+                     }
+                     updatedData.coverUrl = data.slideshowImages[hash % data.slideshowImages.length];
+                } else {
+                     updatedData.coverUrl = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80";
+                }
+            } else {
+                updatedData.coverUrl = inputCover;
+            }
         }
         if (req.body.backgroundUrl !== undefined) {
             updatedData.backgroundUrl = processDriveLink(req.body.backgroundUrl);
@@ -983,16 +1016,30 @@ async function startServer() {
          });
       }
 
-      songs = songs.map((d: any) => ({
-         id: d.id,
-         slug: d.slug,
-         title: d.title,
-         singer: d.singer,
-         author: d.author,
-         composer: d.composer,
-         coverUrl: formatUrl(d.coverUrl, data.globalBaseUrl),
-         requiresPassword: isUserMember ? false : !!(!d.isReleased && (d.password || data.globalPassword))
-      }));
+      songs = songs.map((d: any) => {
+         let coverToUse = d.coverUrl || '';
+         if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
+            const idStr = String(d.id || '');
+            let hash = 0;
+            for (let i = 0; i < idStr.length; i++) {
+               hash += idStr.charCodeAt(i);
+            }
+            coverToUse = data.slideshowImages[hash % data.slideshowImages.length];
+         }
+         if (!coverToUse) {
+            coverToUse = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80";
+         }
+         return {
+            id: d.id,
+            slug: d.slug,
+            title: d.title,
+            singer: d.singer,
+            author: d.author,
+            composer: d.composer,
+            coverUrl: formatUrl(coverToUse, data.globalBaseUrl),
+            requiresPassword: isUserMember ? false : !!(!d.isReleased && (d.password || data.globalPassword))
+         };
+      });
 
       const formattedPlaylist = {
          ...playlist,
@@ -1013,7 +1060,10 @@ async function startServer() {
               ? data.slideshowImages
               : ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80"];
           const idStr = String(demo.id || '');
-          const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+          let hash = 0;
+          for (let i = 0; i < idStr.length; i++) {
+             hash += idStr.charCodeAt(i);
+          }
           demo = { ...demo, coverUrl: imagesToUse[hash % imagesToUse.length] };
       }
       
@@ -1210,7 +1260,10 @@ async function startServer() {
           let coverToUse = demo.coverUrl;
           if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
               const idStr = String(demo.id || '');
-              const hash = Array.from(idStr).reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+              let hash = 0;
+              for (let i = 0; i < idStr.length; i++) {
+                 hash += idStr.charCodeAt(i);
+              }
               coverToUse = data.slideshowImages[hash % data.slideshowImages.length];
           }
           

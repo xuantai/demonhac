@@ -611,7 +611,7 @@ function Home() {
     >
       <SocialCarousel data={data} />
       {data.slideshowImages && data.slideshowImages.length > 0 ? (
-        <div className="absolute inset-0 z-[-1] pointer-events-none bg-neutral-950">
+        <div className="fixed inset-0 z-[-1] pointer-events-none bg-neutral-950">
           <AnimatePresence mode="popLayout">
             <motion.div
               key={currentSlide}
@@ -1989,7 +1989,7 @@ function CheeringEffect() {
       setHatWaves(prev => [...prev, wave1]);
       hatTimer1 = setTimeout(() => {
         setHatWaves(prev => prev.filter(w => w.id !== wave1.id));
-      }, 7000); // Clean after 7.0s (longer than max duration + max delay)
+      }, 10000); // Clean after 10.0s (longer than max duration + max delay)
 
       // Wave 2 after close, random interval (0.8s to 1.4s): 3 hats
       const wave2Delay = 800 + Math.random() * 600;
@@ -1998,7 +1998,7 @@ function CheeringEffect() {
         setHatWaves(prev => [...prev, wave2]);
         setTimeout(() => {
           setHatWaves(prev => prev.filter(w => w.id !== wave2.id));
-        }, 7000);
+        }, 10000);
       }, wave2Delay);
     };
 
