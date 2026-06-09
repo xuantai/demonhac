@@ -543,12 +543,12 @@ function Home() {
     if (node) observer.current.observe(node);
   }, [visibleMVs, ytVideos.length]);
 
-  const handleSharePlaylist = (e: React.MouseEvent, playlistId: string) => {
+  const handleSharePlaylist = async (e: React.MouseEvent, playlistId: string) => {
     e.preventDefault();
     e.stopPropagation();
     let url = window.location.origin + '/playlist/' + playlistId;
-    if (url.includes('xn--ti-jia.com')) url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-    navigator.clipboard.writeText(url);
+    url = formatShareUrl(url);
+    await copyToClipboard(url);
     setToast(t.toastCopy || 'Đã copy link!');
     setTimeout(() => setToast(''), 3000);
   };
@@ -969,14 +969,12 @@ function Home() {
                         <p className="text-xs sm:text-sm text-neutral-400 mt-1">{songsInPlaylist.length} bài hát</p>
                       </div>
                       <button
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           let url = `${window.location.origin}/playlist/${playlist.id}`;
-                          if (url.includes('xn--ti-jia.com')) {
-                            url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                          }
-                          navigator.clipboard.writeText(url);
+                          url = formatShareUrl(url);
+                          await copyToClipboard(url);
                           setToast('Đã copy link playlist!');
                           setTimeout(() => setToast(''), 3000);
                         }}
@@ -1030,14 +1028,12 @@ function Home() {
                           {t.lReleasedMark || 'RELEASED'}
                         </span>
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             let url = `${window.location.origin}/song/${demo.slug || demo.id}`;
-                            if (url.includes('xn--ti-jia.com')) {
-                              url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                            }
-                            navigator.clipboard.writeText(url);
+                            url = formatShareUrl(url);
+                            await copyToClipboard(url);
                             setToast('Đã copy link bài hát!');
                             setTimeout(() => setToast(''), 3000);
                           }}
@@ -1123,7 +1119,7 @@ function Home() {
       </footer>
 
       {toast && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-md text-white border border-white/20 px-5 py-3 rounded-2xl shadow-2xl z-[100] flex items-center gap-2 font-mono text-xs animate-bounce">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-md text-white border border-white/20 px-5 py-3 rounded-2xl shadow-2xl z-[500] flex items-center gap-2 font-mono text-xs animate-bounce">
            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
            {toast}
         </div>
@@ -1139,6 +1135,44 @@ const resolveUploadUrl = (url: string | undefined): string => {
     return url.substring(uploadsIndex);
   }
   return url;
+};
+
+const formatShareUrl = (url: string): string => {
+  if (!url) return '';
+  return url
+    .replace(/xn--ti-jia\.com/gi, 'tài.com')
+    .replace(/xn--ti-8ja\.com/gi, 'tài.com')
+    .replace(/xn--ti-.*\.com/gi, 'tài.com');
+};
+
+const copyToClipboard = async (text: string): Promise<boolean> => {
+  if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      console.warn("Clipboard API failed, using fallback copy method.", e);
+    }
+  }
+  
+  // Fallback copy method
+  try {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return successful;
+  } catch (err) {
+    console.error("Fallback copy method failed.", err);
+    return false;
+  }
 };
 
 function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext, isPreview, lyricsColor, waveColor }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any, isPreview?: boolean, lyricsColor?: string, waveColor?: string }) {
@@ -2999,20 +3033,18 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
             className={`fixed top-0 inset-x-0 h-16 bg-gradient-to-b ${isLight ? 'from-[#faf9f6]/50' : 'from-black/40'} to-transparent pointer-events-none z-40`}
           />
 
-          <div className={`fixed top-6 left-6 flex items-center gap-3 z-[60] ${isLight ? 'text-stone-900' : 'text-white'}`}>
+          <div className={`fixed top-6 left-6 flex items-center gap-3 z-[300] ${isLight ? 'text-stone-900' : 'text-white'}`}>
             <button onClick={handleBack} className="opacity-60 hover:opacity-100 p-2 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all drop-shadow-md cursor-pointer text-current" title={t.back}>
               <ArrowLeft className="w-5 h-5" />
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (!demo) return;
                 const baseUrl = '/song/';
                 const dynamicId = demo.slug || demo.id;
                 let url = window.location.origin + baseUrl + dynamicId;
-                if (url.includes('xn--ti-jia.com')) {
-                  url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                }
-                navigator.clipboard.writeText(url);
+                url = formatShareUrl(url);
+                await copyToClipboard(url);
                 setToast('Đã copy link bài hát!');
                 setTimeout(() => setToast(''), 3000);
               }}
@@ -3023,16 +3055,14 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
             </button>
             {isAdmin && demo?.secretKey && demo?.password && (
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!demo) return;
                   const baseUrl = '/song/';
                   const dynamicId = demo.slug || demo.id;
                   let url = window.location.origin + baseUrl + dynamicId;
-                  if (url.includes('xn--ti-jia.com')) {
-                    url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                  }
+                  url = formatShareUrl(url);
                   url += `?secret=${demo.secretKey}`;
-                  navigator.clipboard.writeText(url);
+                  await copyToClipboard(url);
                   setToast('Đã copy Secret Link!');
                   setTimeout(() => setToast(''), 3000);
                 }}
@@ -3262,7 +3292,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         </motion.div>
       </div>
       {toast && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-md text-white border border-white/20 px-5 py-3 rounded-2xl shadow-2xl z-[100] flex items-center gap-2 font-mono text-xs animate-bounce">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-md text-white border border-white/20 px-5 py-3 rounded-2xl shadow-2xl z-[500] flex items-center gap-2 font-mono text-xs animate-bounce">
            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
            {toast}
         </div>
@@ -3816,23 +3846,19 @@ function AdminDashboard() {
     });
   };
 
-  const handleShare = (slugOrId: string) => {
+  const handleShare = async (slugOrId: string) => {
     let url = window.location.origin + '/song/' + slugOrId;
-    if (url.includes('xn--ti-jia.com')) {
-      url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-    }
-    navigator.clipboard.writeText(url);
+    url = formatShareUrl(url);
+    await copyToClipboard(url);
     setToast('Đã copy link!');
     setTimeout(() => setToast(''), 3000);
   };
 
-  const handleShareSecret = (demoItem: any) => {
+  const handleShareSecret = async (demoItem: any) => {
     let url = window.location.origin + '/song/' + (demoItem.slug || demoItem.id);
-    if (url.includes('xn--ti-jia.com')) {
-      url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-    }
+    url = formatShareUrl(url);
     url += `?secret=${demoItem.secretKey}`;
-    navigator.clipboard.writeText(url);
+    await copyToClipboard(url);
     setToast('Đã copy Secret Link!');
     setTimeout(() => setToast(''), 3000);
   };
@@ -5884,21 +5910,19 @@ function AdminEditDemo() {
                   <div className="min-w-0 flex-1 text-center sm:text-left flex flex-col items-center sm:items-start">
                     <div className="font-bold text-stone-800 text-sm tracking-tight">Secret Link (Chia sẻ trực tiếp xem không hỏi mật khẩu)</div>
                     <div className="text-xs text-amber-800 font-mono select-all truncate w-full max-w-full mt-1.5 px-3 py-1.5 bg-amber-150/40 rounded-lg border border-amber-200/50">
-                      {window.location.origin}/song/{demo.slug || demo.id}?secret={demo.secretKey}
+                      {formatShareUrl(window.location.origin + '/song/' + (demo.slug || demo.id) + '?secret=' + demo.secretKey)}
                     </div>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     const baseUrl = '/song/';
                     const dynamicId = demo.slug || demo.id;
                     let url = window.location.origin + baseUrl + dynamicId;
-                    if (url.includes('xn--ti-jia.com')) {
-                      url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
-                    }
+                    url = formatShareUrl(url);
                     url += `?secret=${demo.secretKey}`;
-                    navigator.clipboard.writeText(url);
+                    await copyToClipboard(url);
                     setToast('Đã copy Secret Link!');
                     setTimeout(() => setToast(''), 3000);
                   }}

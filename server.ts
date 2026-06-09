@@ -1328,17 +1328,19 @@ async function startServer() {
 
       if (ogImage) {
          // Enforce punycode hostname in ogImage
-         ogImage = ogImage.replace(/tài\.com/gi, 'xn--ti-jia.com');
-         ogImage = ogImage.replace(/ta\u0300i\.com/gi, 'xn--ti-jia.com');
-         ogImage = ogImage.replace(/t%C3%A0i\.com/gi, 'xn--ti-jia.com');
-         ogImage = ogImage.replace(/t%c3%a0i\.com/gi, 'xn--ti-jia.com');
-         ogImage = ogImage.replace(/t\u0300?a\u0300?i\.com/gi, 'xn--ti-jia.com');
+         ogImage = ogImage.replace(/tài\.com/gi, 'xn--ti-8ja.com');
+         ogImage = ogImage.replace(/ta\u0300i\.com/gi, 'xn--ti-8ja.com');
+         ogImage = ogImage.replace(/t%C3%A0i\.com/gi, 'xn--ti-8ja.com');
+         ogImage = ogImage.replace(/t%c3%a0i\.com/gi, 'xn--ti-8ja.com');
+         ogImage = ogImage.replace(/t\u0300?a\u0300?i\.com/gi, 'xn--ti-8ja.com');
+         // Also map xn--ti-jia.com to the correct xn--ti-8ja.com
+         ogImage = ogImage.replace(/xn--ti-jia\.com/gi, 'xn--ti-8ja.com');
       }
 
       let ogUrl = `https://${host}${url}`;
-      if (ogUrl.includes('xn--ti-jia.com')) {
-         ogUrl = ogUrl.replace(/xn--ti-jia\.com/gi, 'tài.com');
-      }
+      ogUrl = ogUrl
+         .replace(/xn--ti-jia\.com/gi, 'tài.com')
+         .replace(/xn--ti-8ja\.com/gi, 'tài.com');
 
       // Inject tags
       html = html.replace(/<title>.*?<\/title>/i, `<title>${ogTitle}</title>`);
