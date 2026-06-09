@@ -276,5 +276,38 @@
   100% { transform: scale(2); opacity: 0; }
 }
 
+@keyframes neon-blink {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1.4) drop-shadow(0 0 12px var(--neon-color, currentColor));
+    box-shadow: 0 0 15px var(--neon-color, currentColor), 0 0 30px var(--neon-color, currentColor);
+  }
+  30%, 34% {
+    opacity: 0.35;
+    filter: brightness(0.65) drop-shadow(0 0 2px var(--neon-color, currentColor));
+    box-shadow: 0 0 4px var(--neon-color, currentColor);
+  }
+  32% {
+    opacity: 0.85;
+    filter: brightness(1.25) drop-shadow(0 0 8px var(--neon-color, currentColor));
+    box-shadow: 0 0 12px var(--neon-color, currentColor);
+  }
+  60%, 64% {
+    opacity: 0.45;
+    filter: brightness(0.7) drop-shadow(0 0 3px var(--neon-color, currentColor));
+    box-shadow: 0 0 5px var(--neon-color, currentColor);
+  }
+  62%, 85% {
+    opacity: 1;
+    filter: brightness(1.4) drop-shadow(0 0 12px var(--neon-color, currentColor));
+    box-shadow: 0 0 15px var(--neon-color, currentColor), 0 0 30px var(--neon-color, currentColor);
+  }
+}
+
+.animate-neon-blink {
+  animation: neon-blink 1.8s infinite ease-in-out;
+}
+
+
 
 

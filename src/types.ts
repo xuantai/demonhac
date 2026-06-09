@@ -40,6 +40,7 @@ export interface TemplateConfig {
   bgColor?: string;
   titleColor?: string;
   lyricsColor?: string;
+  waveColor?: string;
 }
 
 export interface AppData {

@@ -96,7 +96,8 @@ function AdminLogin() {
         body: JSON.stringify({ password: pwd })
       });
       if (res.ok) {
-        localStorage.setItem('adminToken', 'MatKhauDay123');
+        const data = await res.json();
+        localStorage.setItem('adminToken', data.token || pwd);
         window.location.href = window.location.pathname;
       } else {
         const data = await res.json();
@@ -252,7 +253,7 @@ function MemberLogin() {
 
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('adminToken');
-  if (token !== 'MatKhauDay123') {
+  if (!token) {
     return <AdminLogin />;
   }
   return <>{children}</>;
@@ -285,6 +286,8 @@ function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
   if (!isAdmin) return null;
 
   const isAdminPage = location.pathname.startsWith('/admin');
+  if (isAdminPage) return null;
+
   const isListeningPage = location.pathname.startsWith('/demo/') || 
                           location.pathname.startsWith('/song/') || 
                           location.pathname.startsWith('/playlist/');
@@ -1129,7 +1132,16 @@ function Home() {
   );
 }
 
-function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext, isPreview, lyricsColor }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any, isPreview?: boolean, lyricsColor?: string }) {
+const resolveUploadUrl = (url: string | undefined): string => {
+  if (!url) return '';
+  const uploadsIndex = url.indexOf('/uploads/');
+  if (uploadsIndex !== -1) {
+    return url.substring(uploadsIndex);
+  }
+  return url;
+};
+
+function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistContext, isPreview, lyricsColor, waveColor }: { src: string, template: string, onEnded?: () => void, onAlmostEnded?: () => void, playlistContext?: any, isPreview?: boolean, lyricsColor?: string, waveColor?: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(!isPreview);
   const [currentTime, setCurrentTime] = useState(0);
@@ -1207,25 +1219,27 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
   const waves = Array.from({ length: 32 });
 
   const isLight = ['1', '4', '6', '7', '9', '17'].includes(template);
-  let waveColor = "bg-white";
-  if (template === '1') waveColor = "bg-orange-500";
-  if (template === '2') waveColor = "bg-fuchsia-300";
-  if (template === '3') waveColor = "bg-slate-300";
-  if (template === '4') waveColor = "bg-teal-600";
-  if (template === '5') waveColor = "bg-red-100";
-  if (template === '6') waveColor = "bg-pink-600";
-  if (template === '7') waveColor = "bg-stone-800";
-  if (template === '8') waveColor = "bg-yellow-400";
-  if (template === '9') waveColor = "bg-sky-600";
-  if (template === '10') waveColor = "bg-yellow-400";
-  if (template === '11') waveColor = "bg-[#d4af37]";
-  if (template === '12') waveColor = "bg-[#d97706]";
-  if (template === '13') waveColor = "bg-[#f43f5e]";
-  if (template === '14') waveColor = "bg-[#38bdf8]";
-  if (template === '15') waveColor = "bg-[#10b981]";
-  if (template === '16') waveColor = "bg-purple-500";
-  if (template === '17') waveColor = "bg-yellow-400";
-  if (template === '18') waveColor = "bg-amber-300";
+  let waveColorClass = "bg-white";
+  if (template === '1') waveColorClass = "bg-orange-500";
+  if (template === '2') waveColorClass = "bg-fuchsia-300";
+  if (template === '3') waveColorClass = "bg-slate-300";
+  if (template === '4') waveColorClass = "bg-teal-600";
+  if (template === '5') waveColorClass = "bg-red-100";
+  if (template === '6') waveColorClass = "bg-pink-600";
+  if (template === '7') waveColorClass = "bg-stone-800";
+  if (template === '8') waveColorClass = "bg-yellow-400";
+  if (template === '9') waveColorClass = "bg-sky-600";
+  if (template === '10') waveColorClass = "bg-yellow-400";
+  if (template === '11') waveColorClass = "bg-[#d4af37]";
+  if (template === '12') waveColorClass = "bg-[#d97706]";
+  if (template === '13') waveColorClass = "bg-[#f43f5e]";
+  if (template === '14') waveColorClass = "bg-[#38bdf8]";
+  if (template === '15') waveColorClass = "bg-[#10b981]";
+  if (template === '16') waveColorClass = "bg-purple-500";
+  if (template === '17') waveColorClass = "bg-yellow-400";
+  if (template === '18') waveColorClass = "bg-amber-300";
+
+  const shouldAnimateWave = isPlaying || isPreview;
 
   return (
     <div 
@@ -1252,11 +1266,11 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
           return (
              <div 
               key={i} 
-              className={`w-1 rounded-full ${waveColor} transition-all duration-300 origin-bottom opacity-90 drop-shadow-sm`}
+              className={`w-1 rounded-full ${waveColorClass} transition-all duration-300 origin-bottom opacity-90 drop-shadow-sm`}
               style={{
-                height: isPlaying ? '100%' : '15%',
-                animation: isPlaying ? `pulse-wave ${randDur}s ease-in-out infinite alternate` : 'none',
-                backgroundColor: lyricsColor || undefined,
+                height: shouldAnimateWave ? '100%' : '15%',
+                animation: shouldAnimateWave ? `pulse-wave ${randDur}s ease-in-out infinite alternate` : 'none',
+                backgroundColor: waveColor || lyricsColor || undefined,
               }}
             ></div>
           );
@@ -1332,7 +1346,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
 
 function ButterflyEffect() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-60">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[30] opacity-60">
       {Array.from({ length: 12 }).map((_, i) => (
         <div 
           key={i} 
@@ -1373,22 +1387,37 @@ function CandyEffect() {
 }
 
 function ElectricEffect() {
-  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-cyan-500'];
+  const colorMap = [
+    { bg: 'bg-red-500', hex: '#ef4444' },
+    { bg: 'bg-blue-500', hex: '#3b82f6' },
+    { bg: 'bg-green-500', hex: '#22c55e' },
+    { bg: 'bg-yellow-500', hex: '#eab308' },
+    { bg: 'bg-purple-500', hex: '#a855f7' },
+    { bg: 'bg-pink-500', hex: '#ec4899' },
+    { bg: 'bg-cyan-500', hex: '#06b6d4' }
+  ];
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-80">
-      {Array.from({ length: 15 }).map((_, i) => (
-        <div 
-          key={i} 
-          className={`absolute w-1 rounded-full animate-snow shadow-[0_0_10px_currentColor] ${colors[i % colors.length]}`}
-          style={{
-            left: `${Math.random() * 100}%`,
-            height: `${Math.random() * 100 + 50}px`,
-            animationDuration: `${Math.random() * 5 + 3}s`,
-            animationDelay: `${Math.random() * -5}s`,
-            color: 'inherit'
-          }}
-        ></div>
-      ))}
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[30] opacity-50">
+      {Array.from({ length: 15 }).map((_, i) => {
+        const item = colorMap[i % colorMap.length];
+        const height = Math.random() * 100 + 50;
+        const duration = Math.random() * 5 + 3;
+        const delay = Math.random() * -5;
+        const blinkDelay = Math.random() * 1.8;
+        return (
+          <div 
+            key={i} 
+            className={`absolute w-1 rounded-full ${item.bg}`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              height: `${height}px`,
+              animation: `snow ${duration}s linear infinite, neon-blink 1.8s infinite ease-in-out`,
+              animationDelay: `${delay}s, ${blinkDelay}s`,
+              '--neon-color': item.hex
+            } as React.CSSProperties}
+          ></div>
+        );
+      })}
     </div>
   );
 }
@@ -1396,7 +1425,7 @@ function ElectricEffect() {
 function ChainEffect() {
   const chains = ['⛓️', '💎', '💰', '👑'];
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-70">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[30] opacity-70">
       {Array.from({ length: 25 }).map((_, i) => (
         <div 
           key={i} 
@@ -1438,7 +1467,7 @@ function NoteEffect() {
 
 function EightBitEffect() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[100] opacity-30">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[30] opacity-30">
       {Array.from({ length: 30 }).map((_, i) => (
         <div 
           key={i} 
@@ -1968,8 +1997,8 @@ function CheeringEffect() {
     };
 
     runConfettiCycle();
-    // 1.2s delay + 4.8s fall time + 5s wait time = 11s cycle!
-    confettiInterval = setInterval(runConfettiCycle, 11000);
+    // 1.2s delay + 4.8s fall time + 2s wait time = 8s cycle!
+    confettiInterval = setInterval(runConfettiCycle, 8000);
 
     return () => {
       clearTimeout(confettiTimer1);
@@ -1984,17 +2013,17 @@ function CheeringEffect() {
     let hatInterval: any;
 
     const runHatCycle = () => {
-      // Wave 1 immediately: 3 hats
-      const wave1 = generateHatWave(3);
+      // Wave 1 immediately: 2 hats
+      const wave1 = generateHatWave(2);
       setHatWaves(prev => [...prev, wave1]);
       hatTimer1 = setTimeout(() => {
         setHatWaves(prev => prev.filter(w => w.id !== wave1.id));
       }, 10000); // Clean after 10.0s (longer than max duration + max delay)
 
-      // Wave 2 after close, random interval (0.8s to 1.4s): 3 hats
+      // Wave 2 after close, random interval (0.8s to 1.4s): 2 hats (Total 4 hats per wave)
       const wave2Delay = 800 + Math.random() * 600;
       hatTimer2 = setTimeout(() => {
-        const wave2 = generateHatWave(3);
+        const wave2 = generateHatWave(2);
         setHatWaves(prev => [...prev, wave2]);
         setTimeout(() => {
           setHatWaves(prev => prev.filter(w => w.id !== wave2.id));
@@ -2003,8 +2032,8 @@ function CheeringEffect() {
     };
 
     runHatCycle();
-    // ~1.4s max wave2Delay + 5.5s max duration + 0.7s delay = ~7.6s total animation time + 5s wait time = 12.6s cycle
-    hatInterval = setInterval(runHatCycle, 12600);
+    // ~1.4s max wave2Delay + 5.5s max duration + 0.7s delay = ~7.6s total animation time + 7.4s wait time = 15s cycle
+    hatInterval = setInterval(runHatCycle, 15000);
 
     return () => {
       clearTimeout(hatTimer1);
@@ -2015,6 +2044,7 @@ function CheeringEffect() {
 
   return (
     <>
+      {/* Behind Cover (z-[5]): Sun (mặt trời vẫn ở sau) and Hats */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-[5]">
         {/* Sun */}
         <div className="absolute top-10 right-10 text-[80px] drop-shadow-[0_0_40px_rgba(255,255,255,0.8)] animate-[cute-spin_8s_ease-in-out_infinite]">
@@ -2033,7 +2063,7 @@ function CheeringEffect() {
                 '--ty': hat.ty,
                 animation: `hat-toss ${hat.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`,
                 animationDelay: `${hat.delay}s`,
-                opacity: 0.7,
+                opacity: 0.4,
                 filter: 'brightness(1.5)',
               } as React.CSSProperties}
             >
@@ -2042,13 +2072,9 @@ function CheeringEffect() {
           ))
         )}
       </div>
+
+      {/* Confetti (z-[20]) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-[20]">
-        {/* Clouds */}
-        <div className="absolute top-20 left-5 text-[60px] animate-[cloud-drift_6s_ease-in-out_infinite] opacity-90 drop-shadow-lg">☁️</div>
-        <div className="absolute top-10 left-[30%] text-[70px] animate-[cloud-drift_8s_ease-in-out_infinite] opacity-80 drop-shadow-lg" style={{ animationDelay: '1s' }}>☁️</div>
-        <div className="absolute top-32 right-32 text-[50px] animate-[cloud-drift_7s_ease-in-out_infinite] opacity-90 drop-shadow-md" style={{ animationDelay: '2s' }}>☁️</div>
-        <div className="absolute top-16 right-[45%] text-[55px] animate-[cloud-drift_9s_ease-in-out_infinite] opacity-70 drop-shadow-sm" style={{ animationDelay: '3s' }}>☁️</div>
-        
         {/* Rhythmic Burst Confetti */}
         {confettiBursts.map(burst => 
           burst.items.map((conf, i) => (
@@ -2061,12 +2087,21 @@ function CheeringEffect() {
                 animation: conf.isLeft 
                   ? `confetti-right ${conf.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards` 
                   : `confetti-left ${conf.duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`,
-                opacity: 0.7,
+                opacity: 0.5,
                 filter: 'brightness(1.5)',
               }}
             />
           ))
         )}
+      </div>
+
+      {/* On top of Cover (z-[45]): Clouds (mây đè lên ảnh bìa z-10 nhưng dưới lời bài hát z-150) */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-[45]">
+        {/* Clouds */}
+        <div className="absolute top-20 left-5 text-[60px] animate-[cloud-drift_6s_ease-in-out_infinite] opacity-90 drop-shadow-lg">☁️</div>
+        <div className="absolute top-10 left-[30%] text-[70px] animate-[cloud-drift_8s_ease-in-out_infinite] opacity-80 drop-shadow-lg" style={{ animationDelay: '1s' }}>☁️</div>
+        <div className="absolute top-32 right-32 text-[50px] animate-[cloud-drift_7s_ease-in-out_infinite] opacity-90 drop-shadow-md" style={{ animationDelay: '2s' }}>☁️</div>
+        <div className="absolute top-16 right-[45%] text-[55px] animate-[cloud-drift_9s_ease-in-out_infinite] opacity-70 drop-shadow-sm" style={{ animationDelay: '3s' }}>☁️</div>
       </div>
     </>
   );
@@ -2414,13 +2449,83 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   const [searchParams] = useSearchParams();
   const secretKey = searchParams.get('secret');
   const navigate = useNavigate();
-  const isAdmin = localStorage.getItem('adminToken') === 'MatKhauDay123';
+  const isAdmin = !!localStorage.getItem('adminToken');
   const [demo, setDemo] = useState<DemoSong | null>(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
+  const [displayCoverUrl, setDisplayCoverUrl] = useState<string>('');
+  const [triedRelative, setTriedRelative] = useState(false);
+  const [triedAbsolute, setTriedAbsolute] = useState(false);
+  const [triedRandom, setTriedRandom] = useState(false);
+
+  // Initialize displayCoverUrl whenever song or previewConfig updates
+  useEffect(() => {
+    const primaryUrl = demo?.coverUrl || demo?.globalCoverUrl || (previewConfig && previewConfig.coverUrl) || '';
+    setDisplayCoverUrl(primaryUrl);
+    setTriedRelative(false);
+    setTriedAbsolute(false);
+    setTriedRandom(false);
+  }, [id, demo?.id, demo?.coverUrl, demo?.globalCoverUrl, previewConfig?.coverUrl]);
+
+  // Sequential error fallback strategy
+  const handleCoverError = () => {
+    // 1. If absolute URL failed but it's an uploaded file, try relative
+    if (displayCoverUrl && displayCoverUrl.startsWith('http') && displayCoverUrl.includes('/uploads/') && !triedRelative) {
+      setTriedRelative(true);
+      const idx = displayCoverUrl.indexOf('/uploads/');
+      if (idx !== -1) {
+        setDisplayCoverUrl(displayCoverUrl.substring(idx));
+        return;
+      }
+    }
+
+    // 2. If relative URL failed, try prefixing globalBaseUrl to load from production
+    if (displayCoverUrl && displayCoverUrl.startsWith('/uploads/')) {
+      if (!triedAbsolute) {
+        setTriedAbsolute(true);
+        let base = '';
+        if (demo?.globalCoverUrl) {
+          try {
+            const urlObj = new URL(demo.globalCoverUrl);
+            base = urlObj.origin;
+          } catch (e) {
+            // ignore
+          }
+        }
+        if (base) {
+          setDisplayCoverUrl(`${base}${displayCoverUrl}`);
+          return;
+        }
+      }
+    }
+
+    // 3. Fall back to song's stable hash-based random cover chosen from slideshow images
+    if (!triedRandom) {
+      setTriedRandom(true);
+      const imagesToUse = (demo?.slideshowImages && demo.slideshowImages.length > 0)
+        ? demo.slideshowImages
+        : (previewConfig?.slideshowImages && previewConfig.slideshowImages.length > 0) ? previewConfig.slideshowImages : [];
+      
+      const imagesList = imagesToUse.length > 0 ? imagesToUse : ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80"];
+      
+      const idStr = String(id || demo?.id || '');
+      let hash = 0;
+      for (let i = 0; i < idStr.length; i++) {
+        hash += idStr.charCodeAt(i);
+      }
+      setDisplayCoverUrl(imagesList[hash % imagesList.length]);
+      return;
+    }
+
+    // 4. Ultimate stock image fallback
+    const ultimateStock = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80";
+    if (displayCoverUrl !== ultimateStock) {
+      setDisplayCoverUrl(ultimateStock);
+    }
+  };
 
   const parseLyricsToElements = (rawLyrics: string) => {
     if (!rawLyrics) return null;
@@ -2662,8 +2767,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   const forceMobile = isPreview && !previewConfig.isPCPreviewMode;
   const forcePC = isPreview && previewConfig.isPCPreviewMode;
   const isLight = templateType === '1' || templateType === '4' || templateType === '6' || templateType === '7' || templateType === '9' || templateType === '17';
-  const displayCoverUrl = demo.coverUrl || demo.globalCoverUrl || '';
-  const pageBgUrl = demo.backgroundUrl || displayCoverUrl;
+  const pageBgUrl = demo.backgroundUrl ? demo.backgroundUrl : displayCoverUrl;
   let themeClasses = "";
   let accentClass = "";
 
@@ -2917,7 +3021,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
             >
               <Share2 className="w-4.5 h-4.5" />
             </button>
-            {isAdmin && demo?.secretKey && (
+            {isAdmin && demo?.secretKey && demo?.password && (
               <button
                 onClick={() => {
                   if (!demo) return;
@@ -2954,7 +3058,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         className={`max-w-5xl mx-auto w-full relative ${forceMobile ? 'block pb-16 pt-8' : forcePC ? 'flex flex-row gap-8 items-stretch pt-16' : 'block md:flex md:flex-row md:gap-8 md:items-stretch pb-16 md:pb-0 pt-8 md:pt-16'}`}
       >
         {/* Left: Player */}
-        <div className={`w-full max-w-md mx-auto block relative z-40 ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
+        <div className={`w-full max-w-md mx-auto block relative z-10 ${forceMobile ? 'px-2 text-center' : forcePC ? 'flex-1 sticky top-24 self-start mx-0' : 'px-2 md:px-0 text-center md:text-left md:flex-1 md:sticky md:top-24 md:self-start md:mx-0'}`}>
           <div className={`${forceMobile ? '' : forcePC ? 'flex flex-col items-center flex-1 text-left' : 'flex flex-col items-center md:items-start flex-1'}`}>
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -3005,6 +3109,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                       src={displayCoverUrl} 
                       alt="Cover" 
                       className="w-full h-full rounded-full object-cover aspect-square z-10" 
+                      onError={handleCoverError}
                     />
                   ) : (
                     <div className="w-full h-full bg-stone-900 rounded-full flex items-center justify-center z-10 text-stone-600 aspect-square">
@@ -3065,6 +3170,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                         alt="Cover" 
                         className="w-full h-full object-cover animate-zoom-gentle relative z-10"
                         style={{ clipPath: 'url(#puzzle-clip)' }}
+                        onError={handleCoverError}
                       />
                     ) : (
                       <div className="w-full h-full bg-stone-900 flex flex-col justify-center items-center relative z-10" style={{ clipPath: 'url(#puzzle-clip)' }}>
@@ -3077,6 +3183,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                     src={displayCoverUrl} 
                     alt="Cover" 
                     className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'} ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}
+                    onError={handleCoverError}
                   />
                 ) : (
                   <div className={`w-full h-full bg-black/30 flex flex-col justify-center items-center ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}>
@@ -3113,7 +3220,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           </motion.div>
           
           <div 
-            className={`rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-50 overflow-hidden animate-fade-in ${forceMobile ? 'fixed bottom-4 w-[calc(100%-2rem)] inset-x-0 mx-auto' : forcePC ? 'relative bottom-auto w-full inset-x-auto mx-0' : 'fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full inset-x-0 md:inset-x-auto mx-auto md:mx-0'}`}
+            className={`rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.3)] border ${isLight ? 'border-black/10' : 'border-white/20'} z-[200] overflow-hidden animate-fade-in ${forceMobile ? 'fixed bottom-4 w-[calc(100%-2rem)] inset-x-0 mx-auto' : forcePC ? 'relative bottom-auto w-full inset-x-auto mx-0' : 'fixed md:relative bottom-4 md:bottom-auto w-[calc(100%-2rem)] md:w-full inset-x-0 md:inset-x-auto mx-auto md:mx-0'}`}
           >
             {/* Background with blur and mask */}
             <div 
@@ -3129,7 +3236,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               )}
             </div>
             <div className="relative z-10 px-4 pt-2 pb-3 md:px-5 md:pt-3 md:pb-4">
-               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} isPreview={isPreview} lyricsColor={customConfig?.lyricsColor} />
+               <CustomAudioPlayer src={demo.audioUrl} template={templateType} onEnded={onEnd} onAlmostEnded={onAlmostEnded} playlistContext={playlistContext} isPreview={isPreview} lyricsColor={customConfig?.lyricsColor} waveColor={customConfig?.waveColor} />
             </div>
           </div>
           </div>
@@ -3140,7 +3247,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`flex-1 w-full relative z-30 ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
+          className={`flex-1 w-full relative z-[150] ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
         >
           <h3 className={`text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>{t.lyric}</h3>
           <div className="pr-4">
@@ -3490,9 +3597,10 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
     const [bgColor, setBgColor] = useState(config.bgColor || '');
     const [titleColor, setTitleColor] = useState(config.titleColor || '');
     const [lyricsColor, setLyricsColor] = useState(config.lyricsColor || '');
+    const [waveColor, setWaveColor] = useState(config.waveColor || '');
     const [previewSongId, setPreviewSongId] = useState(demos[0]?.id || '');
 
-    const currentConfig = { ...config, name, bgColor, titleColor, lyricsColor };
+    const currentConfig = { ...config, name, bgColor, titleColor, lyricsColor, waveColor };
 
     const renderColorPickerField = (
       label: string, 
@@ -3570,6 +3678,7 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
                     {renderColorPickerField("Màu nền tùy chỉnh", bgColor, setBgColor, "VD: #111827")}
                     {renderColorPickerField("Màu chữ tiêu đề", titleColor, setTitleColor, "VD: #ffffff")}
                     {renderColorPickerField("Màu lời bài hát", lyricsColor, setLyricsColor, "VD: #eeeeee")}
+                    {renderColorPickerField("Màu sóng âm", waveColor, setWaveColor, "VD: #10b981")}
                  </div>
              </div>
              <div className="flex-1 w-full min-h-[700px] md:min-h-0 bg-stone-900 relative overflow-hidden flex items-center justify-center py-6 md:py-0">
@@ -3615,6 +3724,14 @@ function AdminDashboard() {
   const [homeCoverUrlPreview, setHomeCoverUrlPreview] = useState('');
   const [faviconUrlPreview, setFaviconUrlPreview] = useState('');
   const [ogImageUrlPreview, setOgImageUrlPreview] = useState('');
+
+  const handleLogoutAdmin = async () => {
+    localStorage.removeItem('adminToken');
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (e) {}
+    window.location.href = '/';
+  };
 
   // Passwords Tab States
   const [oldAdminPass, setOldAdminPass] = useState('');
@@ -3706,6 +3823,17 @@ function AdminDashboard() {
     }
     navigator.clipboard.writeText(url);
     setToast('Đã copy link!');
+    setTimeout(() => setToast(''), 3000);
+  };
+
+  const handleShareSecret = (demoItem: any) => {
+    let url = window.location.origin + '/song/' + (demoItem.slug || demoItem.id);
+    if (url.includes('xn--ti-jia.com')) {
+      url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+    }
+    url += `?secret=${demoItem.secretKey}`;
+    navigator.clipboard.writeText(url);
+    setToast('Đã copy Secret Link!');
     setTimeout(() => setToast(''), 3000);
   };
 
@@ -3872,15 +4000,30 @@ function AdminDashboard() {
           {toast}
         </div>
       )}
-      <header className="bg-white border-b border-stone-200 sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3 font-bold text-lg">
-            <div className="w-8 h-8 bg-stone-900 text-white rounded flex items-center justify-center">A</div>
-            Admin
+      <header className="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-xs">
+        <div className="max-w-6xl mx-auto px-6 h-16 w-full flex items-center justify-between">
+          <div className="flex items-center gap-3 font-bold text-lg select-none">
+            <div className="w-8 h-8 bg-stone-900 text-white rounded-lg flex items-center justify-center font-black text-sm shadow-sm">A</div>
+            <span className="leading-none">Admin</span>
           </div>
-          <Link to="/" className="text-sm font-medium text-stone-500 hover:text-stone-900 flex items-center gap-1">
-            Trang Chủ <ArrowLeft className="w-4 h-4 rotate-180" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link 
+              to="/" 
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 shadow-sm transition-all duration-300 hover:scale-105 animate-[fade-in_0.3s_ease-out]"
+              title="Trang chủ"
+              id="admin-top-home-btn"
+            >
+              <HomeIcon className="w-4 h-4 stroke-[2]" />
+            </Link>
+            <button 
+              onClick={handleLogoutAdmin}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 shadow-sm transition-all duration-300 hover:scale-105 cursor-pointer animate-[fade-in_0.3s_ease-out]"
+              title="Đăng xuất"
+              id="admin-top-logout-btn"
+            >
+              <LogOut className="w-4 h-4 stroke-[2]" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -4146,6 +4289,11 @@ function AdminDashboard() {
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
                             </button>
+                            {demo.secretKey && demo.password && (
+                              <button type="button" onClick={() => handleShareSecret(demo)} className="text-amber-600 hover:bg-amber-50 p-2 rounded-lg transition-colors animate-[fade-in_0.3s_ease-out]" title="Copy Secret Link">
+                                 <Lock className="w-4 h-4 text-amber-500" />
+                              </button>
+                            )}
                             <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
                                <Edit3 className="w-4 h-4" />
                             </Link>
@@ -4223,6 +4371,11 @@ function AdminDashboard() {
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
                             </button>
+                            {demo.secretKey && demo.password && (
+                              <button type="button" onClick={() => handleShareSecret(demo)} className="text-amber-600 hover:bg-amber-50 p-2 rounded-lg transition-colors animate-[fade-in_0.3s_ease-out]" title="Copy Secret Link">
+                                 <Lock className="w-4 h-4 text-amber-500" />
+                              </button>
+                            )}
                             <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
                                <Edit3 className="w-4 h-4" />
                             </Link>
@@ -5722,6 +5875,40 @@ function AdminEditDemo() {
                </div>
             </div>
 
+            {demo.secretKey && demo.password && (
+              <div className="bg-amber-50 border border-amber-250/60 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-5 mt-6 animate-[fade-in_0.3s_ease-out] w-full min-w-0 overflow-hidden">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:flex-1 min-w-0">
+                  <div className="w-12 h-12 bg-amber-100/75 text-amber-700 rounded-xl flex items-center justify-center font-bold shrink-0 mx-auto sm:mx-0 shadow-xs">
+                    <Lock className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div className="min-w-0 flex-1 text-center sm:text-left flex flex-col items-center sm:items-start">
+                    <div className="font-bold text-stone-800 text-sm tracking-tight">Secret Link (Chia sẻ trực tiếp xem không hỏi mật khẩu)</div>
+                    <div className="text-xs text-amber-800 font-mono select-all truncate w-full max-w-full mt-1.5 px-3 py-1.5 bg-amber-150/40 rounded-lg border border-amber-200/50">
+                      {window.location.origin}/song/{demo.slug || demo.id}?secret={demo.secretKey}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const baseUrl = '/song/';
+                    const dynamicId = demo.slug || demo.id;
+                    let url = window.location.origin + baseUrl + dynamicId;
+                    if (url.includes('xn--ti-jia.com')) {
+                      url = url.replace(/xn--ti-jia\.com/gi, 'tài.com');
+                    }
+                    url += `?secret=${demo.secretKey}`;
+                    navigator.clipboard.writeText(url);
+                    setToast('Đã copy Secret Link!');
+                    setTimeout(() => setToast(''), 3000);
+                  }}
+                  className="w-full md:w-auto px-5 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-sm"
+                >
+                  <Lock className="w-4 h-4" /> Copy Secret Link
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-col gap-4 mt-8">
               {demo.isDraft ? (
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
@@ -5751,29 +5938,33 @@ function AdminEditDemo() {
                     disabled={loading} 
                     type="button" 
                     onClick={() => saveDemo(false)}
-                    className="flex-1 bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1"
+                    className="flex-1 bg-stone-900 text-white text-lg font-bold py-4 rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-80 flex justify-center items-center gap-2 shadow-sm"
                   >
+                    <FileText className="w-5 h-5 text-amber-500" />
                     {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                   </button>
-                  <button 
-                    disabled={loading} 
-                    type="button" 
-                    onClick={async () => {
-                      if (!confirm("Bạn có chắc muốn làm mới Secret Link của bài này? Secret Link cũ sẽ không còn hoạt động, tự động chuyển về đường dẫn gốc yêu cầu mật khẩu.")) return;
-                      const res = await fetch(`/api/demos/${demo.id}/reset-secret`, {
-                        method: 'POST',
-                        headers: {
-                          'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                  {demo.password && (
+                    <button 
+                      disabled={loading} 
+                      type="button" 
+                      onClick={async () => {
+                        if (!confirm("Bạn có chắc muốn làm mới Secret Link của bài này? Secret Link cũ sẽ không còn hoạt động, tự động chuyển về đường dẫn gốc yêu cầu mật khẩu.")) return;
+                        const res = await fetch(`/api/demos/${demo.id}/reset-secret`, {
+                          method: 'POST',
+                          headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                          }
+                        });
+                        if (res.ok) {
+                          alert("Đã reset Secret Link thành công!");
                         }
-                      });
-                      if (res.ok) {
-                        alert("Đã reset Secret Link thành công!");
-                      }
-                    }} 
-                    className="flex-1 border-2 border-red-200 text-red-500 hover:bg-red-50 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex flex-col justify-center items-center gap-1"
-                  >
-                    Làm mới Secret Link
-                  </button>
+                      }} 
+                      className="flex-1 border-2 border-red-200 text-red-500 hover:bg-red-50 text-lg font-bold py-4 rounded-xl transition-colors disabled:opacity-80 flex justify-center items-center gap-2 shadow-sm"
+                    >
+                      <Lock className="w-5 h-5 text-red-500" />
+                      Làm mới Secret Link
+                    </button>
+                  )}
                 </div>
               )}
             </div>

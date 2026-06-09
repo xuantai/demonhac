@@ -86,6 +86,10 @@ async function loadData() {
                d.isDraft = true;
                draftChanged = true;
             }
+            if (!d.secretKey) {
+               d.secretKey = crypto.randomBytes(8).toString('hex');
+               draftChanged = true;
+            }
             return true;
          });
          if (data.demos.length !== lenBefore || draftChanged) changed = true;
@@ -136,6 +140,9 @@ async function loadData() {
           d.isDraft = false;
         } else if (d.isDraft === 'true' || d.isDraft === '1') {
           d.isDraft = true;
+        }
+        if (!d.secretKey) {
+          d.secretKey = crypto.randomBytes(8).toString('hex');
         }
         return d;
       });
@@ -1094,10 +1101,11 @@ async function startServer() {
               coverUrl: demo.coverUrl,
               backgroundUrl: demo.backgroundUrl,
               globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl),
+              slideshowImages: data.slideshowImages || [],
               requiresPassword: true 
           });
       }
-      res.json({ ...demo, globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret && !isUserMember });
+      res.json({ ...demo, slideshowImages: data.slideshowImages || [], globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret && !isUserMember });
   });
 
   // Serve static files from public/uploads
