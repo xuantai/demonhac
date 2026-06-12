@@ -304,10 +304,205 @@
   }
 }
 
-.animate-neon-blink {
-  animation: neon-blink 1.8s infinite ease-in-out;
+@keyframes cool-neon-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.82;
+  }
+  16% {
+    opacity: 0.98;
+  }
+  20% {
+    opacity: 0.77;
+  }
+  24% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  54% {
+    opacity: 0.98;
+  }
+  58% {
+    opacity: 0.8;
+  }
+  62% {
+    opacity: 0.96;
+  }
+  80% {
+    opacity: 0.82;
+  }
+  84% {
+    opacity: 0.96;
+  }
+  88% {
+    opacity: 0.74;
+  }
+  92% {
+    opacity: 1;
+  }
 }
 
+/* YouTube organic asynchronous flicker */
+@keyframes flicker-yt {
+  0%, 100% { opacity: 0.98; }
+  14% { opacity: 0.90; }
+  16% { opacity: 0.72; }
+  18% { opacity: 0.95; }
+  45% { opacity: 0.98; }
+  47% { opacity: 0.80; }
+  49% { opacity: 0.96; }
+  78% { opacity: 0.98; }
+  80% { opacity: 0.73; }
+  82% { opacity: 0.94; }
+}
 
+/* TikTok organic asynchronous flicker */
+@keyframes flicker-tt {
+  0%, 100% { opacity: 0.95; }
+  18% { opacity: 0.93; }
+  20% { opacity: 0.75; }
+  22% { opacity: 0.97; }
+  52% { opacity: 0.96; }
+  54% { opacity: 0.78; }
+  56% { opacity: 0.94; }
+  84% { opacity: 0.97; }
+  86% { opacity: 0.70; }
+  88% { opacity: 0.95; }
+}
 
+/* Spotify organic asynchronous flicker */
+@keyframes flicker-sp {
+  0%, 100% { opacity: 0.96; }
+  8% { opacity: 0.94; }
+  10% { opacity: 0.74; }
+  12% { opacity: 0.96; }
+  58% { opacity: 0.95; }
+  60% { opacity: 0.81; }
+  62% { opacity: 0.97; }
+  74% { opacity: 0.97; }
+  76% { opacity: 0.69; }
+  78% { opacity: 0.94; }
+}
 
+/* Clear, elegant slow-gradient background/opacity glows for Row 2 stats */
+@keyframes slow-glow-yt {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.55));
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0));
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slow-glow-tt {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(20, 184, 166, 0.55));
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 0px rgba(20, 184, 166, 0));
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slow-glow-sp {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(29, 185, 84, 0.55));
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 0px rgba(29, 185, 84, 0));
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Custom combined slide-bounce and slow text glow for YouTube Top 1 Trending text */
+@keyframes yt-top1-bounce-glow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.65));
+  }
+  50% {
+    transform: translate3d(0, -3px, 0);
+    opacity: 0.35;
+    filter: drop-shadow(0 0 0px rgba(251, 191, 36, 0));
+  }
+}
+
+.animate-neon-blink {
+  animation: cool-neon-pulse 4.5s ease-in-out infinite;
+}
+
+.animate-flicker-yt {
+  animation: flicker-yt 3.8s ease-in-out infinite;
+}
+
+.animate-flicker-tt {
+  animation: flicker-tt 4.6s ease-in-out infinite;
+}
+
+.animate-flicker-sp {
+  animation: flicker-sp 5.4s ease-in-out infinite;
+}
+
+.animate-slow-glow-yt {
+  animation: slow-glow-yt 2.0s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-slow-glow-tt {
+  animation: slow-glow-tt 2.3s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-slow-glow-sp {
+  animation: slow-glow-sp 2.6s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-yt-top1 {
+  animation: yt-top1-bounce-glow 2.2s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-150%) skewX(-20deg); opacity: 0; }
+  20% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+@keyframes slide-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.02); }
+}
+
+.animate-slide-bounce {
+  animation: slide-bounce 2s ease-in-out infinite;
+}
+
+@keyframes rotate-border {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-rotate-border {
+  animation: rotate-border 4s linear infinite;
+}

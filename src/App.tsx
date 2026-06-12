@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles, Copy } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import { AppData, DemoSong, TemplateConfig } from './types';
+import { AppData, DemoSong, TemplateConfig, Achievement } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 
 function formatText(text: string | null | undefined, disableLinks = false) {
@@ -470,6 +470,122 @@ const LanguageSwitcher = () => {
   )
 }
 
+const TiktokIcon = ({ className }: { className?: string }) => (
+   <svg className={className} viewBox="0 -32 448 576" fill="currentColor">
+     <path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a74.62 74.62 0 1 0 52.23 71.18V0l88 0a121.18 121.18 0 0 0 1.86 22.17h0A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14Z" />
+   </svg>
+);
+
+function AchievementBadge({ achievement, align = 'right' }: { achievement: Achievement; align?: 'left' | 'right' }) {
+  const isLeft = align === 'left';
+  if (achievement.type === 'youtube_trending' || achievement.type === 'youtube_views') {
+    const isTrending = achievement.type === 'youtube_trending';
+    const isTop1Trending = isTrending && (achievement.value?.toString().trim() === '1' || achievement.value?.toString().toLowerCase().trim() === 'top 1' || achievement.value?.toString().trim() === '#1');
+    return (
+      <div className={`flex flex-row items-center gap-2 sm:gap-2.5 w-full ${isLeft ? 'justify-start' : 'justify-end'} group/badge`}>
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#ff0f7b] to-[#f89b29] p-[1px] rounded-lg sm:rounded-xl shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-flicker-yt">
+          <div className="w-full h-full bg-gradient-to-br from-red-600 to-red-800 rounded-[7px] sm:rounded-[11px] flex items-center justify-center border border-red-400/20">
+            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white ml-0.5 shadow-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" fill="currentColor" />
+          </div>
+        </div>
+        <div className={`flex flex-col gap-0.5 ${isLeft ? 'items-start' : 'items-end'} justify-center`}>
+           <div className="border border-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-md flex items-center justify-center shadow-[0_0_4px_rgba(239,68,68,0.15)] animate-flicker-yt">
+             <span className="text-[7.5px] sm:text-[8px] font-black text-red-500 tracking-widest uppercase text-center block" style={{ marginRight: '-0.1em' }}>
+               YOUTUBE
+             </span>
+           </div>
+           <h4 className={`text-[9.5px] sm:text-[10px] font-black text-white whitespace-nowrap mt-0.5 ${isTop1Trending ? 'animate-yt-top1' : 'animate-slow-glow-yt'}`}>
+             {isTrending ? (
+                 <><span className="text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]">TOP {achievement.value}</span> <span className="text-stone-200">Trending</span></>
+             ) : (
+                 <><span className="text-red-400 drop-shadow-[0_0_4px_rgba(248,113,113,0.3)]">&gt; {achievement.value}</span> <span className="text-stone-200">Views</span></>
+             )}
+           </h4>
+        </div>
+      </div>
+    );
+  }
+
+  if (achievement.type === 'tiktok_viral') {
+    return (
+      <div className={`flex flex-row items-center gap-2 sm:gap-2.5 w-full ${isLeft ? 'justify-start' : 'justify-end'} group/badge`}>
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-bl from-[#00f2fe] via-black to-[#fe0979] p-[1px] rounded-lg sm:rounded-xl shrink-0 shadow-[0_0_10px_rgba(34,211,238,0.3)] animate-flicker-tt">
+          <div className="w-full h-full bg-black rounded-[7px] sm:rounded-[11px] flex items-center justify-center border border-white/5">
+            <TiktokIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
+          </div>
+        </div>
+        <div className={`flex flex-col gap-0.5 ${isLeft ? 'items-start' : 'items-end'} justify-center`}>
+           <div className="border border-teal-400 bg-teal-400/10 px-1.5 py-0.5 rounded-md flex items-center justify-center shadow-[0_0_4px_rgba(20,184,166,0.15)] animate-flicker-tt">
+             <span className="text-[7.5px] sm:text-[8px] font-black text-teal-400 tracking-widest uppercase text-center block" style={{ marginRight: '-0.1em' }}>
+               TIKTOK
+             </span>
+           </div>
+           <h4 className="text-[9.5px] sm:text-[10px] font-black text-white whitespace-nowrap mt-0.5 animate-slow-glow-tt">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f2fe] via-white to-[#fe0979] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]">✨ VIRAL ✨</span>
+           </h4>
+        </div>
+      </div>
+    );
+  }
+
+  if (achievement.type === 'spotify_streams') {
+    return (
+      <div className={`flex flex-row items-center gap-2 sm:gap-2.5 w-full ${isLeft ? 'justify-start' : 'justify-end'} group/badge`}>
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#1ED760] to-[#128a3c] p-[1px] rounded-full shrink-0 shadow-[0_0_10px_rgba(29,185,84,0.3)] animate-flicker-sp">
+          <div className="w-full h-full bg-gradient-to-br from-[#1DB954] to-[#169c46] rounded-full flex items-center justify-center border border-white/20">
+            <SpotifyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" />
+          </div>
+        </div>
+        <div className={`flex flex-col gap-0.5 ${isLeft ? 'items-start' : 'items-end'} justify-center`}>
+           <div className="border border-[#1DB954] bg-[#1DB954]/10 px-1.5 py-0.5 rounded-md flex items-center justify-center shadow-[0_0_4px_rgba(29,185,84,0.15)] animate-flicker-sp">
+             <span className="text-[7.5px] sm:text-[8px] font-black text-[#1DB954] tracking-widest uppercase text-center block" style={{ marginRight: '-0.1em' }}>
+               SPOTIFY
+             </span>
+           </div>
+           <h4 className="text-[9.5px] sm:text-[10px] font-black text-white whitespace-nowrap mt-0.5 animate-slow-glow-sp">
+             <span className="text-[#1DB954] drop-shadow-[0_0_4px_rgba(29,185,84,0.5)]">&gt; {achievement.value}</span> <span className="text-stone-200">Streams</span>
+           </h4>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function AchievementCycle({ achievements, align = 'right' }: { achievements: Achievement[]; align?: 'left' | 'right' }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!achievements || achievements.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % achievements.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [achievements]);
+
+  if (!achievements || achievements.length === 0) return null;
+
+  const isLeft = align === 'left';
+
+  return (
+    <div className={`relative w-full h-[40px] sm:h-[48px] flex items-center ${isLeft ? 'justify-start' : 'justify-end'} overflow-visible`}>
+      <AnimatePresence mode="wait">
+        <motion.div
+           key={currentIndex}
+           initial={{ opacity: 0.7 }}
+           animate={{ opacity: 1 }}
+           exit={{ opacity: 0.7 }}
+           transition={{ duration: 0.35, ease: "easeInOut" }}
+           className={`relative w-full flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
+        >
+           <AchievementBadge achievement={achievements[currentIndex]} align={align} />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function Home() {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
@@ -492,7 +608,7 @@ function Home() {
         if (prev === 'demos' && data?.playlists && data.playlists.length > 0) return 'albums';
         return 'released';
       });
-    }, 20000);
+    }, 23000);
     return () => clearInterval(tabInterval);
   }, [data]);
 
@@ -996,8 +1112,19 @@ function Home() {
                     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
                   }}
                 >
-                  <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} className="group relative bg-neutral-900/50 border border-white/5 hover:border-rose-500/50 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden flex items-center gap-3 sm:gap-4 w-full">
-                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500"></div>
+                  <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} className={`group relative rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-3 w-full ${demo.achievements?.length ? 'hover:shadow-[0_0_20px_rgba(251,191,36,0.25)]' : 'hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)]'}`}>
+                    {demo.achievements && demo.achievements.length > 0 ? (
+                      <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
+                        <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0" />
+                        <div className="absolute inset-[1px] rounded-[15px] bg-neutral-900/90 backdrop-blur-md z-0" />
+                        <div className="absolute inset-[1px] rounded-[15px] bg-gradient-to-br from-amber-950/30 to-transparent z-0" />
+                        <div className="absolute inset-[1px] rounded-[15px] bg-gradient-to-r from-transparent via-amber-500/10 to-transparent -translate-x-full animate-shimmer-sweep z-0 pointer-events-none skew-x-[-20deg]" />
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0 bg-neutral-900/50 border border-white/5 group-hover:border-rose-500/50 transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500 z-0"></div>
+                      </div>
+                    )}
                     <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
                       {demo.coverUrl ? (
                          <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
@@ -1012,19 +1139,22 @@ function Home() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0 relative z-10 pr-12">
-                      <h3 className="text-base sm:text-lg font-bold group-hover:text-rose-400 transition-colors">
-                        <div className="w-full break-words">
-                          <HoverTranslate text={demo.title} format={true} />
-                        </div>
+                    <div className={`flex-1 min-w-0 relative z-10 flex flex-col justify-center ${demo.achievements?.length ? 'pr-1.5' : (demo.isReleased ? 'pr-12' : 'pr-4')}`}>
+                      <h3 className={`font-bold transition-colors ${demo.achievements?.length ? 'text-[11px] sm:text-[13px] group-hover:text-amber-400 leading-tight whitespace-normal break-words' : 'text-base sm:text-lg group-hover:text-rose-400 truncate'}`}>
+                        <HoverTranslate text={demo.title} format={true} />
                       </h3>
-                      <p className="text-xs text-neutral-400 mt-1 truncate">
+                      <p className={`text-neutral-400 mt-1 ${demo.achievements?.length ? 'text-[9px] leading-tight whitespace-normal break-words' : 'text-xs truncate'}`}>
                         {formatText(demo.singer || demo.author || 'A.C Xuân Tài', true)}
                       </p>
                     </div>
+                    {demo.achievements && demo.achievements.length > 0 && (
+                      <div className="relative z-10 shrink-0 w-[120px] sm:w-[150px] pr-2 sm:pr-3">
+                         <AchievementCycle achievements={demo.achievements} />
+                      </div>
+                    )}
                     {demo.isReleased ? (
                       <>
-                        <span className="absolute top-2 right-2 rotate-[15deg] bg-emerald-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
+                        <span className="absolute top-0 right-0 translate-x-[20%] -translate-y-[10%] rotate-[15deg] bg-emerald-600 text-[7px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(5,150,105,0.6)] tracking-widest border border-emerald-400/50 select-none flex-shrink-0 z-20 animate-released-wiggle">
                           {t.lReleasedMark || 'RELEASED'}
                         </span>
                         <button
@@ -2424,19 +2554,34 @@ function PlaylistPlayer() {
                         key={song.id} 
                         ref={i === currentIndex ? activeSongRef : null}
                         onClick={() => setCurrentIndex(i)}
-                        className={`w-full text-left p-2 rounded-xl flex items-center gap-3 transition-colors ${i === currentIndex ? 'bg-purple-500/20 border-purple-500/30 border' : 'hover:bg-white/5 border border-transparent'}`}
+                        className={`w-full text-left p-2 rounded-xl flex items-center gap-2 sm:gap-3 transition-colors relative overflow-hidden ${i === currentIndex ? 'bg-purple-500/20 border-purple-500/30 border' : 'hover:bg-white/5 border border-transparent'} ${song.achievements?.length && i !== currentIndex ? 'hover:shadow-[0_0_15px_rgba(251,191,36,0.15)] bg-neutral-900' : ''}`}
                       >
-                         <div className="w-10 h-10 rounded-lg bg-neutral-800 flex-shrink-0 overflow-hidden border border-white/5">
-                            {song.coverUrl ? <img src={song.coverUrl} className="w-full h-full object-cover" /> : <Music className="w-0.5 h-0.5 m-2.5 text-neutral-500" />}
+                         {song.achievements && song.achievements.length > 0 && i !== currentIndex && (
+                            <>
+                              <div className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0" />
+                              <div className="absolute inset-[1px] rounded-[11px] bg-neutral-900/90 backdrop-blur-md z-0" />
+                              <div className="absolute inset-[1px] rounded-[11px] bg-gradient-to-r from-amber-950/20 to-transparent z-0" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent -translate-x-full animate-shimmer-sweep z-0 pointer-events-none skew-x-[-20deg]" />
+                            </>
+                         )}
+                         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-neutral-800 flex-shrink-0 overflow-hidden border border-white/5 relative z-10 transition-transform">
+                            {song.coverUrl ? <img src={song.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <Music className="w-4 h-4 m-3 sm:m-3.5 text-neutral-500" />}
                          </div>
-                         <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-bold truncate ${i === currentIndex ? 'text-purple-400' : 'text-white'}`}>
+                         <div className={`flex-1 min-w-0 flex flex-col justify-center relative z-10 ${song.achievements?.length ? 'pr-1' : 'pr-4'}`}>
+                            <p className={`font-bold transition-colors ${i === currentIndex ? 'text-purple-400' : (song.achievements?.length ? 'text-amber-100 hover:text-amber-300' : 'text-white')} ${song.achievements?.length ? 'text-[10px] sm:text-[11px] leading-[1.15] whitespace-normal break-words' : 'text-sm truncate'}`}>
                               <HoverTranslate text={song.title} />
                             </p>
-                            <p className="text-xs text-neutral-400 truncate">{formatText(song.singer || song.composer || 'Đang cập nhật', true)}</p>
+                            <p className={`text-neutral-400 mt-0.5 ${song.achievements?.length ? 'text-[8.5px] sm:text-[9px] leading-tight opacity-90 whitespace-normal break-words' : 'text-xs truncate'}`}>{formatText(song.singer || song.composer || 'Đang cập nhật', true)}</p>
                          </div>
-                         {song.requiresPassword && <Lock className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
-                         {i === currentIndex && <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_theme(colors.purple.400)]" />}
+                         
+                         {song.achievements && song.achievements.length > 0 && (
+                            <div className="relative z-10 shrink-0 w-[100px] sm:w-[130px] pr-2 transform scale-[0.8] sm:scale-100 origin-right">
+                               <AchievementCycle achievements={song.achievements} />
+                            </div>
+                         )}
+
+                         {song.requiresPassword && !song.achievements?.length && <Lock className="w-3 h-3 text-yellow-500 flex-shrink-0 relative z-10" />}
+                         {i === currentIndex && !song.achievements?.length && <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_theme(colors.purple.400)] relative z-10" />}
                       </button>
                    ))}
                  </div>
@@ -2561,6 +2706,63 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     }
   };
 
+  const getFormattedLyricsText = (rawLyrics: string) => {
+    if (!rawLyrics) return '';
+    const lines = rawLyrics.split(/\r?\n/);
+    const cleanedLines: string[] = [];
+    let skipBlank = false;
+    for (let i = 0; i < lines.length; i++) {
+      let textLine = lines[i];
+      let trimmed = textLine.trim();
+      let lower = trimmed.toLowerCase();
+      
+      if (/^ver\s*(\d+)[:]*\s*$/i.test(lower)) {
+        textLine = trimmed.replace(/^ver\s*(\d+)[:]*\s*/i, "Verse $1");
+        trimmed = textLine.trim();
+        lower = trimmed.toLowerCase();
+      } else if (/^rap[:]*\s*$/i.test(lower)) {
+        textLine = trimmed.replace(/^rap[:]*\s*/i, "Rap");
+        trimmed = textLine.trim();
+        lower = trimmed.toLowerCase();
+      }
+
+      const isAnn = lower.includes("pre") || 
+                    lower.includes("chorus") || 
+                    lower.includes("verse") || 
+                    lower.includes("bridge") || 
+                    lower.includes("drop") ||
+                    lower.includes("ending") ||
+                    lower.includes("coda") ||
+                    lower.includes("rap");
+
+      if (isAnn) {
+        let annotation = trimmed;
+        if (lower.includes("pre")) annotation = "Pre-Chorus";
+        else if (lower.includes("chorus")) annotation = "Chorus";
+        else if (lower.includes("verse")) {
+          const match = trimmed.match(/verse\s*(\d+)?/i);
+          annotation = match?.[1] ? `Verse ${match[1]}` : "Verse";
+        } else if (lower.includes("bridge")) annotation = "Bridge";
+        else if (lower.includes("drop")) annotation = "Drop";
+        else if (lower.includes("ending")) annotation = "Ending";
+        else if (lower.includes("coda")) annotation = "Coda";
+        else if (lower.includes("rap")) annotation = "Rap";
+        
+        cleanedLines.push(`[${annotation}]`);
+        skipBlank = true;
+      } else {
+        if (trimmed === "") {
+          if (skipBlank) continue;
+          cleanedLines.push("");
+        } else {
+          cleanedLines.push(trimmed);
+          skipBlank = false;
+        }
+      }
+    }
+    return cleanedLines.join('\n').trim();
+  };
+
   const parseLyricsToElements = (rawLyrics: string) => {
     if (!rawLyrics) return null;
     const lines = rawLyrics.split(/\r?\n/);
@@ -2570,9 +2772,19 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     let skipBlank = false;
     
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim();
-      const lower = trimmed.toLowerCase();
+      let textLine = lines[i];
+      let trimmed = textLine.trim();
+      let lower = trimmed.toLowerCase();
+
+      if (/^ver\s*(\d+)[:]*\s*$/i.test(lower)) {
+        textLine = trimmed.replace(/^ver\s*(\d+)[:]*\s*/i, "Verse $1");
+        trimmed = textLine.trim();
+        lower = trimmed.toLowerCase();
+      } else if (/^rap[:]*\s*$/i.test(lower)) {
+        textLine = trimmed.replace(/^rap[:]*\s*/i, "Rap");
+        trimmed = textLine.trim();
+        lower = trimmed.toLowerCase();
+      }
       
       const isAnn = lower.includes("pre") || 
                     lower.includes("chorus") || 
@@ -2580,19 +2792,20 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                     lower.includes("bridge") || 
                     lower.includes("drop") ||
                     lower.includes("ending") ||
-                    lower.includes("coda");
+                    lower.includes("coda") ||
+                    lower.includes("rap");
                     
       if (isAnn) {
-        cleanedLines.push({ text: line, origIdx: i });
+        cleanedLines.push({ text: textLine, origIdx: i });
         skipBlank = true;
       } else {
         if (trimmed === "") {
           if (skipBlank) {
             continue; // Skip blank line immediately following annotation
           }
-          cleanedLines.push({ text: line, origIdx: i });
+          cleanedLines.push({ text: textLine, origIdx: i });
         } else {
-          cleanedLines.push({ text: line, origIdx: i });
+          cleanedLines.push({ text: textLine, origIdx: i });
           skipBlank = false;
         }
       }
@@ -2617,7 +2830,8 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
             annotation = "Chorus";
             badgeClass = "bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30 shadow-sm";
           } else if (lower.includes("verse")) {
-            annotation = "Verse";
+            const match = trimmed.match(/verse\s*(\d+)?/i);
+            annotation = match?.[1] ? `Verse ${match[1]}` : "Verse";
             badgeClass = "bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/30 shadow-sm";
           } else if (lower.includes("bridge")) {
             annotation = "Bridge";
@@ -2631,6 +2845,9 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           } else if (lower.includes("coda")) {
             annotation = "Coda";
             badgeClass = "bg-[#14b8a6]/20 text-[#14b8a6] border border-[#14b8a6]/30 shadow-sm";
+          } else if (lower.includes("rap")) {
+            annotation = "Rap";
+            badgeClass = "bg-[#db2777]/20 text-[#db2777] border border-[#db2777]/30 shadow-sm";
           }
           
           if (annotation) {
@@ -3075,7 +3292,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           </div>
 
           {isAdmin && demo && (
-            <div id="admin-controls-ui" className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
+            <div id="admin-controls-ui" className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-[999]">
               <Link to={`/admin/edit/${demo.id}`} className="opacity-80 hover:opacity-100 flex items-center justify-center transition-all bg-black/40 p-3 rounded-full backdrop-blur-md border border-white/20 text-white shadow-xl hover:scale-110" title={t.edit}>
                 <Edit3 className="w-5 h-5" />
               </Link>
@@ -3096,134 +3313,156 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               transition={{ duration: 0.8, delay: 0.2 }}
               className={`w-full flex flex-col items-center`}
             >
-            {templateType === '12' ? (
-              /* WOODEN TURNTABLE CASE WITH REVOLVING VINYL AND DYNAMIC TONEARM */
-              <div id="retro-turntable" className="relative w-full max-w-[280px] md:max-w-[340px] aspect-square p-6 md:p-8 bg-gradient-to-br from-[#4e342e] to-[#2d1a15] rounded-3xl border-8 border-[#3e2723] shadow-[inset_0_4px_10px_rgba(0,0,0,0.6),0_15px_30px_rgba(0,0,0,0.8)] flex items-center justify-center mb-4">
-                {/* Pivot brass accent on the wooden frame */}
-                <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 border border-amber-900 shadow-md z-20 flex items-center justify-center">
-                  <div className="w-5 h-5 rounded-full bg-neutral-800" />
-                </div>
-                
-                {/* Dynamic Tonearm */}
+            <div className={`relative ${templateType === '12' ? 'w-full max-w-[280px] md:max-w-[340px]' : 'w-full max-w-[260px] md:max-w-[320px]'} aspect-square mb-4 mt-2 md:mt-0 z-10 mx-auto`}>
+              {demo.achievements && demo.achievements.length > 0 && (
                 <motion.div 
-                  initial={{ rotate: -55 }}
-                  animate={{ rotate: -15 }}
-                  transition={{ type: 'spring', stiffness: 45, damping: 15, delay: 1 }}
-                  className="absolute top-2 right-2 w-28 h-44 z-30 pointer-events-none origin-[80%_15.6%]"
+                  animate={{ 
+                    y: [2, -2, 3, -1, 2],
+                    rotate: [0, 0.5, -0.5, 0.3, 0]
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 5.5,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute bottom-2 left-2 -translate-x-[12%] translate-y-[12%] z-50 transform scale-[0.82] md:scale-95 origin-center pointer-events-none"
                 >
-                  <svg width="112" height="176" viewBox="0 0 100 160" fill="none" className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
-                    {/* Base pivot center using concentric circles for solid Safari/iOS support */}
-                    <circle cx="80" cy="25" r="14" fill="#b0bec5" stroke="#1a0c06" strokeWidth="1.5" />
-                    <circle cx="80" cy="25" r="8" fill="#455a64" />
-                    <circle cx="80" cy="25" r="4" fill="#111" />
-                    
-                    {/* Metallic arm pole (silver stainless-steel rod) curves to the cartridge */}
-                    {/* Using dual layered solid-stroke paths for a perfect 3D cylindrical metal look visible on iOS Safari */}
-                    <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="#b0bec5" strokeWidth="5.5" strokeLinecap="round" />
-                    <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.8" />
-                    
-                    {/* Cartridge headshell */}
-                    <g transform="translate(15, 126) rotate(35)">
-                      <rect x="0" y="0" width="12" height="20" rx="2" fill="#222" stroke="#d4af37" strokeWidth="1" />
-                      <rect x="2" y="2" width="8" height="6" fill="#8D6E63" />
-                      <circle cx="6" cy="15" r="2" fill="#d4af37" />
-                    </g>
-                  </svg>
-                </motion.div>
-
-                {/* THE ROTATING VINYL DISC */}
-                <div className="w-[190px] h-[190px] sm:w-[224px] sm:h-[224px] md:w-[260px] md:h-[260px] aspect-square relative rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.7)] animate-[spin_12s_linear_infinite] flex items-center justify-center border-4 border-stone-800 bg-[#0c0c0c] overflow-hidden flex-shrink-0 z-10">
-                  {/* Artwork label center */}
-                  {displayCoverUrl ? (
-                    <img 
-                      src={displayCoverUrl} 
-                      alt="Cover" 
-                      className="w-full h-full rounded-full object-cover aspect-square z-10" 
-                      onError={handleCoverError}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-stone-900 rounded-full flex items-center justify-center z-10 text-stone-600 aspect-square">
-                      <Music className="w-8 h-8" />
-                    </div>
-                  )}
-
-                  {/* Glossy vinyl light shine overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/15 rounded-full z-[15] pointer-events-none"></div>
-                  
-                  {/* Spindle hole & metallic center rim to keep visual charm */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#0c0c0c]/90 border border-stone-700 rounded-full z-20 shadow-lg flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></div>
+                  <div className="pl-2.5 pr-4.5 md:pl-3 md:pr-5 py-1.5 bg-gradient-to-r from-amber-950/80 via-yellow-950/75 to-amber-900/80 backdrop-blur-xl border border-amber-400/35 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_8px_rgba(217,119,6,0.12),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-start w-fit min-w-[140px] sm:min-w-[165px] h-[48px] sm:h-[56px] overflow-visible">
+                    <AchievementCycle achievements={demo.achievements} align="left" />
                   </div>
-                </div>
-              </div>
-            ) : (
-              /* ALL OTHER TEMPLATES */
-              <div className={`w-full max-w-[260px] md:max-w-[320px] aspect-square mb-4 relative transition-all duration-1000 mt-2 md:mt-0 ${
-                (templateType === '9' || templateType === '16') ? 'overflow-visible' : 'overflow-hidden'
-              } ${
-                templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
-                templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
-                templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
-                templateType === '4' ? 'shadow-[0_20px_45px_rgba(16,185,129,0.25)] rounded-[2rem] border-[6px] border-emerald-500 hover:scale-105 hover:rotate-1 transition-transform duration-500 bg-emerald-50' : 
-                templateType === '5' ? 'shadow-xl rounded-full border-4 animate-[bounce_2s_infinite] shadow-red-900/50' : 
-                templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
-                templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
-                templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400' :
-                templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
-                templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 
-                templateType === '11' ? 'shadow-[0_0_30px_rgba(212,175,55,0.2)] rounded-2xl border-2 border-stone-800' :
-                templateType === '13' ? 'shadow-[0_0_40px_rgba(244,63,94,0.3)] bg-black/40 border border-[#f43f5e]/20 rounded-[2.5rem] hover:scale-105 transition-transform duration-500' : 
-                templateType === '14' ? 'shadow-[0_0_50px_rgba(14,165,233,0.35)] bg-gradient-to-b from-[#134074] to-[#0B2545] border-4 border-sky-400/50 rounded-[2rem] hover:scale-102 transition-transform duration-500' : 
-                templateType === '15' ? 'border-[6px] border-[#ec4899] rounded-none shadow-[6px_6px_0_#10b981] bg-black hover:scale-105 transition-transform duration-300' : 
-                templateType === '16' ? 'rounded-none overflow-visible hover:scale-105 transition-transform duration-500 max-w-[280px] md:max-w-[340px]' : 
-                templateType === '17' ? 'shadow-[0_0_50px_rgba(250,204,21,0.5)] border-[8px] border-white rounded-3xl rotate-2 hover:rotate-0 transition-transform duration-500' : 
-                templateType === '18' ? 'shadow-[0_0_60px_rgba(251,191,36,0.3)] border-2 border-amber-500/50 rounded-full hover:scale-105 transition-transform duration-500' : 'shadow-2xl rounded-3xl border-4'
-              }`}>
-                {templateType === '9' && (
-                  <>
-                    <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-40 drop-shadow-md select-none">☁️</div>
-                    <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-40 drop-shadow-md select-none" style={{animationDelay: '1s'}}>☁️</div>
-                  </>
-                )}
-                {templateType === '16' ? (
-                  <div className="relative w-full aspect-square p-2 border-0">
-                    {/* Colorful neon/gradient outer backdrop offset shadows */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-yellow-400 via-emerald-400 to-indigo-500 opacity-95 blur-[3px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.06)' }}></div>
-                    <div className="absolute inset-0 bg-gradient-to-bl from-yellow-400 via-orange-500 via-red-500 to-purple-600 opacity-70 blur-[1px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.03)' }}></div>
-                    
-                    {/* Black base fill so cover art fits perfectly */}
-                    <div className="absolute inset-0 bg-black" style={{ clipPath: 'url(#puzzle-clip)' }}></div>
-                    
+                </motion.div>
+              )}
+
+              {templateType === '12' ? (
+                /* WOODEN TURNTABLE CASE WITH REVOLVING VINYL AND DYNAMIC TONEARM */
+                <div id="retro-turntable" className="relative w-full h-full p-6 md:p-8 bg-gradient-to-br from-[#4e342e] to-[#2d1a15] rounded-3xl border-8 border-[#3e2723] shadow-[inset_0_4px_10px_rgba(0,0,0,0.6),0_15px_30px_rgba(0,0,0,0.8)] flex items-center justify-center">
+                  {/* Pivot brass accent on the wooden frame */}
+                  <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 border border-amber-900 shadow-md z-20 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-full bg-neutral-800" />
+                  </div>
+                  
+                  {/* Dynamic Tonearm */}
+                  <motion.div 
+                    initial={{ rotate: -55 }}
+                    animate={{ rotate: -15 }}
+                    transition={{ type: 'spring', stiffness: 45, damping: 15, delay: 1 }}
+                    className="absolute top-2 right-2 w-28 h-44 z-30 pointer-events-none origin-[80%_15.6%]"
+                  >
+                    <svg width="112" height="176" viewBox="0 0 100 160" fill="none" className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
+                      {/* Base pivot center using concentric circles for solid Safari/iOS support */}
+                      <circle cx="80" cy="25" r="14" fill="#b0bec5" stroke="#1a0c06" strokeWidth="1.5" />
+                      <circle cx="80" cy="25" r="8" fill="#455a64" />
+                      <circle cx="80" cy="25" r="4" fill="#111" />
+                      
+                      {/* Metallic arm pole (silver stainless-steel rod) curves to the cartridge */}
+                      {/* Using dual layered solid-stroke paths for a perfect 3D cylindrical metal look visible on iOS Safari */}
+                      <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="#b0bec5" strokeWidth="5.5" strokeLinecap="round" />
+                      <path d="M 80 25 Q 75 80 50 110 L 25 135" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.8" />
+                      
+                      {/* Cartridge headshell */}
+                      <g transform="translate(15, 126) rotate(35)">
+                        <rect x="0" y="0" width="12" height="20" rx="2" fill="#222" stroke="#d4af37" strokeWidth="1" />
+                        <rect x="2" y="2" width="8" height="6" fill="#8D6E63" />
+                        <circle cx="6" cy="15" r="2" fill="#d4af37" />
+                      </g>
+                    </svg>
+                  </motion.div>
+
+                  {/* THE ROTATING VINYL DISC */}
+                  <div className="w-[190px] h-[190px] sm:w-[224px] sm:h-[224px] md:w-[260px] md:h-[260px] aspect-square relative rounded-full shadow-[0_12px_35px_rgba(0,0,0,0.7)] animate-[spin_12s_linear_infinite] flex items-center justify-center border-4 border-stone-800 bg-[#0c0c0c] overflow-hidden flex-shrink-0 z-10">
+                    {/* Artwork label center */}
                     {displayCoverUrl ? (
                       <img 
                         src={displayCoverUrl} 
                         alt="Cover" 
-                        className="w-full h-full object-cover animate-zoom-gentle relative z-10"
-                        style={{ clipPath: 'url(#puzzle-clip)' }}
+                        className="w-full h-full rounded-full object-cover aspect-square z-10" 
                         onError={handleCoverError}
                       />
                     ) : (
-                      <div className="w-full h-full bg-stone-900 flex flex-col justify-center items-center relative z-10" style={{ clipPath: 'url(#puzzle-clip)' }}>
-                        <Music className="w-16 h-16 text-yellow-400 opacity-80" />
+                      <div className="w-full h-full bg-stone-900 rounded-full flex items-center justify-center z-10 text-stone-600 aspect-square">
+                        <Music className="w-8 h-8" />
                       </div>
                     )}
+
+                    {/* Glossy vinyl light shine overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/15 rounded-full z-[15] pointer-events-none"></div>
+                    
+                    {/* Spindle hole & metallic center rim to keep visual charm */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#0c0c0c]/90 border border-stone-700 rounded-full z-20 shadow-lg flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></div>
+                    </div>
                   </div>
-                ) : displayCoverUrl ? (
-                  <img 
-                    src={displayCoverUrl} 
-                    alt="Cover" 
-                    className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'} ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}
-                    onError={handleCoverError}
-                  />
-                ) : (
-                  <div className={`w-full h-full bg-black/30 flex flex-col justify-center items-center ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}>
-                    <Music className="w-24 h-24 opacity-20" />
-                  </div>
-                )}
-                <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '9' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' || templateType === '18' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
-              </div>
-            )}
+                </div>
+              ) : (
+                /* ALL OTHER TEMPLATES */
+                <div className={`w-full h-full relative transition-all duration-1000 ${
+                  (templateType === '9' || templateType === '16') ? 'overflow-visible' : 'overflow-hidden'
+                } ${
+                  templateType === '1' ? 'shadow-glow-1 animate-[bounce_6s_infinite] rounded-3xl border-4' :
+                  templateType === '2' ? 'shadow-glow-2 scale-105 rounded-3xl border-4' :
+                  templateType === '3' ? 'shadow-2xl animate-sway rounded-lg border-[12px] opacity-90' :
+                  templateType === '4' ? 'shadow-[0_20px_45px_rgba(16,185,129,0.25)] rounded-[2rem] border-[6px] border-emerald-500 hover:scale-105 hover:rotate-1 transition-transform duration-500 bg-emerald-50' : 
+                  templateType === '5' ? 'shadow-xl rounded-full border-4 animate-[bounce_2s_infinite] shadow-red-900/50' : 
+                  templateType === '6' ? 'shadow-[12px_12px_0_rgba(244,114,182,0.3)] rounded-l-sm rounded-r-3xl border-l-[20px] border-l-pink-400 border-pink-200 rotate-2 hover:rotate-0 transition-transform bg-white' :
+                  templateType === '7' ? 'shadow-[8px_8px_0px_rgba(0,0,0,0.8)] rounded-xl border-4 border-stone-800 rotate-2 hover:rotate-0 transition-transform' : 
+                  templateType === '8' ? 'shadow-[0_0_40px_rgba(250,204,21,0.6)] rounded-full border-4 border-yellow-400' :
+                  templateType === '9' ? 'shadow-xl shadow-sky-300 rounded-[2rem] border-4 border-white/80 animate-[bounce_4s_infinite]' : 
+                  templateType === '10' ? 'shadow-[8px_8px_0_rgba(234,179,8,1)] border-[4px] border-black rounded-sm skew-x-[-2deg] scale-[1.02] bg-zinc-900' : 
+                  templateType === '11' ? 'shadow-[0_0_30px_rgba(212,175,55,0.2)] rounded-2xl border-2 border-stone-800' :
+                  templateType === '13' ? 'shadow-[0_0_40px_rgba(244,63,94,0.3)] bg-black/40 border border-[#f43f5e]/20 rounded-[2.5rem] hover:scale-105 transition-transform duration-500' : 
+                  templateType === '14' ? 'shadow-[0_0_50px_rgba(14,165,233,0.35)] bg-gradient-to-b from-[#134074] to-[#0B2545] border-4 border-sky-400/50 rounded-[2rem] hover:scale-102 transition-transform duration-500' : 
+                  templateType === '15' ? 'border-[6px] border-[#ec4899] rounded-none shadow-[6px_6px_0_#10b981] bg-black hover:scale-105 transition-transform duration-300' : 
+                  templateType === '16' ? 'rounded-none overflow-visible hover:scale-105 transition-transform duration-500 max-w-[280px] md:max-w-[340px]' : 
+                  templateType === '17' ? 'shadow-[0_0_50px_rgba(250,204,21,0.5)] border-[8px] border-white rounded-3xl rotate-2 hover:rotate-0 transition-transform duration-500' : 
+                  templateType === '18' ? 'shadow-[0_0_60px_rgba(251,191,36,0.3)] border-2 border-amber-500/50 rounded-full hover:scale-105 transition-transform duration-500' : 'shadow-2xl rounded-3xl border-4'
+                }`}>
+                  {templateType === '9' && (
+                    <>
+                      <div className="absolute -top-4 -left-4 text-4xl animate-float-shape z-40 drop-shadow-md select-none">☁️</div>
+                      <div className="absolute -bottom-2 -right-4 text-3xl animate-float-shape z-40 drop-shadow-md select-none" style={{animationDelay: '1s'}}>☁️</div>
+                    </>
+                  )}
+                  {templateType === '16' ? (
+                    <div className="relative w-full aspect-square p-2 border-0">
+                      {/* Colorful neon/gradient outer backdrop offset shadows */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-yellow-400 via-emerald-400 to-indigo-500 opacity-95 blur-[3px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.06)' }}></div>
+                      <div className="absolute inset-0 bg-gradient-to-bl from-yellow-400 via-orange-500 via-red-500 to-purple-600 opacity-70 blur-[1px]" style={{ clipPath: 'url(#puzzle-clip)', transform: 'scale(1.03)' }}></div>
+                      
+                      {/* Black base fill so cover art fits perfectly */}
+                      <div className="absolute inset-0 bg-black" style={{ clipPath: 'url(#puzzle-clip)' }}></div>
+                      
+                      {displayCoverUrl ? (
+                        <img 
+                          src={displayCoverUrl} 
+                          alt="Cover" 
+                          className="w-full h-full object-cover animate-zoom-gentle relative z-10"
+                          style={{ clipPath: 'url(#puzzle-clip)' }}
+                          onError={handleCoverError}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-stone-900 flex flex-col justify-center items-center relative z-10" style={{ clipPath: 'url(#puzzle-clip)' }}>
+                          <Music className="w-16 h-16 text-yellow-400 opacity-80" />
+                        </div>
+                      )}
+                    </div>
+                  ) : displayCoverUrl ? (
+                    <img 
+                      src={displayCoverUrl} 
+                      alt="Cover" 
+                      className={`w-full h-full object-cover ${templateType === '2' ? 'animate-zoom-fast' : 'animate-zoom-gentle'} ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}
+                      onError={handleCoverError}
+                    />
+                  ) : (
+                    <div className={`w-full h-full bg-black/30 flex flex-col justify-center items-center ${templateType === '9' ? 'rounded-[1.7rem]' : ''}`}>
+                      <Music className="w-24 h-24 opacity-20" />
+                    </div>
+                  )}
+                  <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '9' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' || templateType === '18' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
+                </div>
+              )}
+            </div>
+            
           <h1 
             className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center"
             style={{ color: customConfig?.titleColor || undefined }}
@@ -3231,11 +3470,11 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
             <span className="relative inline-block pr-10">
               <HoverTranslate text={demo.title} format={true} />
               {demo.isReleased ? (
-               <div className="absolute -top-3 -right-6 origin-bottom-left rotate-[15deg] bg-emerald-600 text-[10px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle">
+               <div className="absolute top-0 right-0 translate-x-[25%] -translate-y-[10%] rotate-[12deg] bg-emerald-600 text-[9px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle">
                  {t.lReleasedMark || 'RELEASED'}
                </div>
               ) : (
-               <div className="absolute -top-3 -right-2 origin-bottom-left rotate-[15deg] bg-rose-600 text-[10px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
+               <div className="absolute top-0 right-0 translate-x-[15%] -translate-y-[10%] rotate-[12deg] bg-rose-600 text-[9px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
                  {t.lDemoMark || 'DEMO'}
                </div>
               )}
@@ -3279,7 +3518,28 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           transition={{ duration: 0.8, delay: 0.2 }}
           className={`flex-1 w-full relative z-[150] ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
         >
-          <h3 className={`text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>{t.lyric}</h3>
+          <div className={`flex items-center justify-between opacity-50 mb-4 ml-4 pr-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>
+            <h3 className="text-sm font-bold uppercase tracking-widest">{t.lyric}</h3>
+            {demo.lyrics && (
+              <button
+                onClick={async () => {
+                  const formattedTitle = demo.title || 'Unknown';
+                  const formattedSinger = demo.singer || 'Đang cập nhật';
+                  const formattedComposer = demo.composer || 'Đang cập nhật';
+                  const rawLyricsText = getFormattedLyricsText(demo.lyrics).replace(/\n{3,}/g, '\n\n');
+                  const copyText = `${formattedTitle}\nCa sĩ: ${formattedSinger}\nSáng tác: ${formattedComposer}\n\nLời bài hát:\n${rawLyricsText}`;
+                  await copyToClipboard(copyText);
+                  setToast('Đã copy lời bài hát!');
+                  setTimeout(() => setToast(''), 3000);
+                }}
+                className="hover:opacity-100 transition-opacity flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                title="Copy lời bài hát"
+              >
+                <Copy className="w-4 h-4" />
+                Copy
+              </button>
+            )}
+          </div>
           <div className="pr-4">
             {demo.lyrics ? (
               parseLyricsToElements(demo.lyrics)
@@ -3328,11 +3588,7 @@ function SocialCarousel({ data }: { data: AppData }) {
     { id: 'fb', url: formatSocialLink(data.socialFacebook || '', 'fb'), Icon: Facebook, color: 'hover:bg-blue-600' },
     { id: 'ig', url: formatSocialLink(data.socialInstagram || '', 'ig'), Icon: Instagram, color: 'hover:bg-pink-600' },
     { id: 'yt', url: formatSocialLink(data.socialYoutube || '', 'yt'), Icon: Youtube, color: 'hover:bg-red-600' },
-    { id: 'tk', url: formatSocialLink(data.socialTiktok || '', 'tk'), color: 'hover:bg-neutral-800', Icon: ({ className }: { className?: string }) => (
-       <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-         <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.23-.71 4.46-2.06 6.17-1.4 1.76-3.46 2.89-5.71 3.11-2.27.22-4.63-.44-6.24-2.02-1.72-1.7-2.61-4.04-2.58-6.42.03-2.38.99-4.72 2.76-6.38 1.4-1.31 3.32-2.12 5.25-2.27.13 1.34.05 2.69.05 4.03-1.07.03-2.14.33-3.05.97-.68.48-1.21 1.15-1.5 1.95-.31.86-.34 1.83-.1 2.73.28 1.09.97 2.05 1.89 2.65.94.61 2.11.83 3.2.7.99-.12 1.93-.61 2.61-1.36.85-.92 1.25-2.21 1.25-3.47.01-6.73-.01-13.45.01-20.17h4.15l-4.15-10.15z" />
-       </svg>
-    ) }
+    { id: 'tk', url: formatSocialLink(data.socialTiktok || '', 'tk'), color: 'hover:bg-neutral-800', Icon: TiktokIcon }
   ].filter(s => s.url);
 
   useEffect(() => {
@@ -5139,11 +5395,97 @@ function TemplatePickerModal({
   )
 }
 
+const achievementTypes = {
+  youtube_trending: 'Top Trending YouTube',
+  tiktok_viral: 'Viral TikTok',
+  spotify_streams: 'Lượt Streams Spotify',
+  youtube_views: 'Views YouTube',
+};
+
+function AchievementEditor({ achievements, onChange }: { achievements: Achievement[], onChange: (a: Achievement[]) => void }) {
+  const handleAdd = () => {
+    onChange([...achievements, { type: 'youtube_trending', value: '' }]);
+  };
+
+  const handleUpdate = (index: number, field: keyof Achievement, value: string) => {
+    const newAchievements = [...achievements];
+    newAchievements[index] = { ...newAchievements[index], [field]: value };
+    onChange(newAchievements);
+  };
+
+  const handleRemove = (index: number) => {
+    const newAchievements = [...achievements];
+    newAchievements.splice(index, 1);
+    onChange(newAchievements);
+  };
+
+  return (
+    <div className="bg-stone-50 p-6 rounded-2xl border border-stone-200 mt-6 relative hover:border-stone-300 transition-colors">
+      <h3 className="text-stone-800 font-bold mb-6 text-sm flex items-center gap-2">
+        <Sparkles className="w-4 h-4 text-amber-500" />
+        Thành tích đặc sắc (Sử dụng để tạo điểm nhấn hiệu ứng ngoài Trang Chủ)
+      </h3>
+      {achievements.length > 0 && (
+        <div className="space-y-4 mb-4">
+          {achievements.map((ach, index) => (
+            <div key={index} className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-stone-200 shadow-sm relative group overflow-hidden items-end">
+              <div className="w-full sm:w-[220px] shrink-0">
+                <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2">Loại thành tích</label>
+                <div className="relative">
+                   <select 
+                     value={ach.type} 
+                     onChange={e => handleUpdate(index, 'type', e.target.value)}
+                     className="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white appearance-none cursor-pointer pr-10 hover:border-stone-400 transition-colors"
+                   >
+                     {Object.entries(achievementTypes).map(([k, v]) => (
+                       <option key={k} value={k}>{v}</option>
+                     ))}
+                   </select>
+                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                   </div>
+                </div>
+              </div>
+              <div className="flex-1 w-full relative">
+                <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2">Giá trị / Nội dung chi tiết</label>
+                <div className="flex w-full group-focus-within:ring-2 ring-stone-900 rounded-lg">
+                  <input 
+                    value={ach.value} 
+                    onChange={e => handleUpdate(index, 'value', e.target.value)} 
+                    placeholder="VD: 10M, Dành cho hiệu ứng TikTok..."
+                    className="w-full border border-stone-300 rounded-l-lg px-4 py-2.5 text-sm focus:outline-none focus:border-transparent group-focus-within:border-transparent transition-colors z-10 relative"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemove(index)} 
+                    className="shrink-0 aspect-square w-11 flex items-center justify-center border border-l-0 border-stone-300 rounded-r-lg hover:bg-red-50 hover:text-red-600 transition-colors z-10 relative bg-white text-stone-400 hover:border-red-200" 
+                    title="Xóa"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <button 
+        type="button" 
+        onClick={handleAdd} 
+        className="w-full sm:w-auto text-sm font-medium border-2 border-stone-200 hover:border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all px-4 py-2.5 rounded-lg flex items-center justify-center gap-2"
+      >
+        <Plus className="w-4 h-4" /> Thêm thành tích
+      </button>
+    </div>
+  );
+}
+
 // ---- ADMIN CREATE DEMO ----
 function AdminCreateDemo() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [slug, setSlug] = useState('');
   const [isSlugEdited, setIsSlugEdited] = useState(false);
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
@@ -5300,6 +5642,7 @@ function AdminCreateDemo() {
     formData.set('coverUrl', uploadedCoverUrl);
     formData.set('backgroundUrl', uploadedBgUrl);
     formData.set('playlistIds', JSON.stringify(playlistIds));
+    formData.set('achievements', JSON.stringify(achievements));
 
     const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
     const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
@@ -5463,6 +5806,8 @@ function AdminCreateDemo() {
               </div>
             </div>
 
+            <AchievementEditor achievements={achievements} onChange={setAchievements} />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
                <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
@@ -5538,8 +5883,10 @@ function AdminEditDemo() {
   const [loading, setLoading] = useState(false);
   const [demo, setDemo] = useState<DemoSong | null>(null);
   const [appData, setAppData] = useState<AppData | null>(null);
+  const [toast, setToast] = useState('');
 
   const [title, setTitle] = useState('');
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [slug, setSlug] = useState('');
   const [isSlugEdited, setIsSlugEdited] = useState(false);
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
@@ -5628,6 +5975,7 @@ function AdminEditDemo() {
           setComposer(found.composer || '');
           setSinger(found.singer || '');
           setLyrics(found.lyrics || '');
+          setAchievements(found.achievements || []);
         }
       })
       .catch(err => {
@@ -5730,6 +6078,7 @@ function AdminEditDemo() {
     formData.set('coverUrl', uploadedCoverUrl);
     formData.set('backgroundUrl', uploadedBgUrl);
     formData.set('playlistIds', JSON.stringify(playlistIds));
+    formData.set('achievements', JSON.stringify(achievements));
 
     const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
     const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
@@ -5888,6 +6237,8 @@ function AdminEditDemo() {
               </div>
             </div>
 
+            <AchievementEditor achievements={achievements} onChange={setAchievements} />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
                <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
@@ -5995,6 +6346,11 @@ function AdminEditDemo() {
           </form>
         </div>
       </div>
+      {toast && (
+        <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-xl font-bold z-50 animate-[bounce_1s_ease-in-out]">
+          {toast}
+        </div>
+      )}
       {showTemplatePicker && (
          <TemplatePickerModal 
             configs={templateConfigs} 

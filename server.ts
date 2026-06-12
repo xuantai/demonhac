@@ -649,7 +649,65 @@ async function startServer() {
     return url;
   };
 
-  app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), async (req, res) => {
+  const parseLyricsBeforeSave = (rawLyrics: string) => {
+  if (!rawLyrics) return '';
+  const lines = rawLyrics.split(/\r?\n/);
+  const cleanedLines: string[] = [];
+  let skipBlank = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let textLine = lines[i];
+    let trimmed = textLine.trim();
+    let lower = trimmed.toLowerCase();
+
+    // Standardize headers
+    if (/^\[?ver\s*(\d+)\]?[:]*\s*$/i.test(lower)) {
+      textLine = trimmed.replace(/^\[?ver\s*(\d+)\]?[:]*\s*/i, "Verse $1:");
+      trimmed = textLine.trim();
+      lower = trimmed.toLowerCase();
+    } else if (/^\[?rap\]?[:]*\s*$/i.test(lower)) {
+      textLine = "Rap:";
+      trimmed = textLine.trim();
+      lower = trimmed.toLowerCase();
+    } else if (/^\[?(pre-chorus|chorus|verse|bridge|drop|ending|coda)\]?[:]*\s*$/i.test(lower) || 
+               /^\[?verse\s+(\d+)\]?[:]*\s*$/i.test(lower)) {
+      if (!trimmed.startsWith('[')) {
+         if (!trimmed.endsWith(':')) {
+           textLine = trimmed + ':';
+         }
+      }
+      trimmed = textLine.trim();
+      lower = trimmed.toLowerCase();
+    }
+
+    const isHeader = lower.includes("pre-chorus") || 
+                     lower.includes("chorus") || 
+                     lower.includes("verse") || 
+                     lower.includes("bridge") || 
+                     lower.includes("drop") ||
+                     lower.includes("ending") ||
+                     lower.includes("coda") ||
+                     lower.includes("rap");
+
+    const isActuallyHeader = isHeader && (trimmed.endsWith(':') || (trimmed.startsWith('[') && trimmed.endsWith(']')));
+
+    if (isActuallyHeader) {
+      cleanedLines.push(textLine);
+      skipBlank = true;
+    } else {
+      if (trimmed === "") {
+        if (skipBlank) continue;
+        cleanedLines.push(textLine);
+      } else {
+        cleanedLines.push(textLine);
+        skipBlank = false;
+      }
+    }
+  }
+  return cleanedLines.join('\n');
+};
+
+app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), async (req, res) => {
     if (!isRequestAdmin(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -691,7 +749,7 @@ async function startServer() {
       coverUrl: coverUrl,
       secretKey: crypto.randomBytes(8).toString('hex'),
       backgroundUrl: processDriveLink(req.body.backgroundUrl || ''),
-      lyrics: req.body.lyrics || '',
+      lyrics: parseLyricsBeforeSave(req.body.lyrics || ''),
       template: req.body.template || '1',
       status: req.body.status || 'public',
       password: req.body.password || '',
@@ -700,7 +758,8 @@ async function startServer() {
       singer: req.body.singer || 'A.C Xuân Tài',
       isReleased: req.body.isReleased === 'true',
       isDraft: req.body.isDraft === 'true',
-      playlistIds: req.body.playlistIds ? JSON.parse(req.body.playlistIds) : []
+      playlistIds: req.body.playlistIds ? JSON.parse(req.body.playlistIds) : [],
+      achievements: req.body.achievements ? JSON.parse(req.body.achievements) : []
     };
     data.demos.push(newDemo);
     await saveData(data);
@@ -719,6 +778,9 @@ async function startServer() {
         const coverFile = files?.['cover']?.[0];
 
         let updatedData = { ...req.body };
+        if (updatedData.lyrics) {
+           updatedData.lyrics = parseLyricsBeforeSave(updatedData.lyrics);
+        }
         if (audioFile) updatedData.audioUrl = `/uploads/${audioFile.filename}`;
         if (coverFile) {
             updatedData.coverUrl = `/uploads/${coverFile.filename}`;
@@ -755,6 +817,9 @@ async function startServer() {
         }
         if (req.body.playlistIds !== undefined) {
             updatedData.playlistIds = JSON.parse(req.body.playlistIds);
+        }
+        if (req.body.achievements !== undefined) {
+            updatedData.achievements = JSON.parse(req.body.achievements);
         }
 
         data.demos[idx] = { ...data.demos[idx], ...updatedData };

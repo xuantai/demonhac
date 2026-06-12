@@ -10,6 +10,11 @@ export interface Playlist {
   songIds?: string[];
 }
 
+export interface Achievement {
+  type: 'youtube_trending' | 'tiktok_viral' | 'spotify_streams' | 'youtube_views';
+  value: string;
+}
+
 export interface DemoSong {
   id: string;
   slug: string;
@@ -31,6 +36,7 @@ export interface DemoSong {
   playlistIds?: string[];
   createdAt: number;
   secretKey?: string;
+  achievements?: Achievement[];
 }
 
 export interface TemplateConfig {
