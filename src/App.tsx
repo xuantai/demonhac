@@ -429,6 +429,15 @@ const SpotifyIcon = ({className}: {className?: string}) => (
   </svg>
 );
 
+const ZingIcon = ({ className }: { className?: string }) => (
+  <img 
+    className={`${className} rounded-full object-cover`} 
+    src="https://yt3.googleusercontent.com/ytc/AIdro_kfPqO-m9zcBxusjVAWHXrEVzNn2zFiauJ5D9VKmCBNO8g=s900-c-k-c0x00ffffff-no-rj" 
+    alt="Zing MP3"
+    referrerPolicy="no-referrer"
+  />
+);
+
 const LanguageSwitcher = () => {
   const { lang, setLang } = useContext(LanguageContext);
   const [open, setOpen] = useState(false);
@@ -544,6 +553,28 @@ function AchievementBadge({ achievement, align = 'right' }: { achievement: Achie
            </div>
            <h4 className="text-[9.5px] sm:text-[10px] font-black text-white whitespace-nowrap mt-0.5 animate-slow-glow-sp">
              <span className="text-[#1DB954] drop-shadow-[0_0_4px_rgba(29,185,84,0.5)]">&gt; {achievement.value}</span> <span className="text-stone-200">Streams</span>
+           </h4>
+        </div>
+      </div>
+    );
+  }
+
+  if (achievement.type === 'zing_streams') {
+    return (
+      <div className={`flex flex-row items-center gap-2 sm:gap-2.5 w-full ${isLeft ? 'justify-start' : 'justify-end'} group/badge`}>
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#a855f7] to-[#6b21a8] p-[1px] rounded-full shrink-0 shadow-[0_0_10px_rgba(168,85,247,0.3)] animate-flicker-zg">
+          <div className="w-full h-full bg-gradient-to-br from-[#bc56fd] to-[#801bb6] rounded-full flex items-center justify-center border border-white/20 overflow-hidden">
+            <ZingIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] scale-[1.8]" />
+          </div>
+        </div>
+        <div className={`flex flex-col gap-0.5 ${isLeft ? 'items-start' : 'items-end'} justify-center`}>
+           <div className="border border-[#a855f7] bg-[#a855f7]/10 px-1.5 py-0.5 rounded-md flex items-center justify-center shadow-[0_0_4px_rgba(168,85,247,0.15)] animate-flicker-zg">
+             <span className="text-[7.5px] sm:text-[8px] font-black text-[#bc56fd] tracking-widest uppercase text-center block" style={{ marginRight: '-0.1em' }}>
+               ZING MP3
+             </span>
+           </div>
+           <h4 className="text-[9.5px] sm:text-[10px] font-black text-white whitespace-nowrap mt-0.5 animate-slow-glow-zg">
+             <span className="text-[#c084fc] drop-shadow-[0_0_4px_rgba(168,85,247,0.5)]">&gt; {achievement.value}</span> <span className="text-stone-200">Streams</span>
            </h4>
         </div>
       </div>
@@ -1115,8 +1146,8 @@ function Home() {
                   <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} className={`group relative rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-3 w-full ${demo.achievements?.length ? 'hover:shadow-[0_0_20px_rgba(251,191,36,0.25)]' : 'hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)]'}`}>
                     {demo.achievements && demo.achievements.length > 0 ? (
                       <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
-                        <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0" />
-                        <div className="absolute inset-[1px] rounded-[15px] bg-neutral-900/90 backdrop-blur-md z-0" />
+                        <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0 opacity-80" />
+                        <div className="absolute inset-[1px] rounded-[15px] bg-neutral-900/80 backdrop-blur-md z-0" />
                         <div className="absolute inset-[1px] rounded-[15px] bg-gradient-to-br from-amber-950/30 to-transparent z-0" />
                         <div className="absolute inset-[1px] rounded-[15px] bg-gradient-to-r from-transparent via-amber-500/10 to-transparent -translate-x-full animate-shimmer-sweep z-0 pointer-events-none skew-x-[-20deg]" />
                       </div>
@@ -2558,8 +2589,8 @@ function PlaylistPlayer() {
                       >
                          {song.achievements && song.achievements.length > 0 && i !== currentIndex && (
                             <>
-                              <div className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0" />
-                              <div className="absolute inset-[1px] rounded-[11px] bg-neutral-900/90 backdrop-blur-md z-0" />
+                              <div className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0 opacity-80" />
+                              <div className="absolute inset-[1px] rounded-[11px] bg-neutral-900/80 backdrop-blur-md z-0" />
                               <div className="absolute inset-[1px] rounded-[11px] bg-gradient-to-r from-amber-950/20 to-transparent z-0" />
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent -translate-x-full animate-shimmer-sweep z-0 pointer-events-none skew-x-[-20deg]" />
                             </>
@@ -2813,8 +2844,11 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     
     return (
       <div 
-        className={`font-sans pb-24 pl-4 border-l ${isLight ? 'border-black/20 text-black/90' : 'border-white/20 text-white/95'} drop-shadow-md space-y-4`}
-        style={{ color: customConfig?.lyricsColor || undefined }}
+        className={`font-sans pb-24 pl-4 border-l ${isLight ? 'border-black/25 text-black/95' : 'border-white/25 text-white/[0.97]'} space-y-4`}
+        style={{ 
+          color: customConfig?.lyricsColor || undefined,
+          textShadow: isLight ? '0 1px 1px rgba(255,255,255,0.5)' : '0 1px 3px rgba(0,0,0,0.7)'
+        }}
       >
         {cleanedLines.map(({ text, origIdx }) => {
           const trimmed = text.trim();
@@ -2825,29 +2859,45 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           
           if (lower.includes("pre")) {
             annotation = "Pre-Chorus";
-            badgeClass = "bg-[#f59e0b]/20 text-[#f59e0b] border border-[#f59e0b]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-amber-50 text-amber-900 border border-amber-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("chorus")) {
             annotation = "Chorus";
-            badgeClass = "bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-red-50 text-red-900 border border-red-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("verse")) {
             const match = trimmed.match(/verse\s*(\d+)?/i);
             annotation = match?.[1] ? `Verse ${match[1]}` : "Verse";
-            badgeClass = "bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-blue-50 text-blue-900 border border-blue-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("bridge")) {
             annotation = "Bridge";
-            badgeClass = "bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-purple-50 text-purple-900 border border-purple-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("drop")) {
             annotation = "Drop";
-            badgeClass = "bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("ending")) {
             annotation = "Ending";
-            badgeClass = "bg-[#ec4899]/20 text-[#ec4899] border border-[#ec4899]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-pink-50 text-pink-900 border border-pink-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("coda")) {
             annotation = "Coda";
-            badgeClass = "bg-[#14b8a6]/20 text-[#14b8a6] border border-[#14b8a6]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-teal-50 text-teal-900 border border-teal-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           } else if (lower.includes("rap")) {
             annotation = "Rap";
-            badgeClass = "bg-[#db2777]/20 text-[#db2777] border border-[#db2777]/30 shadow-sm";
+            badgeClass = isLight 
+              ? "bg-fuchsia-50 text-fuchsia-900 border border-fuchsia-300 font-bold" 
+              : "bg-white/10 text-white border border-white/65 font-black backdrop-blur-sm shadow-sm";
           }
           
           if (annotation) {
@@ -3327,7 +3377,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                   }}
                   className="absolute bottom-2 left-2 -translate-x-[12%] translate-y-[12%] z-50 transform scale-[0.82] md:scale-95 origin-center pointer-events-none"
                 >
-                  <div className="pl-2.5 pr-4.5 md:pl-3 md:pr-5 py-1.5 bg-gradient-to-r from-amber-950/80 via-yellow-950/75 to-amber-900/80 backdrop-blur-xl border border-amber-400/35 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_8px_rgba(217,119,6,0.12),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-start w-fit min-w-[140px] sm:min-w-[165px] h-[48px] sm:h-[56px] overflow-visible">
+                  <div className="pl-2.5 pr-4.5 md:pl-3 md:pr-5 py-1.5 bg-gradient-to-r from-amber-950/80 via-yellow-950/80 to-amber-900/80 backdrop-blur-xl border border-amber-400/35 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_8px_rgba(217,119,6,0.12),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-start w-fit min-w-[140px] sm:min-w-[165px] h-[48px] sm:h-[56px] overflow-visible">
                     <AchievementCycle achievements={demo.achievements} align="left" />
                   </div>
                 </motion.div>
@@ -3480,10 +3530,18 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
               )}
             </span>
           </h1>
-          <p className="text-lg md:text-xl font-medium text-center mb-0 opacity-90">
+          <p 
+            className="text-lg md:text-xl font-medium text-center mb-0"
+            style={{
+              opacity: isLight ? 0.85 : 0.95,
+              textShadow: isLight ? '0 1px 1.5px rgba(255,255,255,0.7)' : '0 1.5px 3px rgba(0,0,0,0.85)',
+            }}
+          >
             {formatText(demo.singer || demo.author || 'A.C Xuân Tài', !!playlistSongs)}
           </p>
-          <p className="text-xs md:text-sm font-medium text-center mb-1 md:mb-6 opacity-60">
+          <p 
+            className={`text-xs md:text-sm text-center mb-1 md:mb-6 ${templateType === '6' ? 'font-semibold text-[#fef08a]' : 'font-medium opacity-60'}`}
+          >
             {t.sAuth} {formatText(demo.composer || 'A.C Xuân Tài', !!playlistSongs)}
           </p>
           </motion.div>
@@ -3518,8 +3576,12 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           transition={{ duration: 0.8, delay: 0.2 }}
           className={`flex-1 w-full relative z-[150] ${forceMobile ? 'pb-32 mt-8' : forcePC ? 'pb-0 mt-0' : 'pb-32 md:pb-0 mt-8 md:mt-0'}`}
         >
-          <div className={`flex items-center justify-between opacity-50 mb-4 ml-4 pr-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'}`}>
-            <h3 className="text-sm font-bold uppercase tracking-widest">{t.lyric}</h3>
+          <div className={`flex items-center justify-between mb-4 ml-4 pr-4 ${forceMobile ? 'mt-0' : 'mt-0 md:mt-0'} ${templateType === '6' ? '' : 'opacity-50'}`}>
+            <h3 
+              className={`text-[11px] md:text-sm uppercase tracking-widest ${templateType === '6' ? 'font-black text-[#fef08a]' : 'font-bold'}`}
+            >
+              {t.lyric}
+            </h3>
             {demo.lyrics && (
               <button
                 onClick={async () => {
@@ -3532,10 +3594,10 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                   setToast('Đã copy lời bài hát!');
                   setTimeout(() => setToast(''), 3000);
                 }}
-                className="hover:opacity-100 transition-opacity flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                className={`transition-all flex items-center gap-1.5 uppercase tracking-wider cursor-pointer ${templateType === '6' ? 'hover:scale-105 active:scale-95 text-[11px] md:text-xs font-black text-[#fef08a]' : 'hover:opacity-100 text-xs font-bold'}`}
                 title="Copy lời bài hát"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="w-3.5 h-3.5" />
                 Copy
               </button>
             )}
@@ -4560,9 +4622,11 @@ function AdminDashboard() {
                                 {demo.title}
                               </Link>
                               <div className="flex items-center flex-wrap gap-2 text-[10px] md:text-xs">
-                                <span className={`px-1.5 py-0.5 rounded font-semibold ${demo.status === 'public' ? 'bg-green-150 text-green-700 text-[10px]' : 'bg-stone-200 text-stone-600'}`}>
-                                  {demo.status === 'public' ? 'Công khai' : 'Ẩn'}
-                                </span>
+                                {demo.status !== 'public' && (
+                                  <span className="px-1.5 py-0.5 rounded font-semibold bg-stone-200 text-stone-600 text-[10px] flex items-center gap-1">
+                                    <EyeOff className="w-3 h-3" /> Ẩn
+                                  </span>
+                                )}
                                 {demo.singer && <span className="text-stone-500 font-medium">Ca sĩ: {demo.singer}</span>}
                               </div>
                             </div>
@@ -4638,9 +4702,11 @@ function AdminDashboard() {
                                 {demo.title}
                               </Link>
                               <div className="flex items-center flex-wrap gap-2 text-[10px] md:text-xs">
-                                <span className={`px-1.5 py-0.5 rounded font-semibold ${demo.status === 'public' ? 'bg-green-150 text-green-700 text-[10px]' : 'bg-stone-200 text-stone-600'}`}>
-                                  {demo.status === 'public' ? 'Công khai' : 'Ẩn'}
-                                </span>
+                                {demo.status !== 'public' && (
+                                  <span className="px-1.5 py-0.5 rounded font-semibold bg-stone-200 text-stone-600 text-[10px] flex items-center gap-1">
+                                    <EyeOff className="w-3 h-3" /> Ẩn
+                                  </span>
+                                )}
                                 {demo.password && (
                                   <span className="bg-stone-100 text-stone-700 px-1.5 py-0.5 border border-stone-200 rounded flex items-center gap-1 text-[10px] md:text-xs">
                                     <Lock className="w-3 h-3 text-stone-500" /> <span className="font-mono">{demo.password}</span>
@@ -5399,6 +5465,7 @@ const achievementTypes = {
   youtube_trending: 'Top Trending YouTube',
   tiktok_viral: 'Viral TikTok',
   spotify_streams: 'Lượt Streams Spotify',
+  zing_streams: 'Lượt Streams Zing MP3',
   youtube_views: 'Views YouTube',
 };
 

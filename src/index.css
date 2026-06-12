@@ -388,6 +388,20 @@
   78% { opacity: 0.94; }
 }
 
+/* Zing MP3 organic asynchronous flicker */
+@keyframes flicker-zg {
+  0%, 100% { opacity: 0.96; }
+  12% { opacity: 0.93; }
+  14% { opacity: 0.71; }
+  16% { opacity: 0.95; }
+  50% { opacity: 0.97; }
+  52% { opacity: 0.77; }
+  54% { opacity: 0.94; }
+  81% { opacity: 0.96; }
+  83% { opacity: 0.73; }
+  85% { opacity: 0.93; }
+}
+
 /* Clear, elegant slow-gradient background/opacity glows for Row 2 stats */
 @keyframes slow-glow-yt {
   0%, 100% {
@@ -428,6 +442,19 @@
   }
 }
 
+@keyframes slow-glow-zg {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.55));
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 0px rgba(168, 85, 247, 0));
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 /* Custom combined slide-bounce and slow text glow for YouTube Top 1 Trending text */
 @keyframes yt-top1-bounce-glow {
   0%, 100% {
@@ -458,6 +485,10 @@
   animation: flicker-sp 5.4s ease-in-out infinite;
 }
 
+.animate-flicker-zg {
+  animation: flicker-zg 4.9s ease-in-out infinite;
+}
+
 .animate-slow-glow-yt {
   animation: slow-glow-yt 2.0s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
   will-change: transform, opacity;
@@ -470,6 +501,11 @@
 
 .animate-slow-glow-sp {
   animation: slow-glow-sp 2.6s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-slow-glow-zg {
+  animation: slow-glow-zg 2.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
   will-change: transform, opacity;
 }
 

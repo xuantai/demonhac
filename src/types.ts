@@ -11,7 +11,7 @@ export interface Playlist {
 }
 
 export interface Achievement {
-  type: 'youtube_trending' | 'tiktok_viral' | 'spotify_streams' | 'youtube_views';
+  type: 'youtube_trending' | 'tiktok_viral' | 'spotify_streams' | 'youtube_views' | 'zing_streams';
   value: string;
 }
 
