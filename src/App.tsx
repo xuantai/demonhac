@@ -1156,17 +1156,19 @@ function Home() {
                         <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/10 transition-all duration-500 z-0"></div>
                       </div>
                     )}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden relative z-10 border border-white/10 group-hover:border-rose-500/30 transition-colors">
-                      {demo.coverUrl ? (
-                         <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
-                      ) : (
-                         <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
-                            <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
-                         </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
-                          <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative z-10 select-none">
+                      <div className="w-full h-full rounded-xl overflow-hidden relative border border-white/10 group-hover:border-rose-500/30 transition-colors">
+                        {demo.coverUrl ? (
+                           <img src={demo.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={demo.title} />
+                        ) : (
+                           <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 group-hover:text-rose-500 transition-colors">
+                              <Disc3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                           </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform shadow-lg">
+                            <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1214,6 +1216,12 @@ function Home() {
                     {demo.password && !demo.isReleased && (
                       <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
                          <Lock className="w-3.5 h-3.5 text-yellow-500" />
+                      </div>
+                    )}
+                    {demo.releaseYear && (
+                      <div className="absolute bottom-0 left-0 bg-gradient-to-tr from-rose-950/90 via-stone-900/90 to-amber-950/85 backdrop-blur-[4px] text-[8px] sm:text-[9.5px] font-mono font-black text-rose-200 px-3 py-0.5 rounded-tr-xl rounded-bl-[15px] border-t border-r border-rose-500/30 z-20 transition-all duration-300 group-hover:from-rose-600 group-hover:to-pink-600 group-hover:text-white group-hover:border-rose-400/50 shadow-[0_2px_12px_rgba(244,63,94,0.15)] group-hover:shadow-[0_4px_20px_rgba(244,63,94,0.4)] pointer-events-none select-none tracking-widest flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse group-hover:bg-white shrink-0"></span>
+                        {demo.releaseYear}
                       </div>
                     )}
                   </Link>
@@ -1703,11 +1711,11 @@ function SnowEffect() {
 function CuteEffect() {
   const shapes = ['rounded-full', 'rounded-lg rotate-45', 'rounded-tl-3xl rounded-br-3xl'];
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-30">
       {Array.from({ length: 15 }).map((_, i) => (
         <div 
           key={i} 
-          className={`absolute bg-white animate-float-shape ${shapes[i % 3]}`}
+          className={`absolute bg-[#fef08a] animate-float-shape ${shapes[i % 3]}`}
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -3442,6 +3450,17 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                       <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></div>
                     </div>
                   </div>
+                  {demo.releaseYear && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ type: "spring", stiffness: 120, delay: 0.5 }}
+                      whileHover={{ scale: 1.1, rotate: -2 }}
+                      className="absolute bottom-3 right-3 z-30 px-3 py-1 bg-amber-950/80 text-amber-100 border border-amber-500/20 font-serif text-xs rounded-lg shadow-lg tracking-wider"
+                    >
+                      {demo.releaseYear}
+                    </motion.div>
+                  )}
                 </div>
               ) : (
                 /* ALL OTHER TEMPLATES */
@@ -3509,22 +3528,40 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
                   )}
                   <div className={`absolute inset-0 ${templateType === '6' ? 'bg-gradient-to-r from-black/20 to-transparent w-8' : ''}`}></div>
                   <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent ${templateType === '4' || templateType === '9' ? 'rounded-[1.7rem]' : (templateType === '5' || templateType === '8' || templateType === '18' ? 'rounded-full' : '')} ${templateType === '6' ? 'opacity-30' : ''} ${templateType === '16' ? 'hidden' : ''}`}></div>
+                  {demo.releaseYear && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ type: "spring", stiffness: 120, delay: 0.5 }}
+                      whileHover={{ scale: 1.1, rotate: -2 }}
+                      className={`absolute bottom-3 right-3 z-30 px-3 py-1 font-mono text-xs sm:text-sm font-black rounded-lg shadow-lg [text-shadow:0_1px_2px_rgba(0,0,0,0.6)] ${
+                        templateType === '7' ? 'bg-[#faf9f6] text-stone-800 border-2 border-stone-800 font-sans tracking-wide rotate-2' :
+                        templateType === '10' ? 'bg-yellow-400 text-black uppercase font-black px-4 py-1.5 shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest border-2 border-black rounded-none -rotate-3' :
+                        templateType === '11' ? 'bg-[#d4af37]/90 text-black border border-[#d4af37] tracking-widest' :
+                        templateType === '15' ? 'bg-[#ec4899] text-white border-2 border-[#10b981] rounded-none tracking-widest' :
+                        templateType === '16' ? 'bg-gradient-to-r from-pink-500 to-indigo-500 text-white rounded-xl' :
+                        'bg-rose-600/95 text-white border border-white/25 rounded-md tracking-wider'
+                      }`}
+                    >
+                      {demo.releaseYear}
+                    </motion.div>
+                  )}
                 </div>
               )}
             </div>
             
           <h1 
-            className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center"
+            className="text-xl md:text-2xl font-black text-center mb-1 drop-shadow-sm flex items-center justify-center relative z-30"
             style={{ color: customConfig?.titleColor || undefined }}
           >
-            <span className="relative inline-block pr-10">
+            <span className="relative inline-block pr-10 z-40">
               <HoverTranslate text={demo.title} format={true} />
               {demo.isReleased ? (
-               <div className="absolute top-0 right-0 translate-x-[25%] -translate-y-[10%] rotate-[12deg] bg-emerald-600 text-[9px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle">
+               <div className="absolute top-0 right-0 translate-x-[25%] -translate-y-[10%] rotate-[12deg] bg-emerald-600 text-[9px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle z-50">
                  {t.lReleasedMark || 'RELEASED'}
                </div>
               ) : (
-               <div className="absolute top-0 right-0 translate-x-[15%] -translate-y-[10%] rotate-[12deg] bg-rose-600 text-[9px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none">
+               <div className="absolute top-0 right-0 translate-x-[15%] -translate-y-[10%] rotate-[12deg] bg-rose-600 text-[9px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none z-50">
                  {t.lDemoMark || 'DEMO'}
                </div>
               )}
@@ -5567,6 +5604,7 @@ function AdminCreateDemo() {
 
   const [composer, setComposer] = useState('');
   const [singer, setSinger] = useState('');
+  const [releaseYear, setReleaseYear] = useState('');
   const [lyrics, setLyrics] = useState('');
   const [slideshowImages, setSlideshowImages] = useState<string[]>([]);
   const [randomSlideUrl, setRandomSlideUrl] = useState<string>('');
@@ -5710,6 +5748,7 @@ function AdminCreateDemo() {
     formData.set('backgroundUrl', uploadedBgUrl);
     formData.set('playlistIds', JSON.stringify(playlistIds));
     formData.set('achievements', JSON.stringify(achievements));
+    formData.set('releaseYear', releaseYear);
 
     const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
     const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
@@ -5774,7 +5813,7 @@ function AdminCreateDemo() {
               <p className="text-xs text-stone-500 mt-2">Sẽ tự động tạo dựa trên tên bài hát nếu bỏ trống.</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Sáng tác</label>
                 <input name="composer" value={composer} onChange={e => setComposer(e.target.value)} placeholder="Sáng tác (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
@@ -5782,6 +5821,10 @@ function AdminCreateDemo() {
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ca sĩ thể hiện</label>
                 <input name="singer" value={singer} onChange={e => setSinger(e.target.value)} placeholder="Ca sĩ (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Năm phát hành</label>
+                <input name="releaseYear" value={releaseYear} onChange={e => setReleaseYear(e.target.value)} placeholder="Ví dụ: 2026, 2024..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 
@@ -5971,6 +6014,7 @@ function AdminEditDemo() {
 
   const [composer, setComposer] = useState('');
   const [singer, setSinger] = useState('');
+  const [releaseYear, setReleaseYear] = useState('');
   const [lyrics, setLyrics] = useState('');
   const [randomSlideUrl, setRandomSlideUrl] = useState<string>('');
 
@@ -6041,6 +6085,7 @@ function AdminEditDemo() {
           setTemplate(found.template || '1');
           setComposer(found.composer || '');
           setSinger(found.singer || '');
+          setReleaseYear(found.releaseYear || '');
           setLyrics(found.lyrics || '');
           setAchievements(found.achievements || []);
         }
@@ -6146,6 +6191,7 @@ function AdminEditDemo() {
     formData.set('backgroundUrl', uploadedBgUrl);
     formData.set('playlistIds', JSON.stringify(playlistIds));
     formData.set('achievements', JSON.stringify(achievements));
+    formData.set('releaseYear', releaseYear);
 
     const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
     const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
@@ -6205,7 +6251,7 @@ function AdminEditDemo() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Sáng tác</label>
                 <input name="composer" value={composer} onChange={e => setComposer(e.target.value)} placeholder="Sáng tác (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
@@ -6213,6 +6259,10 @@ function AdminEditDemo() {
               <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ca sĩ thể hiện</label>
                 <input name="singer" value={singer} onChange={e => setSinger(e.target.value)} placeholder="Ca sĩ (A.C Xuân Tài)" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">Năm phát hành</label>
+                <input name="releaseYear" value={releaseYear} onChange={e => setReleaseYear(e.target.value)} placeholder="Ví dụ: 2026, 2024..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
               </div>
             </div>
 

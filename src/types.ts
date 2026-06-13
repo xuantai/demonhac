@@ -33,6 +33,7 @@ export interface DemoSong {
   passwordValue?: string; // From admin API
   requiresPassword?: boolean;
   isReleased?: boolean;
+  releaseYear?: string;
   playlistIds?: string[];
   createdAt: number;
   secretKey?: string;

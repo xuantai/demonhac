@@ -758,6 +758,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       singer: req.body.singer || 'A.C Xuân Tài',
       isReleased: req.body.isReleased === 'true',
       isDraft: req.body.isDraft === 'true',
+      releaseYear: req.body.releaseYear || '',
       playlistIds: req.body.playlistIds ? JSON.parse(req.body.playlistIds) : [],
       achievements: req.body.achievements ? JSON.parse(req.body.achievements) : []
     };
