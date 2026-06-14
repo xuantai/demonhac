@@ -7,8 +7,13 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import multer from 'multer';
 import sharp from 'sharp';
+import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const firebaseConfig = {
   projectId: "nice-momentum-trwfn",
@@ -23,6 +28,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp, "ai-studio-55e9d594-1864-4eda-b3a6-811c2fea9f04");
+const firebaseStorage = getStorage(firebaseApp);
 const DOC_REF = doc(db, 'app_data', 'main');
 
 const DATA_FILE = path.join(process.cwd(), 'data.json');
@@ -30,6 +36,103 @@ const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 
 async function ensureUploadsDir() {
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
+}
+
+async function uploadLocalToCloud(localPath: string, filename: string, mimetype: string): Promise<string> {
+  try {
+    const fileBuffer = await fs.readFile(localPath);
+    const storageRef = ref(firebaseStorage, `uploads/${filename}`);
+    await uploadBytes(storageRef, fileBuffer, { contentType: mimetype });
+    const cloudUrl = await getDownloadURL(storageRef);
+    try {
+      await fs.unlink(localPath);
+    } catch (e) {}
+    return cloudUrl;
+  } catch (error) {
+    console.error("Lỗi upload file lên Cloud Storage:", error);
+    return `/uploads/${filename}`;
+  }
+}
+
+async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string): Promise<string> {
+  if (!urlOrPath) return '';
+  if (urlOrPath.includes('firebasestorage.googleapis.com')) return urlOrPath;
+  if (urlOrPath.startsWith('data:')) return urlOrPath;
+
+  let fileBuffer: Buffer | null = null;
+  let mimetype = 'image/jpeg';
+  let filename = `sync-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+
+  if (urlOrPath.toLowerCase().endsWith('.png')) {
+    mimetype = 'image/png';
+    filename += '.png';
+  } else if (urlOrPath.toLowerCase().endsWith('.gif')) {
+    mimetype = 'image/gif';
+    filename += '.gif';
+  } else if (urlOrPath.toLowerCase().endsWith('.webp')) {
+    mimetype = 'image/webp';
+    filename += '.webp';
+  } else {
+    filename += '.jpg';
+  }
+
+  // 1. Try reading local file
+  if (urlOrPath.startsWith('/uploads/') || urlOrPath.startsWith('uploads/')) {
+    const relativePath = urlOrPath.startsWith('/') ? urlOrPath.substring(1) : urlOrPath;
+    const localFullPath = path.join(process.cwd(), 'public', relativePath);
+    try {
+      fileBuffer = await fs.readFile(localFullPath);
+      console.log(`Đọc thành công file cục bộ: ${localFullPath}`);
+    } catch (err) {
+      console.log(`Không tìm thấy file cục bộ: ${localFullPath}, chuẩn bị tải về...`);
+    }
+  }
+
+  // 2. Try fetching over HTTP if local read failed or it's an external URL
+  if (!fileBuffer) {
+    let fullUrl = urlOrPath;
+    if (urlOrPath.startsWith('/')) {
+      const baseUrl = globalBaseUrl || 'https://xn--ti-jia.com';
+      fullUrl = `${baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl}${urlOrPath}`;
+    } else if (!urlOrPath.startsWith('http')) {
+      const baseUrl = globalBaseUrl || 'https://xn--ti-jia.com';
+      fullUrl = `${baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'}${urlOrPath}`;
+    }
+
+    try {
+      console.log(`Đang tải ảnh từ: ${fullUrl}`);
+      const res = await fetch(fullUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+      });
+
+      if (res.ok) {
+        const arrayBuffer = await res.arrayBuffer();
+        fileBuffer = Buffer.from(arrayBuffer);
+        const contentType = res.headers.get('content-type');
+        if (contentType) mimetype = contentType;
+        console.log(`Tải thành công ${fullUrl} (${fileBuffer.length} bytes)`);
+      } else {
+        throw new Error(`HTTP status ${res.status}`);
+      }
+    } catch (downloadErr: any) {
+      console.error(`Không thể tải ảnh từ ${fullUrl}:`, downloadErr.message);
+    }
+  }
+
+  // 3. Upload to Firebase Storage
+  if (fileBuffer) {
+    try {
+      const storageRef = ref(firebaseStorage, `uploads/${filename}`);
+      await uploadBytes(storageRef, fileBuffer, { contentType: mimetype });
+      const cloudUrl = await getDownloadURL(storageRef);
+      console.log(`Đã đồng bộ lên Firebase Storage: ${cloudUrl}`);
+      return cloudUrl;
+    } catch (uploadErr) {
+      console.error(`Lỗi upload đồng bộ lên Firebase Storage:`, uploadErr);
+    }
+  }
+
+  return urlOrPath;
 }
 
 // Multer setup
@@ -44,7 +147,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 30 * 1024 * 1024 } 
+  limits: { fileSize: 100 * 1024 * 1024 } 
 });
 
 let currentAdminPassword = 'MatKhauDay123';
@@ -515,6 +618,86 @@ async function startServer() {
     res.json(data);
   });
 
+  app.post('/api/admin/sync-covers-to-cloud', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+      const data = await loadData();
+      const logs: string[] = [];
+      let updatedCount = 0;
+
+      logs.push("Bắt đầu đồng bộ hóa toàn bộ ảnh bìa cũ lên Firebase Storage...");
+
+      // 1. Sync homeCoverUrl
+      if (data.homeCoverUrl && !data.homeCoverUrl.includes('firebasestorage.googleapis.com')) {
+        logs.push(`Đang xử lý Ảnh trang chủ (Home Cover): ${data.homeCoverUrl}`);
+        const newUrl = await uploadUrlOrFileToCloud(data.homeCoverUrl, data.globalBaseUrl);
+        if (newUrl !== data.homeCoverUrl) {
+          data.homeCoverUrl = newUrl;
+          updatedCount++;
+          logs.push(`-> Đồng bộ thành công Home Cover: ${newUrl}`);
+        }
+      }
+
+      // 2. Sync ogImageUrl
+      if (data.ogImageUrl && !data.ogImageUrl.includes('firebasestorage.googleapis.com')) {
+        logs.push(`Đang xử lý Ảnh giới thiệu Facebook (OG Image): ${data.ogImageUrl}`);
+        const newUrl = await uploadUrlOrFileToCloud(data.ogImageUrl, data.globalBaseUrl);
+        if (newUrl !== data.ogImageUrl) {
+          data.ogImageUrl = newUrl;
+          updatedCount++;
+          logs.push(`-> Đồng bộ thành công OG Image: ${newUrl}`);
+        }
+      }
+
+      // 3. Sync Demos
+      if (data.demos && data.demos.length > 0) {
+        for (let i = 0; i < data.demos.length; i++) {
+          const demo = data.demos[i];
+          if (demo.coverUrl && !demo.coverUrl.includes('firebasestorage.googleapis.com')) {
+            logs.push(`Đang xử lý bài hát [${demo.title}]: ${demo.coverUrl}`);
+            const newUrl = await uploadUrlOrFileToCloud(demo.coverUrl, data.globalBaseUrl);
+            if (newUrl !== demo.coverUrl) {
+              demo.coverUrl = newUrl;
+              updatedCount++;
+              logs.push(`-> Đồng bộ xong bài [${demo.title}] thành: ${newUrl}`);
+            }
+          }
+        }
+      }
+
+      // 4. Sync Playlists
+      if (data.playlists && data.playlists.length > 0) {
+        for (let i = 0; i < data.playlists.length; i++) {
+          const playlist = data.playlists[i];
+          if (playlist.coverUrl && !playlist.coverUrl.includes('firebasestorage.googleapis.com')) {
+            logs.push(`Đang xử lý Danh sách phát [${playlist.title}]: ${playlist.coverUrl}`);
+            const newUrl = await uploadUrlOrFileToCloud(playlist.coverUrl, data.globalBaseUrl);
+            if (newUrl !== playlist.coverUrl) {
+              playlist.coverUrl = newUrl;
+              updatedCount++;
+              logs.push(`-> Đồng bộ xong Playlist [${playlist.title}] thành: ${newUrl}`);
+            }
+          }
+        }
+      }
+
+      if (updatedCount > 0) {
+        await saveData(data);
+        logs.push(`Đã lưu dữ liệu mới cập nhật vào Firestore! Đã đồng bộ thành công ${updatedCount} tệp tin.`);
+      } else {
+        logs.push("Không phát hiện ảnh bìa cũ nào cần nạp. Toàn bộ ảnh bìa đều đã được lưu trữ trên Firebase Storage rồi!");
+      }
+
+      res.json({ success: true, updatedCount, logs });
+    } catch (err: any) {
+      console.error("Lỗi đồng bộ ảnh bìa:", err);
+      res.status(500).json({ error: err.message || "Lỗi đồng bộ trong quá trình xử lý" });
+    }
+  });
+
   app.get('/api/youtube-playlist', async (req, res) => {
     try {
       const plId = req.query.plId as string;
@@ -723,7 +906,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
 
     let coverUrl = '';
     if (coverFile) {
-      coverUrl = `/uploads/${coverFile.filename}`;
+      coverUrl = await uploadLocalToCloud(coverFile.path, coverFile.filename, coverFile.mimetype);
     } else {
       const inputCover = req.body.coverUrl ? processDriveLink(req.body.coverUrl) : '';
       if (inputCover) {
@@ -740,12 +923,19 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       }
     }
 
+    let audioUrl = '';
+    if (audioFile) {
+      audioUrl = await uploadLocalToCloud(audioFile.path, audioFile.filename, audioFile.mimetype);
+    } else {
+      audioUrl = req.body.audioUrl || '';
+    }
+
     const newDemo = {
       id: Date.now().toString(),
       slug: slug,
       title: req.body.title,
       author: req.body.author || '',
-      audioUrl: audioFile ? `/uploads/${audioFile.filename}` : (req.body.audioUrl || ''),
+      audioUrl: audioUrl,
       coverUrl: coverUrl,
       secretKey: crypto.randomBytes(8).toString('hex'),
       backgroundUrl: processDriveLink(req.body.backgroundUrl || ''),
@@ -782,9 +972,11 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
         if (updatedData.lyrics) {
            updatedData.lyrics = parseLyricsBeforeSave(updatedData.lyrics);
         }
-        if (audioFile) updatedData.audioUrl = `/uploads/${audioFile.filename}`;
+        if (audioFile) {
+           updatedData.audioUrl = await uploadLocalToCloud(audioFile.path, audioFile.filename, audioFile.mimetype);
+        }
         if (coverFile) {
-            updatedData.coverUrl = `/uploads/${coverFile.filename}`;
+           updatedData.coverUrl = await uploadLocalToCloud(coverFile.path, coverFile.filename, coverFile.mimetype);
         } else if (req.body.coverUrl !== undefined) {
             const inputCover = processDriveLink(req.body.coverUrl);
             if (!inputCover) {
@@ -1194,13 +1386,118 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
            
            // Xóa file gốc
            await fs.unlink(req.file.path);
-           res.json({ url: `/uploads/${optimizedFilename}` });
+           
+           // Upload to Firebase Storage
+           try {
+              const fileBuffer = await fs.readFile(optimizedPath);
+              const storageRef = ref(firebaseStorage, `uploads/${optimizedFilename}`);
+              await uploadBytes(storageRef, fileBuffer, { contentType: 'image/webp' });
+              const cloudUrl = await getDownloadURL(storageRef);
+              
+              // Xóa file optimized cục bộ sau khi đã upload lên cloud thành công
+              await fs.unlink(optimizedPath);
+              res.json({ url: cloudUrl });
+           } catch (firebaseErr) {
+              console.error("Lỗi upload Cloud Storage cho ảnh optimized, chuyển sang lưu cục bộ:", firebaseErr);
+              res.json({ url: `/uploads/${optimizedFilename}` });
+           }
         } catch (error) {
            console.error("Lỗi nén ảnh:", error);
-           res.json({ url: `/uploads/${req.file.filename}` });
+           try {
+              const fileBuffer = await fs.readFile(req.file.path);
+              const storageRef = ref(firebaseStorage, `uploads/${req.file.filename}`);
+              await uploadBytes(storageRef, fileBuffer, { contentType: req.file.mimetype });
+              const cloudUrl = await getDownloadURL(storageRef);
+              await fs.unlink(req.file.path);
+              res.json({ url: cloudUrl });
+           } catch (firebaseErr) {
+              console.error("Lỗi upload ảnh gốc lên Cloud Storage:", firebaseErr);
+              res.json({ url: `/uploads/${req.file.filename}` });
+           }
         }
       } else {
-        res.json({ url: `/uploads/${req.file.filename}` });
+        // Tệp không phải là ảnh
+        const isWav = req.file.originalname.toLowerCase().endsWith('.wav') || 
+                      req.file.mimetype.includes('wav') || 
+                      req.file.mimetype.includes('wave') ||
+                      req.file.mimetype.includes('x-wav');
+
+        if (isWav) {
+          try {
+            console.log(`Đang chạy cơ chế tự chuyển đổi: File WAV được phát hiện (${req.file.originalname}). Khởi động FFmpeg để convert thành MP3.`);
+            const wavPath = req.file.path;
+            const mp3Filename = `${req.file.filename.split('.')[0]}-${Date.now()}.mp3`;
+            const mp3Path = path.join(process.cwd(), 'public', 'uploads', mp3Filename);
+
+            // Chuyển đổi WAV sang MP3 bằng ffmpeg
+            await new Promise<void>((resolve, reject) => {
+              ffmpeg(wavPath)
+                .toFormat('mp3')
+                .audioBitrate(192) // 192kbps chất lượng rất tốt & dung lượng siêu nhẹ
+                .on('end', () => {
+                  console.log(`Đã chuyển đổi thành công WAV sang MP3 cục bộ: ${mp3Path}`);
+                  resolve();
+                })
+                .on('error', (err) => {
+                  console.error("Lỗi FFmpeg chuyển đổi:", err);
+                  reject(err);
+                })
+                .save(mp3Path);
+            });
+
+            // Xóa file WAV gốc cục bộ để tránh rác server
+            try {
+              await fs.unlink(wavPath);
+            } catch (unlinkErr) {
+              console.error("Không thể xóa file WAV tạm:", unlinkErr);
+            }
+
+            // Upload file MP3 đã được tạo lên Firebase Storage
+            try {
+              const fileBuffer = await fs.readFile(mp3Path);
+              const storageRef = ref(firebaseStorage, `uploads/${mp3Filename}`);
+              await uploadBytes(storageRef, fileBuffer, { contentType: 'audio/mpeg' });
+              const cloudUrl = await getDownloadURL(storageRef);
+              
+              // Xóa file MP3 cục bộ sau khi đã upload Cloud Storage thành công
+              try {
+                await fs.unlink(mp3Path);
+              } catch (e) {}
+
+              res.json({ url: cloudUrl });
+            } catch (firebaseErr) {
+              console.error("Lỗi upload file MP3 đã chuyển đổi lên Cloud Storage, dùng url cục bộ:", firebaseErr);
+              res.json({ url: `/uploads/${mp3Filename}` });
+            }
+          } catch (convertErr: any) {
+            console.error("Lỗi chuyển đổi (.wav -> .mp3): Khôi phục cơ chế mặc định.", convertErr);
+            // Fallback: nếu lỗi convert thì vẫn tải bản gốc lên
+            try {
+               const fileBuffer = await fs.readFile(req.file.path);
+               const storageRef = ref(firebaseStorage, `uploads/${req.file.filename}`);
+               await uploadBytes(storageRef, fileBuffer, { contentType: req.file.mimetype });
+               const cloudUrl = await getDownloadURL(storageRef);
+               await fs.unlink(req.file.path);
+               res.json({ url: cloudUrl });
+            } catch (firebaseErr) {
+               console.error("Lỗi upload file gốc lên Cloud Storage sau khi convert thất bại:", firebaseErr);
+               res.json({ url: `/uploads/${req.file.filename}` });
+            }
+          }
+        } else {
+          // File khác (vẫn giữ nguyên logic: upload trực tiếp lên Storage, nếu thất bại trả về url cục bộ)
+          try {
+             const fileBuffer = await fs.readFile(req.file.path);
+             const storageRef = ref(firebaseStorage, `uploads/${req.file.filename}`);
+             await uploadBytes(storageRef, fileBuffer, { contentType: req.file.mimetype });
+             const cloudUrl = await getDownloadURL(storageRef);
+             await fs.unlink(req.file.path);
+             res.json({ url: cloudUrl });
+          } catch (firebaseErr) {
+             console.error("Lỗi upload file không phải ảnh lên Cloud Storage:", firebaseErr);
+             res.json({ url: `/uploads/${req.file.filename}` });
+          }
+        }
       }
     } else {
       res.status(400).json({ error: 'Upload failed' });
@@ -1222,7 +1519,20 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
       
       await fs.writeFile(filepath, buffer);
-      res.json({ url: `/uploads/${filename}` });
+      
+      // Upload to Firebase Storage
+      try {
+         const storageRef = ref(firebaseStorage, `uploads/${filename}`);
+         await uploadBytes(storageRef, buffer, { contentType: 'image/png' });
+         const cloudUrl = await getDownloadURL(storageRef);
+         
+         // Xóa file cục bộ sau khi đã upload lên cloud thành công
+         await fs.unlink(filepath);
+         res.json({ url: cloudUrl });
+      } catch (firebaseErr) {
+         console.error("Lỗi upload base64 lên Cloud Storage:", firebaseErr);
+         res.json({ url: `/uploads/${filename}` });
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: 'Failed to upload image' });
@@ -1464,6 +1774,8 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
         <meta property="og:title" content="${escapedTitle}" />
         <meta property="og:description" content="${escapedDesc}" />
         <meta property="og:image" content="${escapedImage}" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content="${escapedUrl}" />
         <meta property="og:site_name" content="tài.com" />
         <meta property="og:type" content="website" />

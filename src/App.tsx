@@ -4103,6 +4103,8 @@ function AdminDashboard() {
   const [homeCoverProgress, setHomeCoverProgress] = useState(0);
   const [faviconProgress, setFaviconProgress] = useState(0);
   const [ogImageProgress, setOgImageProgress] = useState(0);
+  const [syncingCovers, setSyncingCovers] = useState(false);
+  const [syncLogs, setSyncLogs] = useState<string[]>([]);
   const [slideProgress, setSlideProgress] = useState(0);
   const [draggingSlideIdx, setDraggingSlideIdx] = useState<number | null>(null);
   
@@ -5159,6 +5161,83 @@ function AdminDashboard() {
                   <input name="globalBaseUrl" defaultValue={data.globalBaseUrl} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-mono" placeholder="VD: tài.com" />
                   <p className="text-sm text-stone-500 mt-2">Dùng để đồng bộ nếu host file ở server khác. Nếu link nhạc/ảnh là đường dẫn tương đối (bắt đầu bằng /) hoặc bị lỗi Gốc, hệ thống sẽ thêm/đổi sang URL này.</p>
                 </div>
+
+                <hr className="border-stone-200 my-6" />
+                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-6">
+                  <h3 className="font-bold text-stone-800 text-lg mb-2 flex items-center gap-2">
+                    🔄 Đồng bộ và Sao lưu Ảnh bìa lên Firebase Storage
+                  </h3>
+                  <p className="text-sm text-stone-600 mb-4">
+                    Nếu bạn có những ca khúc hoặc album cũ hiển thị ảnh bìa từ tệp cục bộ thiết bị hoặc liên kết ngoài cũ, nhấp vào đây để hệ thống tự động tải về và sao lưu vĩnh viễn lên <strong>Firebase Storage (Cloud)</strong>. Khắc phục triệt để lỗi ảnh bị biến mất khi Server khởi động lại.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    {syncingCovers ? (
+                      <div className="flex items-center gap-3 text-stone-700 text-sm font-semibold">
+                        <span className="w-4 h-4 border-2 border-stone-900 border-t-transparent rounded-full animate-spin"></span>
+                        Đang rà soát và nạp ảnh lên Cloud Storage... Vui lòng giữ kết nối!
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!confirm("Bắt đầu quét và đồng bộ hóa toàn bộ ảnh bìa lên Firebase Storage?")) return;
+                          
+                          setSyncingCovers(true);
+                          setSyncLogs(["Đang thiết lập kết nối tới máy chủ..."]);
+                          
+                          try {
+                            const res = await fetch('/api/admin/sync-covers-to-cloud', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                              }
+                            });
+                            
+                            const result = await res.json();
+                            if (res.ok && result.success) {
+                              setSyncLogs(result.logs || ["Đồng bộ Cloud hoàn tất!"]);
+                              setToast(`Đồng bộ thành công ${result.updatedCount} ảnh bìa!`);
+                              setTimeout(() => setToast(''), 3000);
+                              loadData(); // Nạp lại dữ liệu UI mới ngay lập tức
+                            } else {
+                              setSyncLogs(prev => [...prev, `❌ Lỗi: ${result.error || 'Yêu cầu không được chấp nhận'}`]);
+                            }
+                          } catch (err: any) {
+                            setSyncLogs(prev => [...prev, `❌ Lỗi kết nối: ${err.message || err}`]);
+                          } finally {
+                            setSyncingCovers(false);
+                          }
+                        }}
+                        className="bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 font-bold px-5 py-3 rounded-xl transition-colors text-sm flex items-center gap-2"
+                      >
+                        🚀 Nạp toàn bộ ảnh bìa lên Cloud Storage vĩnh viễn
+                      </button>
+                    )}
+
+                    {syncLogs.length > 0 && (
+                      <div className="mt-4">
+                        <div className="text-xs font-bold text-stone-500 mb-1 flex justify-between items-center">
+                          <span>Nhật ký tiến trình đồng bộ:</span>
+                          <button
+                            type="button"
+                            onClick={() => setSyncLogs([])}
+                            className="text-stone-400 hover:text-stone-600 underline text-[10px]"
+                          >
+                            Xóa nhật ký
+                          </button>
+                        </div>
+                        <div className="bg-stone-950 text-emerald-400 font-mono text-[11px] p-4 rounded-xl max-h-[220px] overflow-y-auto space-y-1">
+                          {syncLogs.map((log, idx) => (
+                            <div key={idx} className="leading-relaxed">{log}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-4 border-t border-stone-200 pt-6 mt-2">
                     <button type="submit" className="bg-stone-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-stone-800 transition-colors">Lưu thay đổi</button>
                     <button type="button" onClick={async () => {
@@ -5675,8 +5754,8 @@ function AdminCreateDemo() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 30 * 1024 * 1024) { // 30MB limit check client-side
-        alert('File quá nặng. Vui lòng chọn file dưới 30MB (Khuyên dùng MP3).');
+    if (file.size > 100 * 1024 * 1024) { // 100MB limit check client-side
+        alert('File quá nặng. Vui lòng chọn file dưới 100MB (Hệ thống hỗ trợ tự động convert nhạc WAV sang MP3 và tối ưu hóa ảnh).');
         e.target.value = '';
         return;
     }
@@ -5712,7 +5791,7 @@ function AdminCreateDemo() {
                 setBgUploadProgress(100);
             }
         } else {
-            alert(xhr.status === 413 ? 'Hệ thống báo lỗi file quá lớn (Tối đa 30MB). Vui lòng dùng MP3.' : 'Lỗi tải file. Vui lòng thử lại.');
+            alert(xhr.status === 413 ? 'Hệ thống báo lỗi file quá lớn (Tối đa 100MB).' : 'Lỗi tải file. Vui lòng thử lại.');
             if (type === 'audio') setAudioUploadProgress(0);
             else if (type === 'cover') setCoverUploadProgress(0);
             else setBgUploadProgress(0);
@@ -6115,8 +6194,8 @@ function AdminEditDemo() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 30 * 1024 * 1024) { // 30MB limit check client-side
-        alert('File quá nặng. Vui lòng chọn file dưới 30MB (Khuyên dùng MP3).');
+    if (file.size > 100 * 1024 * 1024) { // 100MB limit check client-side
+        alert('File quá nặng. Vui lòng chọn file dưới 100MB (Hệ thống hỗ trợ tự động convert nhạc WAV sang MP3 và tối ưu hóa ảnh).');
         e.target.value = '';
         return;
     }
@@ -6152,7 +6231,7 @@ function AdminEditDemo() {
                 setBgUploadProgress(100);
             }
         } else {
-            alert(xhr.status === 413 ? 'Hệ thống báo lỗi file quá lớn (Tối đa 30MB). Vui lòng dùng MP3.' : 'Lỗi tải file. Vui lòng thử lại.');
+            alert(xhr.status === 413 ? 'Hệ thống báo lỗi file quá lớn (Tối đa 100MB).' : 'Lỗi tải file. Vui lòng thử lại.');
             if (type === 'audio') setAudioUploadProgress(0);
             else if (type === 'cover') setCoverUploadProgress(0);
             else setBgUploadProgress(0);
