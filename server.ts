@@ -1313,7 +1313,9 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
 
       const defaultDesc = data.pageTitle || `Kho nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
       let ogTitle = data.pageTitle || `Thiên đường âm nhạc của ${data.artistName || 'A.C Xuân Tài'}`;
-      let ogImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : '');
+      
+      const initialOgImage = data.ogImageUrl || data.homeCoverUrl || (data.slideshowImages && data.slideshowImages.length > 0 ? data.slideshowImages[0] : "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80");
+      let ogImage = formatUrl(initialOgImage, data.globalBaseUrl) || '';
       
       const cleanPath = url.split('?')[0];
       const isHomepage = cleanPath === '/' || cleanPath === '/index.html' || cleanPath === '';
@@ -1321,33 +1323,38 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
         ? `Nơi cập nhật sản phẩm và demo của ${data.artistName || 'A.C Xuân Tài'}`
         : defaultDesc;
 
-      let querySongSlug = '';
-      try {
-        const parsedUrl = new URL(url, 'http://localhost');
-        querySongSlug = parsedUrl.searchParams.get('song') || parsedUrl.searchParams.get('demo') || '';
-      } catch (e) {}
-
+      // Extract active song slug / query robustly (case-insensitive)
+      let querySongSlug = (req.query.song as string) || (req.query.demo as string) || '';
       let activeSong: any = null;
+      
       if (querySongSlug) {
-        const decodedSlug = decodeURIComponent(querySongSlug);
-        activeSong = data.demos.find((d: any) => (d.id === decodedSlug || d.slug === decodedSlug) && !d.deleted);
+        const decodedSlug = decodeURIComponent(querySongSlug).trim().toLowerCase();
+        activeSong = data.demos.find((d: any) => {
+          const fid = String(d.id || '').toLowerCase();
+          const fslug = String(d.slug || '').toLowerCase();
+          return (fid === decodedSlug || fslug === decodedSlug) && !d.deleted;
+        });
       }
 
       if (!activeSong) {
-        const songPathMatch = cleanPath.match(/^\/(?:demo|song)\/([^\/?]+)/);
+        const songPathMatch = cleanPath.match(/^\/(?:demo|song)\/([^\/?]+)/i);
         if (songPathMatch) {
-          const slug = decodeURIComponent(songPathMatch[1]);
-          activeSong = data.demos.find((d: any) => (d.id === slug || d.slug === slug) && !d.deleted);
+          const slug = decodeURIComponent(songPathMatch[1]).trim().toLowerCase();
+          activeSong = data.demos.find((d: any) => {
+            const fid = String(d.id || '').toLowerCase();
+            const fslug = String(d.slug || '').toLowerCase();
+            return (fid === slug || fslug === slug) && !d.deleted;
+          });
         }
       }
 
       if (activeSong) {
-        const titleSuffix = activeSong.singer || activeSong.author || activeSong.composer || 'Unknown';
+        const titleSuffix = activeSong.singer || activeSong.author || activeSong.composer || 'A.C Xuân Tài';
         ogTitle = activeSong.isReleased 
           ? `${activeSong.title} - ${titleSuffix}`
           : `${activeSong.title} - ${titleSuffix} ( demo )`;
         
-        let coverToUse = activeSong.coverUrl;
+        let coverToUse = activeSong.coverUrl || activeSong.ogImageUrl;
         if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
             const idStr = String(activeSong.id || '');
             let hash = 0;
@@ -1357,15 +1364,19 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
             coverToUse = data.slideshowImages[hash % data.slideshowImages.length];
         }
         
-        ogImage = activeSong.ogImageUrl || coverToUse || data.homeCoverUrl || data.ogImageUrl || '';
+        if (!coverToUse) {
+            coverToUse = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80";
+        }
+        
+        ogImage = formatUrl(coverToUse, data.globalBaseUrl) || '';
         ogDesc = defaultDesc;
       }
 
-      const playlistMatch = cleanPath.match(/^\/playlist\/([^\/?]+)/);
+      const playlistMatch = cleanPath.match(/^\/playlist\/([^\/?]+)/i);
       if (playlistMatch && !activeSong) {
-        const playlistId = decodeURIComponent(playlistMatch[1]);
+        const playlistId = decodeURIComponent(playlistMatch[1]).trim().toLowerCase();
         if (data.playlists) {
-          const playlist = data.playlists.find((p: any) => p.id === playlistId && !p.deleted);
+          const playlist = data.playlists.find((p: any) => String(p.id || '').toLowerCase() === playlistId && !p.deleted);
           if (playlist) {
             ogTitle = `${playlist.title} - A.C Xuân Tài`;
             
@@ -1386,14 +1397,18 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
                  let firstSong = pSongs[0];
                  let firstSongCover = firstSong.coverUrl;
                  if (!firstSongCover && data.slideshowImages && data.slideshowImages.length > 0) {
-                    const idStr = String(firstSong.id || '');
-                    const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
-                    firstSongCover = data.slideshowImages[hash % data.slideshowImages.length];
+                     const idStr = String(firstSong.id || '');
+                     const hash = Array.from(idStr).reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+                     firstSongCover = data.slideshowImages[hash % data.slideshowImages.length];
                  }
                  pCover = firstSongCover;
               }
             }
-            ogImage = pCover || data.homeCoverUrl || data.ogImageUrl || '';
+            
+            if (!pCover) {
+              pCover = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80";
+            }
+            ogImage = formatUrl(pCover, data.globalBaseUrl) || '';
             ogDesc = defaultDesc;
           }
         }
@@ -1417,26 +1432,47 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       }
 
       let ogUrl = `https://${host}${url}`;
-      if (ogUrl.includes('xn--ti-jia.com')) {
-         ogUrl = ogUrl.replace(/xn--ti-jia\.com/gi, 'tài.com');
+      // Enforce ASCII punycode hostname in ogUrl for reliable DNS crawls
+      if (ogUrl) {
+         ogUrl = ogUrl.replace(/tài\.com/gi, 'xn--ti-jia.com');
+         ogUrl = ogUrl.replace(/ta\u0300i\.com/gi, 'xn--ti-jia.com');
+         ogUrl = ogUrl.replace(/t%C3%A0i\.com/gi, 'xn--ti-jia.com');
+         ogUrl = ogUrl.replace(/t%c3%a0i\.com/gi, 'xn--ti-jia.com');
+         ogUrl = ogUrl.replace(/t\u0300?a\u0300?i\.com/gi, 'xn--ti-jia.com');
       }
 
+      // Escape tag attributes carefully to prevent broken HTML on double/single quotes or ampersands
+      const escapeHtmlAttr = (str: string | undefined | null) => {
+        if (!str) return '';
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      };
+
+      const escapedTitle = escapeHtmlAttr(ogTitle);
+      const escapedDesc = escapeHtmlAttr(ogDesc);
+      const escapedImage = escapeHtmlAttr(ogImage);
+      const escapedUrl = escapeHtmlAttr(ogUrl);
+
       // Inject tags
-      html = html.replace(/<title>.*?<\/title>/i, `<title>${ogTitle}</title>`);
+      html = html.replace(/<title>.*?<\/title>/i, `<title>${escapedTitle}</title>`);
       
       const metaTags = `
-        <meta property="og:title" content="${ogTitle}" />
-        <meta property="og:description" content="${ogDesc.replace(/"/g, '&quot;')}" />
-        <meta property="og:image" content="${ogImage}" />
-        <meta property="og:url" content="${ogUrl}" />
+        <meta property="og:title" content="${escapedTitle}" />
+        <meta property="og:description" content="${escapedDesc}" />
+        <meta property="og:image" content="${escapedImage}" />
+        <meta property="og:url" content="${escapedUrl}" />
         <meta property="og:site_name" content="tài.com" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="${ogTitle}" />
-        <meta name="twitter:description" content="${ogDesc.replace(/"/g, '&quot;')}" />
-        <meta name="twitter:image" content="${ogImage}" />
+        <meta name="twitter:title" content="${escapedTitle}" />
+        <meta name="twitter:description" content="${escapedDesc}" />
+        <meta name="twitter:image" content="${escapedImage}" />
       `;
-      html = html.replace('</head>', `${metaTags}</head>`);
+      html = html.replace(/<\/head>/i, `${metaTags}</head>`);
 
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
     } catch (e: any) {
