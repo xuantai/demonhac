@@ -44,9 +44,7 @@ async function uploadLocalToCloud(localPath: string, filename: string, mimetype:
     const storageRef = ref(firebaseStorage, `uploads/${filename}`);
     await uploadBytes(storageRef, fileBuffer, { contentType: mimetype });
     const cloudUrl = await getDownloadURL(storageRef);
-    try {
-      await fs.unlink(localPath);
-    } catch (e) {}
+    // Nhờ sự điều chỉnh: Chúng tôi KHÔNG XÓA file cục bộ ở localPath để đảm bảo cả 2 nơi (Local + Firebase) đều có backup!
     return cloudUrl;
   } catch (error) {
     console.error("Lỗi upload file lên Cloud Storage:", error);
@@ -61,34 +59,37 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
 
   let fileBuffer: Buffer | null = null;
   let mimetype = 'image/jpeg';
-  let filename = `sync-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+  let filename = '';
 
-  if (urlOrPath.toLowerCase().endsWith('.png')) {
-    mimetype = 'image/png';
-    filename += '.png';
-  } else if (urlOrPath.toLowerCase().endsWith('.gif')) {
-    mimetype = 'image/gif';
-    filename += '.gif';
-  } else if (urlOrPath.toLowerCase().endsWith('.webp')) {
-    mimetype = 'image/webp';
-    filename += '.webp';
-  } else {
-    filename += '.jpg';
-  }
-
-  // 1. Try reading local file
+  // 1. Thử đọc từ tệp tin cục bộ trên server trước
   if (urlOrPath.startsWith('/uploads/') || urlOrPath.startsWith('uploads/')) {
     const relativePath = urlOrPath.startsWith('/') ? urlOrPath.substring(1) : urlOrPath;
     const localFullPath = path.join(process.cwd(), 'public', relativePath);
     try {
       fileBuffer = await fs.readFile(localFullPath);
       console.log(`Đọc thành công file cục bộ: ${localFullPath}`);
+      filename = path.basename(localFullPath);
+      
+      const ext = path.extname(filename).toLowerCase();
+      if (ext === '.mp3') {
+        mimetype = 'audio/mpeg';
+      } else if (ext === '.wav') {
+        mimetype = 'audio/wav';
+      } else if (ext === '.webp') {
+        mimetype = 'image/webp';
+      } else if (ext === '.png') {
+        mimetype = 'image/png';
+      } else if (ext === '.gif') {
+        mimetype = 'image/gif';
+      } else {
+        mimetype = 'image/jpeg';
+      }
     } catch (err) {
       console.log(`Không tìm thấy file cục bộ: ${localFullPath}, chuẩn bị tải về...`);
     }
   }
 
-  // 2. Try fetching over HTTP if local read failed or it's an external URL
+  // 2. Tải về từ HTTP nếu đọc tệp cục bộ thất bại hoặc là liên kết bên ngoài
   if (!fileBuffer) {
     let fullUrl = urlOrPath;
     if (urlOrPath.startsWith('/')) {
@@ -99,8 +100,33 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
       fullUrl = `${baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'}${urlOrPath}`;
     }
 
+    // Xác định tên tệp và định dạng tệp từ URL
+    const urlWithoutQuery = fullUrl.split('?')[0];
+    const originalFilename = path.basename(urlWithoutQuery);
+    const ext = path.extname(urlWithoutQuery).toLowerCase();
+    
+    if (ext === '.mp3') {
+      mimetype = 'audio/mpeg';
+      filename = originalFilename.includes('.') ? originalFilename : `sync-${Date.now()}.mp3`;
+    } else if (ext === '.wav') {
+      mimetype = 'audio/wav';
+      filename = originalFilename.includes('.') ? originalFilename : `sync-${Date.now()}.wav`;
+    } else if (ext === '.webp') {
+      mimetype = 'image/webp';
+      filename = originalFilename.includes('.') ? originalFilename : `sync-${Date.now()}.webp`;
+    } else if (ext === '.png') {
+      mimetype = 'image/png';
+      filename = originalFilename.includes('.') ? originalFilename : `sync-${Date.now()}.png`;
+    } else if (ext === '.gif') {
+      mimetype = 'image/gif';
+      filename = originalFilename.includes('.') ? originalFilename : `sync-${Date.now()}.gif`;
+    } else {
+      mimetype = 'image/jpeg';
+      filename = originalFilename.includes('.') ? originalFilename : `sync-${Date.now()}.jpg`;
+    }
+
     try {
-      console.log(`Đang tải ảnh từ: ${fullUrl}`);
+      console.log(`Đang tải tệp tin từ: ${fullUrl}`);
       const res = await fetch(fullUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
       });
@@ -115,12 +141,12 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
         throw new Error(`HTTP status ${res.status}`);
       }
     } catch (downloadErr: any) {
-      console.error(`Không thể tải ảnh từ ${fullUrl}:`, downloadErr.message);
+      console.error(`Không thể tải tệp tin từ ${fullUrl}:`, downloadErr.message);
     }
   }
 
-  // 3. Upload to Firebase Storage
-  if (fileBuffer) {
+  // 3. Đưa lên Firebase Storage
+  if (fileBuffer && filename) {
     try {
       const storageRef = ref(firebaseStorage, `uploads/${filename}`);
       await uploadBytes(storageRef, fileBuffer, { contentType: mimetype });
@@ -652,17 +678,30 @@ async function startServer() {
         }
       }
 
-      // 3. Sync Demos
+      // 3. Sync Demos (Song Cover & Song Audio)
       if (data.demos && data.demos.length > 0) {
         for (let i = 0; i < data.demos.length; i++) {
           const demo = data.demos[i];
+          
+          // Đồng bộ ảnh bìa bài hát
           if (demo.coverUrl && !demo.coverUrl.includes('firebasestorage.googleapis.com')) {
-            logs.push(`Đang xử lý bài hát [${demo.title}]: ${demo.coverUrl}`);
+            logs.push(`Đang xử lý Ảnh Bìa bài hát [${demo.title}]: ${demo.coverUrl}`);
             const newUrl = await uploadUrlOrFileToCloud(demo.coverUrl, data.globalBaseUrl);
             if (newUrl !== demo.coverUrl) {
               demo.coverUrl = newUrl;
               updatedCount++;
-              logs.push(`-> Đồng bộ xong bài [${demo.title}] thành: ${newUrl}`);
+              logs.push(`-> Đồng bộ xong Ảnh Bìa bài [${demo.title}] thành: ${newUrl}`);
+            }
+          }
+
+          // Đồng bộ file nhạc audio bài hát
+          if (demo.audioUrl && !demo.audioUrl.includes('firebasestorage.googleapis.com')) {
+            logs.push(`Đang xử lý file nhạc [${demo.title}]: ${demo.audioUrl}`);
+            const newUrl = await uploadUrlOrFileToCloud(demo.audioUrl, data.globalBaseUrl);
+            if (newUrl !== demo.audioUrl) {
+              demo.audioUrl = newUrl;
+              updatedCount++;
+              logs.push(`-> Đồng bộ xong Nhạc (Audio) bài [${demo.title}] thành: ${newUrl}`);
             }
           }
         }
@@ -1384,8 +1423,8 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
             .resize({ width: 1920, withoutEnlargement: true })
             .toFile(optimizedPath);
            
-           // Xóa file gốc
-           await fs.unlink(req.file.path);
+           // Xóa file raw gốc chưa qua tối ưu hóa để giải phóng dung lượng rác
+           await fs.unlink(req.file.path).catch(() => {});
            
            // Upload to Firebase Storage
            try {
@@ -1394,8 +1433,8 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
               await uploadBytes(storageRef, fileBuffer, { contentType: 'image/webp' });
               const cloudUrl = await getDownloadURL(storageRef);
               
-              // Xóa file optimized cục bộ sau khi đã upload lên cloud thành công
-              await fs.unlink(optimizedPath);
+              // Nhờ sự điều chỉnh của bạn: CHÚNG TÔI KHÔNG XÓA file optimized cục bộ ở đây!
+              // Tệp tin WebP đã tối ưu luôn được lưu trữ song song tại cả server và trong Cloud!
               res.json({ url: cloudUrl });
            } catch (firebaseErr) {
               console.error("Lỗi upload Cloud Storage cho ảnh optimized, chuyển sang lưu cục bộ:", firebaseErr);
@@ -1408,7 +1447,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
               const storageRef = ref(firebaseStorage, `uploads/${req.file.filename}`);
               await uploadBytes(storageRef, fileBuffer, { contentType: req.file.mimetype });
               const cloudUrl = await getDownloadURL(storageRef);
-              await fs.unlink(req.file.path);
+              // CHÚNG TÔI KHÔNG XÓA file gốc cục bộ để duy trì backup 2 nơi song song!
               res.json({ url: cloudUrl });
            } catch (firebaseErr) {
               console.error("Lỗi upload ảnh gốc lên Cloud Storage:", firebaseErr);
@@ -1416,7 +1455,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
            }
         }
       } else {
-        // Tệp không phải là ảnh
+        // Tệp không phải là ảnh (Nhạc hoặc tài liệu khác)
         const isWav = req.file.originalname.toLowerCase().endsWith('.wav') || 
                       req.file.mimetype.includes('wav') || 
                       req.file.mimetype.includes('wave') ||
@@ -1445,25 +1484,21 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
                 .save(mp3Path);
             });
 
-            // Xóa file WAV gốc cục bộ để tránh rác server
+            // Xóa file WAV gốc cục bộ để tránh rác server (vì WAV quá nặng, up thành MP3 rồi thì xóa WAV đi)
             try {
               await fs.unlink(wavPath);
             } catch (unlinkErr) {
               console.error("Không thể xóa file WAV tạm:", unlinkErr);
             }
 
-            // Upload file MP3 đã được tạo lên Firebase Storage
+            // Upload tệp tin MP3 đã được tạo lên Firebase Storage
             try {
               const fileBuffer = await fs.readFile(mp3Path);
               const storageRef = ref(firebaseStorage, `uploads/${mp3Filename}`);
               await uploadBytes(storageRef, fileBuffer, { contentType: 'audio/mpeg' });
               const cloudUrl = await getDownloadURL(storageRef);
               
-              // Xóa file MP3 cục bộ sau khi đã upload Cloud Storage thành công
-              try {
-                await fs.unlink(mp3Path);
-              } catch (e) {}
-
+              // Nhờ sự điều chỉnh của bạn: CHÚNG TÔI GIỮ LẠI file MP3 cục bộ để làm backup song song!
               res.json({ url: cloudUrl });
             } catch (firebaseErr) {
               console.error("Lỗi upload file MP3 đã chuyển đổi lên Cloud Storage, dùng url cục bộ:", firebaseErr);
@@ -1477,7 +1512,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
                const storageRef = ref(firebaseStorage, `uploads/${req.file.filename}`);
                await uploadBytes(storageRef, fileBuffer, { contentType: req.file.mimetype });
                const cloudUrl = await getDownloadURL(storageRef);
-               await fs.unlink(req.file.path);
+               // CHÚNG TÔI GIỮ LẠI file gốc cục bộ để làm backup song song!
                res.json({ url: cloudUrl });
             } catch (firebaseErr) {
                console.error("Lỗi upload file gốc lên Cloud Storage sau khi convert thất bại:", firebaseErr);
@@ -1491,7 +1526,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
              const storageRef = ref(firebaseStorage, `uploads/${req.file.filename}`);
              await uploadBytes(storageRef, fileBuffer, { contentType: req.file.mimetype });
              const cloudUrl = await getDownloadURL(storageRef);
-             await fs.unlink(req.file.path);
+             // CHÚNG TÔI GIỮ LẠI file gốc cục bộ để làm backup song song!
              res.json({ url: cloudUrl });
           } catch (firebaseErr) {
              console.error("Lỗi upload file không phải ảnh lên Cloud Storage:", firebaseErr);
@@ -1774,8 +1809,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
         <meta property="og:title" content="${escapedTitle}" />
         <meta property="og:description" content="${escapedDesc}" />
         <meta property="og:image" content="${escapedImage}" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        <meta property="og:image:secure_url" content="${escapedImage}" />
         <meta property="og:url" content="${escapedUrl}" />
         <meta property="og:site_name" content="tài.com" />
         <meta property="og:type" content="website" />

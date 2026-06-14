@@ -349,6 +349,37 @@ export default function App() {
     }).catch(()=>setLang('vi'));
   }, []);
 
+  // Cơ chế tự động khôi phục Ảnh từ Server cục bộ nếu Link Firebase Storage bị Die/Chặn trong nước
+  useEffect(() => {
+    const handleGlobalImgError = (event: ErrorEvent) => {
+      const target = event.target as HTMLElement;
+      if (target && target.tagName === 'IMG') {
+        const img = target as HTMLImageElement;
+        const currentSrc = img.src;
+        if (currentSrc && currentSrc.includes('firebasestorage.googleapis.com') && currentSrc.includes('uploads%2F')) {
+          try {
+            const parts = currentSrc.split('uploads%2F');
+            if (parts.length > 1) {
+              const filenameWithParams = parts[1];
+              const filename = filenameWithParams.split('?')[0];
+              const decodedFilename = decodeURIComponent(filename);
+              const fallbackUrl = `/uploads/${decodedFilename}`;
+              console.log("Global Capture: Chuyển hướng ảnh sang local fallback do Link Firebase không phản hồi:", fallbackUrl);
+              img.src = fallbackUrl;
+            }
+          } catch (e) {
+            console.error("Lỗi khi khôi phục link ảnh dự phòng cục bộ:", e);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('error', handleGlobalImgError, true); // true = Bắt sự kiện trong Capture Phase
+    return () => {
+      window.removeEventListener('error', handleGlobalImgError, true);
+    };
+  }, []);
+
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>
       <BrowserRouter>
@@ -1351,6 +1382,11 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const almostEndedTriggered = useRef(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
+
+  useEffect(() => {
+    setCurrentSrc(src);
+  }, [src]);
 
   useEffect(() => {
     almostEndedTriggered.current = false;
@@ -1367,7 +1403,7 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
     } else if (isPreview) {
         setIsPlaying(false);
     }
-  }, [src, isPreview]);
+  }, [currentSrc, isPreview]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -1451,12 +1487,27 @@ function CustomAudioPlayer({ src, template, onEnded, onAlmostEnded, playlistCont
     >
       <audio 
         ref={audioRef} 
-        src={src} 
+        src={currentSrc} 
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={onEnded}
+        onError={() => {
+          if (currentSrc && currentSrc.includes('firebasestorage.googleapis.com') && currentSrc.includes('uploads%2F')) {
+            try {
+              const parts = currentSrc.split('uploads%2F');
+              if (parts.length > 1) {
+                const filename = parts[1].split('?')[0];
+                const fallbackUrl = `/uploads/${decodeURIComponent(filename)}`;
+                console.log("Audio Error: Chuyển hướng nhạc sang local fallback:", fallbackUrl);
+                setCurrentSrc(fallbackUrl);
+              }
+            } catch (err) {
+              console.error("Audio fallback calculation failed", err);
+            }
+          }
+        }}
         loop={playlistContext?.repeat === 2}
       />
       
@@ -5165,23 +5216,23 @@ function AdminDashboard() {
                 <hr className="border-stone-200 my-6" />
                 <div className="bg-stone-50 border border-stone-200 rounded-2xl p-6">
                   <h3 className="font-bold text-stone-800 text-lg mb-2 flex items-center gap-2">
-                    🔄 Đồng bộ và Sao lưu Ảnh bìa lên Firebase Storage
+                    🔄 Đồng bộ và Sao lưu Toàn bộ Dữ liệu (Ảnh Bìa & Nhạc) lên Cloud Storage
                   </h3>
                   <p className="text-sm text-stone-600 mb-4">
-                    Nếu bạn có những ca khúc hoặc album cũ hiển thị ảnh bìa từ tệp cục bộ thiết bị hoặc liên kết ngoài cũ, nhấp vào đây để hệ thống tự động tải về và sao lưu vĩnh viễn lên <strong>Firebase Storage (Cloud)</strong>. Khắc phục triệt để lỗi ảnh bị biến mất khi Server khởi động lại.
+                    Nếu bạn có những ca khúc hoặc album cũ hiển thị ảnh bìa hoặc file nhạc từ tệp cục bộ thiết bị hoặc liên kết ngoài cũ, nhấp vào đây để hệ thống tự động tải về, sao lưu vạch định và đồng thời lưu song song trên cả <strong>Server lẫn Firebase Storage (Cloud)</strong> giúp an toàn 2 lớp.
                   </p>
                   
                   <div className="space-y-4">
                     {syncingCovers ? (
                       <div className="flex items-center gap-3 text-stone-700 text-sm font-semibold">
                         <span className="w-4 h-4 border-2 border-stone-900 border-t-transparent rounded-full animate-spin"></span>
-                        Đang rà soát và nạp ảnh lên Cloud Storage... Vui lòng giữ kết nối!
+                        Đang rà soát và nạp ảnh bìa + nhạc lên Cloud Storage... Vui lòng giữ kết nối!
                       </div>
                     ) : (
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!confirm("Bắt đầu quét và đồng bộ hóa toàn bộ ảnh bìa lên Firebase Storage?")) return;
+                          if (!confirm("Bắt đầu quét và đồng bộ hóa toàn bộ ảnh bìa và file nhạc lên Firebase Storage? (Giữ lại cả file cục bộ để backup 2 nơi)")) return;
                           
                           setSyncingCovers(true);
                           setSyncLogs(["Đang thiết lập kết nối tới máy chủ..."]);
@@ -5198,7 +5249,7 @@ function AdminDashboard() {
                             const result = await res.json();
                             if (res.ok && result.success) {
                               setSyncLogs(result.logs || ["Đồng bộ Cloud hoàn tất!"]);
-                              setToast(`Đồng bộ thành công ${result.updatedCount} ảnh bìa!`);
+                              setToast(`Đồng bộ thành công ${result.updatedCount} mục dữ liệu!`);
                               setTimeout(() => setToast(''), 3000);
                               loadData(); // Nạp lại dữ liệu UI mới ngay lập tức
                             } else {
@@ -5212,7 +5263,7 @@ function AdminDashboard() {
                         }}
                         className="bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 font-bold px-5 py-3 rounded-xl transition-colors text-sm flex items-center gap-2"
                       >
-                        🚀 Nạp toàn bộ ảnh bìa lên Cloud Storage vĩnh viễn
+                        🚀 Nạp toàn bộ Ảnh bìa & Nhạc lên Cloud Storage vĩnh viễn (Giữ song song 2 nơi)
                       </button>
                     )}
 
