@@ -1321,34 +1321,49 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
         ? `Nơi cập nhật sản phẩm và demo của ${data.artistName || 'A.C Xuân Tài'}`
         : defaultDesc;
 
-      const match = url.match(/^\/(?:demo|song)\/([^\/?]+)/);
-      if (match) {
-        const slug = match[1];
-        const demo = data.demos.find((d: any) => (d.id === slug || d.slug === slug) && !d.deleted);
-        if (demo) {
-          const titleSuffix = demo.singer || demo.author || demo.composer || 'Unknown';
-          ogTitle = demo.isReleased 
-            ? `${demo.title} - ${titleSuffix}`
-            : `${demo.title} - ${titleSuffix} ( demo )`;
-          
-          let coverToUse = demo.coverUrl;
-          if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
-              const idStr = String(demo.id || '');
-              let hash = 0;
-              for (let i = 0; i < idStr.length; i++) {
-                 hash += idStr.charCodeAt(i);
-              }
-              coverToUse = data.slideshowImages[hash % data.slideshowImages.length];
-          }
-          
-          ogImage = demo.ogImageUrl || coverToUse || data.homeCoverUrl || data.ogImageUrl || '';
-          ogDesc = defaultDesc;
+      let querySongSlug = '';
+      try {
+        const parsedUrl = new URL(url, 'http://localhost');
+        querySongSlug = parsedUrl.searchParams.get('song') || parsedUrl.searchParams.get('demo') || '';
+      } catch (e) {}
+
+      let activeSong: any = null;
+      if (querySongSlug) {
+        const decodedSlug = decodeURIComponent(querySongSlug);
+        activeSong = data.demos.find((d: any) => (d.id === decodedSlug || d.slug === decodedSlug) && !d.deleted);
+      }
+
+      if (!activeSong) {
+        const songPathMatch = cleanPath.match(/^\/(?:demo|song)\/([^\/?]+)/);
+        if (songPathMatch) {
+          const slug = decodeURIComponent(songPathMatch[1]);
+          activeSong = data.demos.find((d: any) => (d.id === slug || d.slug === slug) && !d.deleted);
         }
       }
 
-      const playlistMatch = url.match(/^\/playlist\/([^\/?]+)/);
-      if (playlistMatch) {
-        const playlistId = playlistMatch[1];
+      if (activeSong) {
+        const titleSuffix = activeSong.singer || activeSong.author || activeSong.composer || 'Unknown';
+        ogTitle = activeSong.isReleased 
+          ? `${activeSong.title} - ${titleSuffix}`
+          : `${activeSong.title} - ${titleSuffix} ( demo )`;
+        
+        let coverToUse = activeSong.coverUrl;
+        if (!coverToUse && data.slideshowImages && data.slideshowImages.length > 0) {
+            const idStr = String(activeSong.id || '');
+            let hash = 0;
+            for (let i = 0; i < idStr.length; i++) {
+               hash += idStr.charCodeAt(i);
+            }
+            coverToUse = data.slideshowImages[hash % data.slideshowImages.length];
+        }
+        
+        ogImage = activeSong.ogImageUrl || coverToUse || data.homeCoverUrl || data.ogImageUrl || '';
+        ogDesc = defaultDesc;
+      }
+
+      const playlistMatch = cleanPath.match(/^\/playlist\/([^\/?]+)/);
+      if (playlistMatch && !activeSong) {
+        const playlistId = decodeURIComponent(playlistMatch[1]);
         if (data.playlists) {
           const playlist = data.playlists.find((p: any) => p.id === playlistId && !p.deleted);
           if (playlist) {
