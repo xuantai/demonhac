@@ -60,15 +60,16 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
   let fileBuffer: Buffer | null = null;
   let mimetype = 'image/jpeg';
   let filename = '';
+  let localSourceFullPath = '';
 
   // 1. Thử đọc từ tệp tin cục bộ trên server trước
   if (urlOrPath.startsWith('/uploads/') || urlOrPath.startsWith('uploads/')) {
     const relativePath = urlOrPath.startsWith('/') ? urlOrPath.substring(1) : urlOrPath;
-    const localFullPath = path.join(process.cwd(), 'public', relativePath);
+    localSourceFullPath = path.join(process.cwd(), 'public', relativePath);
     try {
-      fileBuffer = await fs.readFile(localFullPath);
-      console.log(`Đọc thành công file cục bộ: ${localFullPath}`);
-      filename = path.basename(localFullPath);
+      fileBuffer = await fs.readFile(localSourceFullPath);
+      console.log(`Đọc thành công file cục bộ: ${localSourceFullPath}`);
+      filename = path.basename(localSourceFullPath);
       
       const ext = path.extname(filename).toLowerCase();
       if (ext === '.mp3') {
@@ -85,7 +86,7 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
         mimetype = 'image/jpeg';
       }
     } catch (err) {
-      console.log(`Không tìm thấy file cục bộ: ${localFullPath}, chuẩn bị tải về...`);
+      console.log(`Không tìm thấy file cục bộ: ${localSourceFullPath}, chuẩn bị tải về...`);
     }
   }
 
@@ -145,13 +146,98 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
     }
   }
 
-  // 3. Đưa lên Firebase Storage
+  // 3. Tự động tối ưu hoá chất lượng khi đồng bộ hoá
   if (fileBuffer && filename) {
+    const ext = path.extname(filename).toLowerCase();
+    const isImage = mimetype.startsWith('image/') && ext !== '.svg' && ext !== '.gif';
+    const isWav = ext === '.wav' || mimetype.includes('wav') || mimetype.includes('wave') || mimetype.includes('x-wav');
+
+    if (isImage) {
+      try {
+        console.log(`[Đồng bộ hóa] Phát hiện ảnh chưa nén [${filename}]. Bắt đầu tối ưu sang WebP...`);
+        const baseFilename = filename.includes('.') ? filename.substring(0, filename.lastIndexOf('.')) : filename;
+        const optimizedFilename = `${baseFilename}-${Date.now()}.webp`;
+        const optimizedPath = path.join(UPLOADS_DIR, optimizedFilename);
+
+        const optimizedBuffer = await sharp(fileBuffer)
+          .webp({ quality: 80 })
+          .resize({ width: 1920, withoutEnlargement: true })
+          .toBuffer();
+
+        // Ghi lại cục bộ ở uploads để an toàn 2 lớp
+        await fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(() => {});
+        await fs.writeFile(optimizedPath, optimizedBuffer);
+        console.log(`[Đồng bộ hóa] Đã tối ưu hóa ảnh và giữ một bản backup WebP tại: ${optimizedPath}`);
+
+        fileBuffer = optimizedBuffer;
+        filename = optimizedFilename;
+        mimetype = 'image/webp';
+      } catch (sharpErr) {
+        console.error(`[Đồng bộ hóa] Sharp gặp lỗi tối ưu hóa ảnh, chuyển sang dùng ảnh gốc:`, sharpErr);
+      }
+    } else if (isWav) {
+      try {
+        console.log(`[Đồng bộ hóa] Phát hiện bài hát định dạng WAV nặng [${filename}]. Khởi chạy FFmpeg convert sang MP3...`);
+        const baseFilename = filename.includes('.') ? filename.substring(0, filename.lastIndexOf('.')) : filename;
+        const mp3Filename = `${baseFilename}-${Date.now()}.mp3`;
+        const mp3Path = path.join(UPLOADS_DIR, mp3Filename);
+
+        let tempWavPath = localSourceFullPath;
+        let isTempWavCreated = false;
+
+        if (!tempWavPath) {
+          tempWavPath = path.join(UPLOADS_DIR, `temp-sync-${Date.now()}.wav`);
+          await fs.writeFile(tempWavPath, fileBuffer);
+          isTempWavCreated = true;
+        }
+
+        // Chạy FFmpeg convert
+        await new Promise<void>((resolve, reject) => {
+          ffmpeg(tempWavPath)
+            .toFormat('mp3')
+            .audioBitrate(192)
+            .on('end', () => {
+              console.log(`[Đồng bộ hóa] Đã chuyển đổi WAV sang MP3 thành công tại: ${mp3Path}`);
+              resolve();
+            })
+            .on('error', (err) => {
+              reject(err);
+            })
+            .save(mp3Path);
+        });
+
+        // Đọc lại file mp3 tối ưu
+        fileBuffer = await fs.readFile(mp3Path);
+        filename = mp3Filename;
+        mimetype = 'audio/mpeg';
+
+        // Gỡ tệp WAV rác
+        if (isTempWavCreated) {
+          await fs.unlink(tempWavPath).catch(() => {});
+        } else {
+          await fs.unlink(localSourceFullPath).catch(() => {});
+          console.log(`[Đồng bộ hóa] Đã dọn dẹp file WAV nặng cục bộ thành công: ${localSourceFullPath}`);
+        }
+      } catch (ffmpegErr) {
+        console.error(`[Đồng bộ hóa] FFmpeg gặp lỗi convert WAV sang MP3, giữ nguyên định dạng file gốc:`, ffmpegErr);
+      }
+    }
+
     try {
       const storageRef = ref(firebaseStorage, `uploads/${filename}`);
       await uploadBytes(storageRef, fileBuffer, { contentType: mimetype });
       const cloudUrl = await getDownloadURL(storageRef);
       console.log(`Đã đồng bộ lên Firebase Storage: ${cloudUrl}`);
+
+      // Đảm bảo file được đồng bộ đồng thời nằm trong thư mục uploads của server
+      const destLocalPath = path.join(UPLOADS_DIR, filename);
+      const isExist = await fs.access(destLocalPath).then(() => true).catch(() => false);
+      if (!isExist) {
+        await fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(() => {});
+        await fs.writeFile(destLocalPath, fileBuffer);
+        console.log(`[Đồng bộ hóa] Lưu dự phòng bản sao cục bộ thành công: ${destLocalPath}`);
+      }
+
       return cloudUrl;
     } catch (uploadErr) {
       console.error(`Lỗi upload đồng bộ lên Firebase Storage:`, uploadErr);
