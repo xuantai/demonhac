@@ -4722,7 +4722,7 @@ function AdminDashboard() {
                 {demosSubTab === 'landing_pages' && (() => {
                   const landingList = data.demos?.filter(d => d.linkType === 'indirect' && !d.deleted) || [];
                   if (landingList.length === 0) {
-                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có Landing Page nào. Hãy tạo mới và chọn Loại Liên Kết là "Gián tiếp"!</div>;
+                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có Landing Page nào. Hãy tạo mới và chọn Loại Liên Kết là "Landing Page"!</div>;
                   }
                   return (
                     <div className="flex flex-col gap-2">
@@ -6050,7 +6050,7 @@ function AdminCreateDemo() {
           
           <div className="flex bg-stone-100 p-1 rounded-xl mb-8 w-full max-w-xs mx-auto">
             <button type="button" onClick={() => setLinkType('direct')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'direct' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Trực Tiếp</button>
-            <button type="button" onClick={() => setLinkType('indirect')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'indirect' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Gián Tiếp</button>
+            <button type="button" onClick={() => setLinkType('indirect')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'indirect' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Landing Page</button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -6549,7 +6549,7 @@ function AdminEditDemo() {
           
           <div className="flex bg-stone-100 p-1 rounded-xl mb-8 w-full max-w-xs mx-auto">
             <button type="button" onClick={() => setLinkType('direct')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'direct' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Trực Tiếp</button>
-            <button type="button" onClick={() => setLinkType('indirect')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'indirect' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Gián Tiếp</button>
+            <button type="button" onClick={() => setLinkType('indirect')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'indirect' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Landing Page</button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

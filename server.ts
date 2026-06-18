@@ -1358,7 +1358,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
     const data = await loadData();
     let demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
     if (!demo) return res.status(404).json({ error: 'Not found' });
-    const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
+    const expectedPassword = demo.linkType === 'indirect' ? demo.password : (demo.isReleased ? null : (demo.password || data.globalPassword));
     if (expectedPassword && expectedPassword === req.body.password) {
       if (!demo.coverUrl) {
           const imagesToUse = (data.slideshowImages && data.slideshowImages.length > 0)
@@ -1465,7 +1465,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
         templateConfigs: data.templateConfigs || []
       };
 
-      const expectedPassword = demo.isReleased ? null : (demo.password || data.globalPassword);
+      const expectedPassword = demo.linkType === 'indirect' ? demo.password : (demo.isReleased ? null : (demo.password || data.globalPassword));
       const isUserAdmin = isRequestAdmin(req);
       const isUserMember = isRequestMember(req);
       const fromPlaylist = req.query.fromPlaylist === 'true';
