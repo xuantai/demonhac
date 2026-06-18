@@ -1256,12 +1256,12 @@ function Home() {
                       </>
                     ) : (
                       <>
-                        <span className="absolute top-2 right-2 rotate-[15deg] bg-rose-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20">
-                          {t.lDemoMark || 'DEMO'}
+                        <span className={`absolute top-2 right-2 rotate-[15deg] ${demo.linkType === 'indirect' ? 'bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.8)]' : 'bg-rose-600 shadow-[0_0_10px_rgba(225,29,72,0.8)]'} text-[8px] font-black text-white px-1.5 py-0.5 rounded animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none flex-shrink-0 z-20`}>
+                          {demo.linkType === 'indirect' ? 'Landing Page' : (t.lDemoMark || 'DEMO')}
                         </span>
                       </>
                     )}
-                    {(demo.password || data?.globalPassword) && !demo.isReleased && (
+                    {(demo.password || data?.globalPassword) && !demo.isReleased && demo.linkType !== 'indirect' && (
                       <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
                          <Lock className="w-3.5 h-3.5 text-yellow-500" />
                       </div>
@@ -3652,7 +3652,11 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
           >
             <span className="relative inline-block pr-10 z-40">
               <HoverTranslate text={demo.title} format={true} />
-              {demo.isReleased ? (
+              {demo.linkType === 'indirect' ? (
+               <div className="absolute top-0 right-0 translate-x-[15%] -translate-y-[10%] rotate-[12deg] bg-indigo-600 text-[9px] font-black text-white px-1.5 py-0.5 rounded shadow-[0_0_15px_rgba(79,70,229,0.8)] animate-[pulse_2s_ease-in-out_infinite] tracking-widest border border-white/20 select-none z-50 whitespace-nowrap">
+                 Landing Page
+               </div>
+              ) : demo.isReleased ? (
                <div className="absolute top-0 right-0 translate-x-[25%] -translate-y-[10%] rotate-[12deg] bg-emerald-600 text-[9px] font-black text-white px-2 py-0.5 rounded shadow-[0_0_15px_rgba(5,150,105,0.8)] tracking-widest border border-emerald-400/50 select-none animate-released-wiggle z-50">
                  {t.lReleasedMark || 'RELEASED'}
                </div>
@@ -4824,7 +4828,7 @@ function AdminDashboard() {
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
                             </button>
-                            {demo.secretKey && (demo.password || (data?.globalPassword && !demo.isReleased)) && (
+                            {demo.secretKey && (demo.linkType === 'indirect' ? demo.password : (demo.password || (data?.globalPassword && !demo.isReleased))) && (
                               <button type="button" onClick={() => handleShareSecret(demo)} className="text-amber-600 hover:bg-amber-50 p-2 rounded-lg transition-colors animate-[fade-in_0.3s_ease-out]" title="Copy Secret Link">
                                  <Lock className="w-4 h-4 text-amber-500" />
                               </button>
@@ -4896,7 +4900,7 @@ function AdminDashboard() {
                                     <EyeOff className="w-3 h-3" /> Ẩn
                                   </span>
                                 )}
-                                {(demo.password || (data?.globalPassword && !demo.isReleased)) ? (
+                                {(demo.linkType === 'indirect' ? demo.password : (demo.password || (data?.globalPassword && !demo.isReleased))) ? (
                                   <span className="bg-stone-100 text-stone-700 px-1.5 py-0.5 border border-stone-200 rounded flex items-center gap-1 text-[10px] md:text-xs">
                                     <Lock className="w-3 h-3 text-stone-500" /> <span className="font-mono">{demo.password || `Mật khẩu chung: ${data?.globalPassword}`}</span>
                                   </span>
@@ -4908,7 +4912,7 @@ function AdminDashboard() {
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
                             </button>
-                            {demo.secretKey && (demo.password || data?.globalPassword) && !demo.isReleased && (
+                            {demo.secretKey && (demo.linkType === 'indirect' ? demo.password : (demo.password || (data?.globalPassword && !demo.isReleased))) && (
                               <button type="button" onClick={() => handleShareSecret(demo)} className="text-amber-600 hover:bg-amber-50 p-2 rounded-lg transition-colors animate-[fade-in_0.3s_ease-out]" title="Copy Secret Link">
                                  <Lock className="w-4 h-4 text-amber-500" />
                               </button>
@@ -6722,7 +6726,7 @@ function AdminEditDemo() {
                    </div>
                 </div>
 
-                {demo.secretKey && (demo.password || (appData?.globalPassword && !demo.isReleased)) && (
+                {demo.secretKey && (demo.linkType === 'indirect' ? demo.password : (demo.password || (appData?.globalPassword && !demo.isReleased))) && (
                   <div className="bg-amber-50 border border-amber-250/60 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-5 mt-6 animate-[fade-in_0.3s_ease-out] w-full min-w-0 overflow-hidden">
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:flex-1 min-w-0">
                       <div className="w-12 h-12 bg-amber-100/75 text-amber-700 rounded-xl flex items-center justify-center font-bold shrink-0 mx-auto sm:mx-0 shadow-xs">
@@ -6790,7 +6794,7 @@ function AdminEditDemo() {
                     <FileText className="w-5 h-5 text-amber-500" />
                     {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                   </button>
-                  {(demo.password || appData?.globalPassword) && !demo.isReleased && (
+                  {(demo.linkType === 'indirect' ? demo.password : (demo.password || (appData?.globalPassword && !demo.isReleased))) && (
                     <button 
                       disabled={loading} 
                       type="button" 
