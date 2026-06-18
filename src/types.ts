@@ -38,6 +38,13 @@ export interface DemoSong {
   createdAt: number;
   secretKey?: string;
   achievements?: Achievement[];
+  linkType?: 'direct' | 'indirect';
+  linkZing?: string;
+  linkSpotify?: string;
+  linkApple?: string;
+  linkYoutubeMusic?: string;
+  linkYoutube?: string;
+  hasPassword?: boolean;
 }
 
 export interface TemplateConfig {

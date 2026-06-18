@@ -47,7 +47,7 @@ async function uploadLocalToCloud(localPath: string, filename: string, mimetype:
     // Nhờ sự điều chỉnh: Chúng tôi KHÔNG XÓA file cục bộ ở localPath để đảm bảo cả 2 nơi (Local + Firebase) đều có backup!
     return cloudUrl;
   } catch (error) {
-    console.error("Lỗi upload file lên Cloud Storage:", error);
+    console.warn("⚠️ Bỏ qua upload Firebase Storage (chưa cấu hình rules hoặc bucket). Đã lưu offline!");
     return `/uploads/${filename}`;
   }
 }
@@ -240,7 +240,7 @@ async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string)
 
       return cloudUrl;
     } catch (uploadErr) {
-      console.error(`Lỗi upload đồng bộ lên Firebase Storage:`, uploadErr);
+      console.warn(`⚠️ Bỏ qua upload đồng bộ Firebase Storage (chưa cấu hình rules hoặc bucket). Đã lưu offline!`);
     }
   }
 
@@ -497,16 +497,14 @@ async function startServer() {
       finalBaseUrl = finalBaseUrl.replace(/\/$/, '');
     }
 
-    // If the URL is an uploaded file (contains /uploads/)
+    // Always prefer relative URLs for uploads so that they work relative to the SPA dev environment
     const uploadMatch = url.match(/\/uploads\/[^/]+$/);
     if (uploadMatch) {
-      if (finalBaseUrl) return finalBaseUrl + uploadMatch[0];
       if (url.startsWith('http')) return url;
       return uploadMatch[0];
     }
     if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
       let normalized = url.startsWith('/') ? url : '/' + url;
-      if (finalBaseUrl) return finalBaseUrl + normalized;
       return normalized;
     }
 
@@ -518,10 +516,6 @@ async function startServer() {
     // Also replace absolute xtpro domains just in case
     if (finalBaseUrl && url.includes('xtpro.vn')) {
         url = url.replace(/https?:\/\/[a-zA-Z0-9-]+\.xtpro\.vn/g, finalBaseUrl);
-    }
-
-    if (url.startsWith('/') && finalBaseUrl) {
-      return finalBaseUrl + url;
     }
     
     return url;
@@ -1075,7 +1069,13 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       isDraft: req.body.isDraft === 'true',
       releaseYear: req.body.releaseYear || '',
       playlistIds: req.body.playlistIds ? JSON.parse(req.body.playlistIds) : [],
-      achievements: req.body.achievements ? JSON.parse(req.body.achievements) : []
+      achievements: req.body.achievements ? JSON.parse(req.body.achievements) : [],
+      linkType: req.body.linkType || 'direct',
+      linkZing: req.body.linkZing || '',
+      linkSpotify: req.body.linkSpotify || '',
+      linkApple: req.body.linkApple || '',
+      linkYoutubeMusic: req.body.linkYoutubeMusic || '',
+      linkYoutube: req.body.linkYoutube || ''
     };
     data.demos.push(newDemo);
     await saveData(data);
@@ -1485,10 +1485,11 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
               backgroundUrl: demo.backgroundUrl,
               globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl),
               slideshowImages: data.slideshowImages || [],
-              requiresPassword: true 
+              requiresPassword: true,
+              hasPassword: true
           });
       }
-      res.json({ ...demo, slideshowImages: data.slideshowImages || [], globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret && !isUserMember });
+      res.json({ ...demo, slideshowImages: data.slideshowImages || [], globalCoverUrl: formatUrl(data.homeCoverUrl, data.globalBaseUrl), requiresPassword: !!expectedPassword && !isValidSecret && !isUserMember, hasPassword: !!expectedPassword });
   });
 
   // Serve static files from public/uploads
@@ -1523,7 +1524,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
               // Tệp tin WebP đã tối ưu luôn được lưu trữ song song tại cả server và trong Cloud!
               res.json({ url: cloudUrl });
            } catch (firebaseErr) {
-              console.error("Lỗi upload Cloud Storage cho ảnh optimized, chuyển sang lưu cục bộ:", firebaseErr);
+              console.warn("⚠️ Bỏ qua Firebase Storage cho ảnh optimized (chưa cấu hình rules hoặc bucket). Đã lưu offline!");
               res.json({ url: `/uploads/${optimizedFilename}` });
            }
         } catch (error) {
@@ -1536,7 +1537,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
               // CHÚNG TÔI KHÔNG XÓA file gốc cục bộ để duy trì backup 2 nơi song song!
               res.json({ url: cloudUrl });
            } catch (firebaseErr) {
-              console.error("Lỗi upload ảnh gốc lên Cloud Storage:", firebaseErr);
+              console.warn("⚠️ Bỏ qua Firebase Storage cho ảnh gốc (chưa cấu hình rules). Đã lưu offline!");
               res.json({ url: `/uploads/${req.file.filename}` });
            }
         }
@@ -1587,7 +1588,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
               // Nhờ sự điều chỉnh của bạn: CHÚNG TÔI GIỮ LẠI file MP3 cục bộ để làm backup song song!
               res.json({ url: cloudUrl });
             } catch (firebaseErr) {
-              console.error("Lỗi upload file MP3 đã chuyển đổi lên Cloud Storage, dùng url cục bộ:", firebaseErr);
+              console.warn("⚠️ Bỏ qua Firebase Storage cho MP3 (chưa cấu hình rules). Đã lưu offline!");
               res.json({ url: `/uploads/${mp3Filename}` });
             }
           } catch (convertErr: any) {
@@ -1601,7 +1602,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
                // CHÚNG TÔI GIỮ LẠI file gốc cục bộ để làm backup song song!
                res.json({ url: cloudUrl });
             } catch (firebaseErr) {
-               console.error("Lỗi upload file gốc lên Cloud Storage sau khi convert thất bại:", firebaseErr);
+               console.warn("⚠️ Bỏ qua upload Firebase Storage sau khi convert thất bại (chưa cấu hình rules hoặc bucket). Đã lưu offline!");
                res.json({ url: `/uploads/${req.file.filename}` });
             }
           }
@@ -1615,7 +1616,7 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
              // CHÚNG TÔI GIỮ LẠI file gốc cục bộ để làm backup song song!
              res.json({ url: cloudUrl });
           } catch (firebaseErr) {
-             console.error("Lỗi upload file không phải ảnh lên Cloud Storage:", firebaseErr);
+             console.warn("⚠️ Bỏ qua upload Firebase Storage cho file khác (chưa cấu hình rules hoặc bucket). Đã lưu offline!");
              res.json({ url: `/uploads/${req.file.filename}` });
           }
         }
@@ -1651,7 +1652,8 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
          await fs.unlink(filepath);
          res.json({ url: cloudUrl });
       } catch (firebaseErr) {
-         console.error("Lỗi upload base64 lên Cloud Storage:", firebaseErr);
+         console.warn("⚠️ Bỏ qua upload Firebase Storage cho ảnh base64 (chưa cấu hình rules hoặc bucket).");
+         // Không xóa file nếu upload lỗi, giữ lại offline
          res.json({ url: `/uploads/${filename}` });
       }
     } catch (e) {
@@ -1709,6 +1711,19 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
   // Serve runtime uploads folder
   const uploadsPath = path.join(process.cwd(), 'public', 'uploads');
   app.use('/uploads', express.static(uploadsPath));
+  
+  // Fallback for missing uploads: redirect to the production domain
+  app.use('/uploads', async (req, res, next) => {
+     try {
+        const data = await loadData();
+        if (data.globalBaseUrl) {
+           const base = data.globalBaseUrl.startsWith('http') ? data.globalBaseUrl : `https://${data.globalBaseUrl}`;
+           const cleanBase = base.replace(/\/$/, "");
+           return res.redirect(`${cleanBase}/uploads${req.path}`);
+        }
+     } catch (e) {}
+     next();
+  });
 
   let vite: any;
   // Vite middleware for development

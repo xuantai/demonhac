@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles, Copy } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles, Copy, ExternalLink } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong, TemplateConfig, Achievement } from './types';
 import { motion, AnimatePresence } from 'motion/react';
+import { IndirectBioCard } from './components/IndirectBioCard';
 
 function formatText(text: string | null | undefined, disableLinks = false) {
   if (!text) return null;
@@ -661,7 +662,14 @@ function Home() {
   const [spotifyLoaded, setSpotifyLoaded] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [toast, setToast] = useState('');
+  const [activeBioSong, setActiveBioSong] = useState<any | null>(null);
   const observer = useRef<IntersectionObserver>();
+
+  const getPreviewUrl = (url: string | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+    return url;
+  };
 
   useEffect(() => {
     const tabInterval = setInterval(() => {
@@ -1166,7 +1174,7 @@ function Home() {
                 );
               })
             ) : (
-              data.demos.filter(d => d.status === 'public').filter(d => activeListTab === 'demos' ? !d.isReleased : d.isReleased).map(demo => (
+              data.demos.filter(d => d.linkType === 'indirect' || d.status === 'public').filter(d => activeListTab === 'demos' ? (!d.isReleased && d.linkType !== 'indirect') : (d.isReleased || d.linkType === 'indirect')).map(demo => (
                 <motion.div
                   key={demo.id}
                   variants={{
@@ -1174,7 +1182,16 @@ function Home() {
                     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
                   }}
                 >
-                  <Link to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} className={`group relative rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-3 w-full ${demo.achievements?.length ? 'hover:shadow-[0_0_20px_rgba(251,191,36,0.25)]' : 'hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)]'}`}>
+                  <Link 
+                    to={activeListTab === 'released' ? `/playlist/released?song=${demo.slug || demo.id}` : `/song/${demo.slug || demo.id}`} 
+                    onClick={(e) => {
+                      if (demo.linkType === 'indirect') {
+                        e.preventDefault();
+                        setActiveBioSong(demo);
+                      }
+                    }}
+                    className={`group relative rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-3 w-full ${demo.achievements?.length ? 'hover:shadow-[0_0_20px_rgba(251,191,36,0.25)]' : 'hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)]'}`}
+                  >
                     {demo.achievements && demo.achievements.length > 0 ? (
                       <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
                         <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_280deg,theme(colors.amber.500)_360deg)] animate-rotate-border z-0 opacity-80" />
@@ -1244,7 +1261,7 @@ function Home() {
                         </span>
                       </>
                     )}
-                    {demo.password && !demo.isReleased && (
+                    {(demo.password || data?.globalPassword) && !demo.isReleased && (
                       <div className="absolute bottom-3 right-3 z-20 bg-black/60 p-1.5 rounded-full border border-white/10 shadow-md">
                          <Lock className="w-3.5 h-3.5 text-yellow-500" />
                       </div>
@@ -1324,6 +1341,17 @@ function Home() {
            {toast}
         </div>
       )}
+
+      {/* Indirect Bio Card Popup */}
+      <AnimatePresence>
+        {activeBioSong && (
+          <IndirectBioCard 
+            demo={{...activeBioSong, coverUrl: getPreviewUrl(activeBioSong.coverUrl)}} 
+            onClose={() => setActiveBioSong(null)} 
+            isStandalone={false}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -3120,6 +3148,23 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t.load}</div>;
   if (!demo) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Không tìm thấy demo</div>;
 
+  const resolveCoverUrl = (urlStr: string | undefined): string => {
+    if (!urlStr) return '';
+    if (urlStr.startsWith('http') || urlStr.startsWith('data:') || urlStr.startsWith('blob:')) return urlStr;
+    try {
+      const base = demo?.globalCoverUrl ? new URL(demo.globalCoverUrl).origin : window.location.origin;
+      return urlStr.startsWith('/') ? `${base}${urlStr}` : `${base}/${urlStr}`;
+    } catch {
+      return urlStr;
+    }
+  };
+
+  const finalDisplayCover = resolveCoverUrl(displayCoverUrl) || displayCoverUrl;
+
+  if (demo?.linkType === 'indirect') {
+    return <IndirectBioCard demo={{...demo, coverUrl: finalDisplayCover}} isStandalone={true} />;
+  }
+
   // Templates
   const templateType = (previewConfig && previewConfig.id) ? previewConfig.id : (demo.template || '1');
   const customConfig = previewConfig || demo.templateConfigs?.find((c: any) => c.id === templateType);
@@ -3379,7 +3424,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
             >
               <Share2 className="w-4.5 h-4.5" />
             </button>
-            {isAdmin && demo?.secretKey && demo?.password && (
+            {isAdmin && demo?.secretKey && (demo?.password || demo?.hasPassword) && (
               <button
                 onClick={async () => {
                   if (!demo) return;
@@ -4141,7 +4186,7 @@ function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'|'security'|'templates'>('demos');
-  const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'drafts' | 'playlists' | 'trash'>('released');
+  const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'drafts' | 'playlists' | 'trash' | 'landing_pages'>('released');
   const [draggedItemIdx, setDraggedItemIdx] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
@@ -4222,11 +4267,7 @@ function AdminDashboard() {
 
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
-    if (data?.globalBaseUrl && url.startsWith('/uploads')) {
-       const base = data.globalBaseUrl.startsWith('http') ? data.globalBaseUrl : `https://${data.globalBaseUrl}`;
-       return `${base}${url}`;
-    }
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
     return url;
   };
 
@@ -4563,7 +4604,7 @@ function AdminDashboard() {
                     <Music className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
                     <span>Ra rồi</span>
                     <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-xs">
-                      {data.demos?.filter(d => d.isReleased && !d.deleted && !d.isDraft).length || 0}
+                      {data.demos?.filter(d => d.isReleased && !d.deleted && !d.isDraft && d.linkType !== 'indirect').length || 0}
                     </span>
                   </button>
                   <button
@@ -4578,7 +4619,7 @@ function AdminDashboard() {
                     <Disc3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500" />
                     <span>Đề Mô</span>
                     <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded text-xs">
-                      {data.demos?.filter(d => !d.isReleased && !d.deleted && !d.isDraft).length || 0}
+                      {data.demos?.filter(d => !d.isReleased && !d.deleted && !d.isDraft && d.linkType !== 'indirect').length || 0}
                     </span>
                   </button>
                   <button
@@ -4593,7 +4634,22 @@ function AdminDashboard() {
                     <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
                     <span>Nháp</span>
                     <span className="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded text-xs">
-                      {data.demos?.filter(d => d.isDraft && !d.deleted).length || 0}
+                      {data.demos?.filter(d => d.isDraft && !d.deleted && d.linkType !== 'indirect').length || 0}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDemosSubTab('landing_pages')}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all relative ${
+                      demosSubTab === 'landing_pages'
+                        ? 'bg-white text-stone-900 shadow-sm'
+                        : 'text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-500" />
+                    <span>Landing Page</span>
+                    <span className="bg-pink-50 text-pink-700 px-1.5 py-0.5 rounded text-xs">
+                      {data.demos?.filter(d => d.linkType === 'indirect' && !d.deleted).length || 0}
                     </span>
                   </button>
                   <button
@@ -4663,8 +4719,51 @@ function AdminDashboard() {
 
               {/* Action area for selected subtab */}
               <div className="overflow-x-auto min-h-[300px]">
+                {demosSubTab === 'landing_pages' && (() => {
+                  const landingList = data.demos?.filter(d => d.linkType === 'indirect' && !d.deleted) || [];
+                  if (landingList.length === 0) {
+                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có Landing Page nào. Hãy tạo mới và chọn Loại Liên Kết là "Gián tiếp"!</div>;
+                  }
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
+                        <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả các dòng để sắp xếp thứ tự
+                      </div>
+                      {landingList.map((demo, idx) => (
+                        <div
+                          key={demo.id}
+                          className="border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all shadow-sm"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-stone-500 font-mono font-bold text-sm w-7 tracking-tight flex items-center justify-center bg-stone-100/80 rounded-md h-7 shrink-0">#{idx + 1}</span>
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <Link to={`/song/${demo.slug || demo.id}`} state={{ fromAdmin: true }} className="hover:text-pink-600 font-bold text-stone-850 text-sm md:text-base block truncate">
+                                {demo.title}
+                              </Link>
+                              <div className="flex items-center flex-wrap gap-2 text-[10px] md:text-xs">
+                                <span className="text-stone-500 font-medium">Landing Page / Điều hướng</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+                            <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
+                               <Globe className="w-4 h-4" />
+                            </button>
+                            <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
+                               <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <button type="button" onClick={() => handleDeleteClick('song', demo.id, demo.title)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold text-lg" title="Xóa">
+                              <X className="w-4 h-4 text-red-500 stroke-[3]" />
+                            </button>
+                          </div>
+                         </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
                 {demosSubTab === 'released' && (() => {
-                  const releasedList = data.demos?.filter(d => d.isReleased && !d.deleted && !d.isDraft) || [];
+                  const releasedList = data.demos?.filter(d => d.isReleased && !d.deleted && !d.isDraft && d.linkType !== 'indirect') || [];
                   if (releasedList.length === 0) {
                      return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát đã phát hành nào. Hãy tạo mới và đặt trạng thái "Ra rồi"!</div>;
                   }
@@ -4725,7 +4824,7 @@ function AdminDashboard() {
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
                             </button>
-                            {demo.secretKey && demo.password && (
+                            {demo.secretKey && (demo.password || (data?.globalPassword && !demo.isReleased)) && (
                               <button type="button" onClick={() => handleShareSecret(demo)} className="text-amber-600 hover:bg-amber-50 p-2 rounded-lg transition-colors animate-[fade-in_0.3s_ease-out]" title="Copy Secret Link">
                                  <Lock className="w-4 h-4 text-amber-500" />
                               </button>
@@ -4744,7 +4843,7 @@ function AdminDashboard() {
                 })()}
 
                 {demosSubTab === 'demos' && (() => {
-                  const demoList = data.demos?.filter(d => !d.isReleased && !d.deleted && !d.isDraft) || [];
+                  const demoList = data.demos?.filter(d => !d.isReleased && !d.deleted && !d.isDraft && d.linkType !== 'indirect') || [];
                   if (demoList.length === 0) {
                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bài hát demo nào. Hãy tạo mới và đặt trạng thái "Đề mô"!</div>;
                   }
@@ -4797,11 +4896,11 @@ function AdminDashboard() {
                                     <EyeOff className="w-3 h-3" /> Ẩn
                                   </span>
                                 )}
-                                {demo.password && (
+                                {(demo.password || (data?.globalPassword && !demo.isReleased)) ? (
                                   <span className="bg-stone-100 text-stone-700 px-1.5 py-0.5 border border-stone-200 rounded flex items-center gap-1 text-[10px] md:text-xs">
-                                    <Lock className="w-3 h-3 text-stone-500" /> <span className="font-mono">{demo.password}</span>
+                                    <Lock className="w-3 h-3 text-stone-500" /> <span className="font-mono">{demo.password || `Mật khẩu chung: ${data?.globalPassword}`}</span>
                                   </span>
-                                )}
+                                ) : null}
                               </div>
                             </div>
                           </div>
@@ -4809,7 +4908,7 @@ function AdminDashboard() {
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
                             </button>
-                            {demo.secretKey && demo.password && (
+                            {demo.secretKey && (demo.password || data?.globalPassword) && !demo.isReleased && (
                               <button type="button" onClick={() => handleShareSecret(demo)} className="text-amber-600 hover:bg-amber-50 p-2 rounded-lg transition-colors animate-[fade-in_0.3s_ease-out]" title="Copy Secret Link">
                                  <Lock className="w-4 h-4 text-amber-500" />
                               </button>
@@ -4828,7 +4927,7 @@ function AdminDashboard() {
                 })()}
 
                 {demosSubTab === 'drafts' && (() => {
-                  const draftList = data.demos?.filter(d => d.isDraft && !d.deleted) || [];
+                  const draftList = data.demos?.filter(d => d.isDraft && !d.deleted && d.linkType !== 'indirect') || [];
                   if (draftList.length === 0) {
                     return <div className="py-12 text-center text-stone-500 italic border border-stone-200 rounded-xl bg-stone-50">Chưa có bản nháp nào. Bản nháp được lưu từ màn hình tạo hoặc chỉnh sửa bài hát!</div>;
                   }
@@ -5742,6 +5841,19 @@ function AdminCreateDemo() {
   const [template, setTemplate] = useState('1');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
+  const [linkType, setLinkType] = useState<'direct'|'indirect'>('direct');
+  const [linkZing, setLinkZing] = useState('');
+  const [linkSpotify, setLinkSpotify] = useState('');
+  const [linkApple, setLinkApple] = useState('');
+  const [linkYoutubeMusic, setLinkYoutubeMusic] = useState('');
+  const [linkYoutube, setLinkYoutube] = useState('');
+
+  const getPreviewUrl = (url: string | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+    return url;
+  };
+
   const generateSlug = (text: string) => {
     return text.toString()
       .normalize('NFD') // split an accented letter in the base letter and the accent
@@ -5860,10 +5972,12 @@ function AdminCreateDemo() {
   };
 
   const saveDemo = async (isDraft: boolean) => {
-    if (!isDraft && !uploadedAudioUrl) return alert("Vui lòng tải lên file nhạc!");
-    if (audioUploadProgress > 0 && audioUploadProgress < 100) return alert("Vui lòng đợi file nhạc tải lên xong!");
+    if (linkType === 'direct') {
+      if (!isDraft && !uploadedAudioUrl) return alert("Vui lòng tải lên file nhạc!");
+      if (audioUploadProgress > 0 && audioUploadProgress < 100) return alert("Vui lòng đợi file nhạc tải lên xong!");
+      if (bgUploadProgress > 0 && bgUploadProgress < 100) return alert("Vui lòng đợi ảnh nền tải lên xong!");
+    }
     if (coverUploadProgress > 0 && coverUploadProgress < 100) return alert("Vui lòng đợi ảnh bìa tải lên xong!");
-    if (bgUploadProgress > 0 && bgUploadProgress < 100) return alert("Vui lòng đợi ảnh nền tải lên xong!");
 
     setLoading(true);
     const formData = new FormData();
@@ -5879,6 +5993,12 @@ function AdminCreateDemo() {
     formData.set('playlistIds', JSON.stringify(playlistIds));
     formData.set('achievements', JSON.stringify(achievements));
     formData.set('releaseYear', releaseYear);
+    formData.set('linkType', linkType);
+    formData.set('linkZing', linkZing);
+    formData.set('linkSpotify', linkSpotify);
+    formData.set('linkApple', linkApple);
+    formData.set('linkYoutubeMusic', linkYoutubeMusic);
+    formData.set('linkYoutube', linkYoutube);
 
     const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
     const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
@@ -5926,8 +6046,13 @@ function AdminCreateDemo() {
         </Link>
         
         <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-xl shadow-stone-200/50">
-          <h1 className="text-3xl font-bold mb-8">Demo mới</h1>
+          <h1 className="text-3xl font-bold mb-6">Demo mới</h1>
           
+          <div className="flex bg-stone-100 p-1 rounded-xl mb-8 w-full max-w-xs mx-auto">
+            <button type="button" onClick={() => setLinkType('direct')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'direct' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Trực Tiếp</button>
+            <button type="button" onClick={() => setLinkType('indirect')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'indirect' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Gián Tiếp</button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-2">Tên bài hát *</label>
@@ -5959,23 +6084,10 @@ function AdminCreateDemo() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc (Audio) *</label>
-                <div className="flex flex-wrap gap-4 items-center">
-                  {(uploadedAudioUrl || audioUploadProgress === 100) && <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-500 shadow-sm"><FileAudio className="w-8 h-8"/></div>}
-                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${audioUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('audioCreateUpload')?.click()}>
-                      {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${audioUploadProgress}%` }}></div>}
-                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {audioUploadProgress > 0 && audioUploadProgress < 100 ? `${audioUploadProgress}%` : ''}</span>
-                  </button>
-                  {(uploadedAudioUrl || audioUploadProgress === 100) && <button type="button" onClick={() => { setUploadedAudioUrl(''); setAudioUploadProgress(0); (document.getElementById('audioCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
-                  <input type="file" id="audioCreateUpload" name="audio" accept="audio/mp3,audio/wav,audio/*" required={!uploadedAudioUrl} onChange={e => handleFileUpload(e, 'audio')} className="hidden" />
-                </div>
-              </div>
-
-               <div>
+              <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa</label>
                 <div className="flex flex-wrap gap-4 items-center">
-                  {uploadedCoverUrl && <img src={uploadedCoverUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  {uploadedCoverUrl && <img src={getPreviewUrl(uploadedCoverUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
                   <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${coverUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('coverCreateUpload')?.click()}>
                       {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${coverUploadProgress}%` }}></div>}
                       <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {coverUploadProgress > 0 && coverUploadProgress < 100 ? `${coverUploadProgress}%` : ''}</span>
@@ -5987,79 +6099,132 @@ function AdminCreateDemo() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền</label>
-                <div className="flex flex-wrap gap-4 items-center">
-                  {uploadedBgUrl && <img src={uploadedBgUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
-                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgCreateUpload')?.click()}>
-                      {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
-                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
-                  </button>
-                  {uploadedBgUrl && <button type="button" onClick={() => { setUploadedBgUrl(''); setBgUploadProgress(0); (document.getElementById('bgCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
-                  <input type="hidden" name="backgroundUrl" value={uploadedBgUrl} />
-                  <input type="file" id="bgCreateUpload" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="hidden" />
+            {linkType === 'direct' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc (Audio) *</label>
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {(uploadedAudioUrl || audioUploadProgress === 100) && <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-500 shadow-sm"><FileAudio className="w-8 h-8"/></div>}
+                    <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${audioUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('audioCreateUpload')?.click()}>
+                        {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${audioUploadProgress}%` }}></div>}
+                        <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {audioUploadProgress > 0 && audioUploadProgress < 100 ? `${audioUploadProgress}%` : ''}</span>
+                    </button>
+                    {(uploadedAudioUrl || audioUploadProgress === 100) && <button type="button" onClick={() => { setUploadedAudioUrl(''); setAudioUploadProgress(0); (document.getElementById('audioCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                    <input type="file" id="audioCreateUpload" name="audio" accept="audio/mp3,audio/wav,audio/*" required={!uploadedAudioUrl} onChange={e => handleFileUpload(e, 'audio')} className="hidden" />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
-              <textarea name="lyrics" rows={6} value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
-            </div>
+            {linkType === 'direct' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền</label>
+                    <div className="flex flex-wrap gap-4 items-center">
+                      {uploadedBgUrl && <img src={uploadedBgUrl} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                      <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgCreateUpload')?.click()}>
+                          {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
+                          <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
+                      </button>
+                      {uploadedBgUrl && <button type="button" onClick={() => { setUploadedBgUrl(''); setBgUploadProgress(0); (document.getElementById('bgCreateUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                      <input type="hidden" name="backgroundUrl" value={uploadedBgUrl} />
+                      <input type="file" id="bgCreateUpload" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="hidden" />
+                    </div>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
-              <div className="w-full">
-                <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 min-w-0">
-                  <select name="template" value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full min-w-0 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white shadow-sm">
-                    {templateConfigs.map((tc: any) => (
-                      <option key={tc.id} value={tc.id}>{tc.name}</option>
-                    ))}
-                  </select>
-                  <button 
-                    type="button" 
-                    disabled={!title.trim()}
-                    onClick={() => setShowTemplatePicker(true)} 
-                    className={`px-6 py-3 border border-transparent shrink-0 shadow-sm text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all ${(!title.trim()) ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10'}`}
-                  >
-                    <Eye className="w-5 h-5" /> Xem trước giao diện
-                  </button>
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
+                  <textarea name="lyrics" rows={6} value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
+                  <div className="w-full">
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 min-w-0">
+                      <select name="template" value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full min-w-0 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white shadow-sm">
+                        {templateConfigs.map((tc: any) => (
+                          <option key={tc.id} value={tc.id}>{tc.name}</option>
+                        ))}
+                      </select>
+                      <button 
+                        type="button" 
+                        disabled={!title.trim()}
+                        onClick={() => setShowTemplatePicker(true)} 
+                        className={`px-6 py-3 border border-transparent shrink-0 shadow-sm text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all ${(!title.trim()) ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10'}`}
+                      >
+                        <Eye className="w-5 h-5" /> Xem trước giao diện
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {linkType === 'indirect' && (
+              <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
+                <h3 className="font-bold text-stone-800 text-lg">Liên kết phát nhạc</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Zing MP3</label>
+                    <input name="linkZing" value={linkZing} onChange={e => setLinkZing(e.target.value)} placeholder="Nhập link Zing MP3..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Spotify</label>
+                    <input name="linkSpotify" value={linkSpotify} onChange={e => setLinkSpotify(e.target.value)} placeholder="Nhập link Spotify..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Apple Music</label>
+                    <input name="linkApple" value={linkApple} onChange={e => setLinkApple(e.target.value)} placeholder="Nhập link Apple Music..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">YouTube Music</label>
+                    <input name="linkYoutubeMusic" value={linkYoutubeMusic} onChange={e => setLinkYoutubeMusic(e.target.value)} placeholder="Nhập link YouTube Music..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">YouTube MV</label>
+                    <input name="linkYoutube" value={linkYoutube} onChange={e => setLinkYoutube(e.target.value)} placeholder="Nhập link YouTube MV..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
-              <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu bảo vệ (tùy chọn)</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
-                  <input name="password" placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+            {linkType !== 'indirect' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu bảo vệ (tùy chọn)</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
+                      <input name="password" placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                    </div>
+                  </div>
+                   <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Hiển thị (Trạng thái phát hành)</label>
+                     <select name="status" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
+                      <option value="public">Công khai</option>
+                      <option value="hidden">Ẩn</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Hiển thị (Trạng thái phát hành)</label>
-                 <select name="status" className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
-                  <option value="public">Công khai</option>
-                  <option value="hidden">Ẩn</option>
-                </select>
-              </div>
-            </div>
 
-            <AchievementEditor achievements={achievements} onChange={setAchievements} />
+                <AchievementEditor achievements={achievements} onChange={setAchievements} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
-                <label className="inline-flex items-center gap-3 cursor-pointer mt-1">
-                  <input type="checkbox" name="isReleased" value="true" className="w-6 h-6 rounded border-stone-300 text-stone-900 focus:ring-stone-900 transition-all cursor-pointer" />
-                </label>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
+                   <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
+                    <label className="inline-flex items-center gap-3 cursor-pointer mt-1">
+                      <input type="checkbox" name="isReleased" value="true" className="w-6 h-6 rounded border-stone-300 text-stone-900 focus:ring-stone-900 transition-all cursor-pointer" />
+                    </label>
+                  </div>
 
-               <div>
-                 <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
-               </div>
-            </div>
+                   <div>
+                     <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+                   </div>
+                </div>
+              </>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <button 
@@ -6148,13 +6313,16 @@ function AdminEditDemo() {
   const [lyrics, setLyrics] = useState('');
   const [randomSlideUrl, setRandomSlideUrl] = useState<string>('');
 
+  const [linkType, setLinkType] = useState<'direct'|'indirect'>('direct');
+  const [linkZing, setLinkZing] = useState('');
+  const [linkSpotify, setLinkSpotify] = useState('');
+  const [linkApple, setLinkApple] = useState('');
+  const [linkYoutubeMusic, setLinkYoutubeMusic] = useState('');
+  const [linkYoutube, setLinkYoutube] = useState('');
+
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
-    if (appData?.globalBaseUrl && url.startsWith('/uploads')) {
-       const base = appData.globalBaseUrl.startsWith('http') ? appData.globalBaseUrl : `https://${appData.globalBaseUrl}`;
-       return `${base}${url}`;
-    }
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
     return url;
   };
 
@@ -6218,6 +6386,12 @@ function AdminEditDemo() {
           setReleaseYear(found.releaseYear || '');
           setLyrics(found.lyrics || '');
           setAchievements(found.achievements || []);
+          setLinkType(found.linkType || 'direct');
+          setLinkZing(found.linkZing || '');
+          setLinkSpotify(found.linkSpotify || '');
+          setLinkApple(found.linkApple || '');
+          setLinkYoutubeMusic(found.linkYoutubeMusic || '');
+          setLinkYoutube(found.linkYoutube || '');
         }
       })
       .catch(err => {
@@ -6317,11 +6491,17 @@ function AdminEditDemo() {
     } else {
       formData.set('audioUrl', demo?.audioUrl || '');
     }
-    formData.set('coverUrl', uploadedCoverUrl);
-    formData.set('backgroundUrl', uploadedBgUrl);
+    formData.set('coverUrl', uploadedCoverUrl || demo?.coverUrl || '');
+    formData.set('backgroundUrl', uploadedBgUrl || demo?.backgroundUrl || '');
     formData.set('playlistIds', JSON.stringify(playlistIds));
     formData.set('achievements', JSON.stringify(achievements));
     formData.set('releaseYear', releaseYear);
+    formData.set('linkType', linkType);
+    formData.set('linkZing', linkZing);
+    formData.set('linkSpotify', linkSpotify);
+    formData.set('linkApple', linkApple);
+    formData.set('linkYoutubeMusic', linkYoutubeMusic);
+    formData.set('linkYoutube', linkYoutube);
 
     const passwordEl = document.querySelector('input[name="password"]') as HTMLInputElement;
     const statusEl = document.querySelector('select[name="status"]') as HTMLSelectElement;
@@ -6365,8 +6545,13 @@ function AdminEditDemo() {
         </Link>
         
         <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-xl shadow-stone-200/50">
-          <h1 className="text-3xl font-bold mb-8">Chỉnh Sửa Demo</h1>
+          <h1 className="text-3xl font-bold mb-6">Chỉnh Sửa Demo</h1>
           
+          <div className="flex bg-stone-100 p-1 rounded-xl mb-8 w-full max-w-xs mx-auto">
+            <button type="button" onClick={() => setLinkType('direct')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'direct' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Trực Tiếp</button>
+            <button type="button" onClick={() => setLinkType('indirect')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${linkType === 'indirect' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>Gián Tiếp</button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-2">Tên bài hát *</label>
@@ -6397,23 +6582,10 @@ function AdminEditDemo() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc Mới (Nếu muốn thay đổi)</label>
-                <div className="flex flex-wrap gap-4 items-center">
-                  {(uploadedAudioUrl || audioUploadProgress === 100) && <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-500 shadow-sm"><FileAudio className="w-8 h-8"/></div>}
-                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${audioUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('audioEditUpload')?.click()}>
-                      {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${audioUploadProgress}%` }}></div>}
-                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {audioUploadProgress > 0 && audioUploadProgress < 100 ? `${audioUploadProgress}%` : ''}</span>
-                  </button>
-                  {(uploadedAudioUrl || audioUploadProgress === 100) && <button type="button" onClick={() => { setUploadedAudioUrl(''); setAudioUploadProgress(0); (document.getElementById('audioEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
-                  <input type="file" id="audioEditUpload" name="audio" accept="audio/mp3,audio/wav,audio/*" onChange={e => handleFileUpload(e, 'audio')} className="hidden" />
-                </div>
-              </div>
-
-               <div>
+              <div>
                 <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Bìa Mới (Tùy chọn)</label>
                 <div className="flex flex-wrap gap-4 items-center">
-                  {uploadedCoverUrl && <img src={getPreviewUrl(uploadedCoverUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                  {(uploadedCoverUrl || demo?.coverUrl) && <img src={getPreviewUrl(uploadedCoverUrl || demo?.coverUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
                   <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${coverUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('coverEditUpload')?.click()}>
                       {coverUploadProgress > 0 && coverUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${coverUploadProgress}%` }}></div>}
                       <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {coverUploadProgress > 0 && coverUploadProgress < 100 ? `${coverUploadProgress}%` : ''}</span>
@@ -6425,110 +6597,163 @@ function AdminEditDemo() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền Mới (Tùy chọn)</label>
-                <div className="flex flex-wrap gap-4 items-center">
-                  {uploadedBgUrl && <img src={getPreviewUrl(uploadedBgUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
-                  <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgEditUpload')?.click()}>
-                      {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
-                      <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
-                  </button>
-                  {uploadedBgUrl && <button type="button" onClick={() => { setUploadedBgUrl(''); setBgUploadProgress(0); (document.getElementById('bgEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
-                  <input type="hidden" name="backgroundUrl" value={uploadedBgUrl} />
-                  <input type="file" id="bgEditUpload" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="hidden" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
-              <textarea name="lyrics" rows={6} value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
-              <div className="w-full">
-                <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 min-w-0">
-                  <select name="template" value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full min-w-0 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white shadow-sm">
-                    {templateConfigs.map((tc: any) => (
-                      <option key={tc.id} value={tc.id}>{tc.name}</option>
-                    ))}
-                  </select>
-                  <button 
-                    type="button" 
-                    disabled={!title.trim()}
-                    onClick={() => setShowTemplatePicker(true)} 
-                    className={`px-6 py-3 border border-transparent shrink-0 shadow-sm text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all ${(!title.trim()) ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10'}`}
-                  >
-                    <Eye className="w-5 h-5" /> Xem trước giao diện
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
-              <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu bảo vệ (tùy chọn)</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
-                  <input name="password" defaultValue={demo.passwordValue || demo.password as any} placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
-                </div>
-              </div>
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Hiển thị (Trạng thái phát hành)</label>
-                 <select name="status" defaultValue={demo.status} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
-                  <option value="public">Công khai</option>
-                  <option value="hidden">Ẩn</option>
-                </select>
-              </div>
-            </div>
-
-            <AchievementEditor achievements={achievements} onChange={setAchievements} />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
-               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
-                <label className="inline-flex items-center gap-3 cursor-pointer mt-1">
-                  <input type="checkbox" name="isReleased" value="true" defaultChecked={demo.isReleased} className="w-6 h-6 rounded border-stone-300 text-stone-900 focus:ring-stone-900 transition-all cursor-pointer" />
-                </label>
-              </div>
-
-               <div>
-                 <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
-               </div>
-            </div>
-
-            {demo.secretKey && demo.password && (
-              <div className="bg-amber-50 border border-amber-250/60 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-5 mt-6 animate-[fade-in_0.3s_ease-out] w-full min-w-0 overflow-hidden">
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:flex-1 min-w-0">
-                  <div className="w-12 h-12 bg-amber-100/75 text-amber-700 rounded-xl flex items-center justify-center font-bold shrink-0 mx-auto sm:mx-0 shadow-xs">
-                    <Lock className="w-6 h-6 text-amber-600" />
+            {linkType === 'direct' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">File Nhạc Mới (Nếu muốn thay đổi)</label>
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {(uploadedAudioUrl || audioUploadProgress === 100) && <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-500 shadow-sm"><FileAudio className="w-8 h-8"/></div>}
+                    <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${audioUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('audioEditUpload')?.click()}>
+                        {audioUploadProgress > 0 && audioUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${audioUploadProgress}%` }}></div>}
+                        <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {audioUploadProgress > 0 && audioUploadProgress < 100 ? `${audioUploadProgress}%` : ''}</span>
+                    </button>
+                    {(uploadedAudioUrl || audioUploadProgress === 100) && <button type="button" onClick={() => { setUploadedAudioUrl(''); setAudioUploadProgress(0); (document.getElementById('audioEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                    <input type="file" id="audioEditUpload" name="audio" accept="audio/mp3,audio/wav,audio/*" onChange={e => handleFileUpload(e, 'audio')} className="hidden" />
                   </div>
-                  <div className="min-w-0 flex-1 text-center sm:text-left flex flex-col items-center sm:items-start">
-                    <div className="font-bold text-stone-800 text-sm tracking-tight">Secret Link (Chia sẻ trực tiếp xem không hỏi mật khẩu)</div>
-                    <div className="text-xs text-amber-800 font-mono select-all truncate w-full max-w-full mt-1.5 px-3 py-1.5 bg-amber-150/40 rounded-lg border border-amber-200/50">
-                      {formatShareUrl(window.location.origin + '/song/' + (demo.slug || demo.id) + '?secret=' + demo.secretKey)}
+                </div>
+              </div>
+            )}
+
+            {linkType === 'direct' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Ảnh Nền Mới (Tùy chọn)</label>
+                    <div className="flex flex-wrap gap-4 items-center">
+                      {(uploadedBgUrl || demo?.backgroundUrl) && <img src={getPreviewUrl(uploadedBgUrl || demo?.backgroundUrl)} className="w-16 h-16 rounded-xl object-cover border border-stone-200 shadow-sm" />}
+                      <button type="button" className={`w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden transition-colors border shadow-sm ${bgUploadProgress === 100 ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100'}`} onClick={() => document.getElementById('bgEditUpload')?.click()}>
+                          {bgUploadProgress > 0 && bgUploadProgress < 100 && <div className="absolute left-0 bottom-0 right-0 bg-stone-200 transition-all duration-300" style={{ height: `${bgUploadProgress}%` }}></div>}
+                          <span className="relative z-10 font-bold text-[10px] flex flex-col items-center gap-1"><Upload className="w-5 h-5"/> {bgUploadProgress > 0 && bgUploadProgress < 100 ? `${bgUploadProgress}%` : ''}</span>
+                      </button>
+                      {uploadedBgUrl && <button type="button" onClick={() => { setUploadedBgUrl(''); setBgUploadProgress(0); (document.getElementById('bgEditUpload') as HTMLInputElement).value = ''; }} className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"><X className="w-5 h-5"/></button>}
+                      <input type="hidden" name="backgroundUrl" value={uploadedBgUrl} />
+                      <input type="file" id="bgEditUpload" name="background" accept="image/*" onChange={e => handleFileUpload(e, 'background')} className="hidden" />
                     </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const baseUrl = '/song/';
-                    const dynamicId = demo.slug || demo.id;
-                    let url = window.location.origin + baseUrl + dynamicId;
-                    url = formatShareUrl(url);
-                    url += `?secret=${demo.secretKey}`;
-                    await copyToClipboard(url);
-                    setToast('Đã copy Secret Link!');
-                    setTimeout(() => setToast(''), 3000);
-                  }}
-                  className="w-full md:w-auto px-5 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-sm"
-                >
-                  <Lock className="w-4 h-4" /> Copy Secret Link
-                </button>
+
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">Lời bài hát</label>
+                  <textarea name="lyrics" rows={6} value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Nhập lời bài hát (nếu có)..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow leading-relaxed"></textarea>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
+                  <div className="w-full">
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Template Giao Diện</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 min-w-0">
+                      <select name="template" value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full min-w-0 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white shadow-sm">
+                        {templateConfigs.map((tc: any) => (
+                          <option key={tc.id} value={tc.id}>{tc.name}</option>
+                        ))}
+                      </select>
+                      <button 
+                        type="button" 
+                        disabled={!title.trim()}
+                        onClick={() => setShowTemplatePicker(true)} 
+                        className={`px-6 py-3 border border-transparent shrink-0 shadow-sm text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all ${(!title.trim()) ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10'}`}
+                      >
+                        <Eye className="w-5 h-5" /> Xem trước giao diện
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {linkType === 'indirect' && (
+              <div className="grid grid-cols-1 gap-6 pt-4 border-t border-stone-100">
+                <h3 className="font-bold text-stone-800 text-lg">Liên kết phát nhạc</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Zing MP3</label>
+                    <input name="linkZing" value={linkZing} onChange={e => setLinkZing(e.target.value)} placeholder="Nhập link Zing MP3..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Spotify</label>
+                    <input name="linkSpotify" value={linkSpotify} onChange={e => setLinkSpotify(e.target.value)} placeholder="Nhập link Spotify..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Apple Music</label>
+                    <input name="linkApple" value={linkApple} onChange={e => setLinkApple(e.target.value)} placeholder="Nhập link Apple Music..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">YouTube Music</label>
+                    <input name="linkYoutubeMusic" value={linkYoutubeMusic} onChange={e => setLinkYoutubeMusic(e.target.value)} placeholder="Nhập link YouTube Music..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">YouTube MV</label>
+                    <input name="linkYoutube" value={linkYoutube} onChange={e => setLinkYoutube(e.target.value)} placeholder="Nhập link YouTube MV..." className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                  </div>
+                </div>
               </div>
+            )}
+
+            {linkType !== 'indirect' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu bảo vệ (tùy chọn)</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
+                      <input name="password" defaultValue={demo.passwordValue || demo.password as any} placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+                    </div>
+                  </div>
+                   <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Hiển thị (Trạng thái phát hành)</label>
+                     <select name="status" defaultValue={demo.status} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
+                      <option value="public">Công khai</option>
+                      <option value="hidden">Ẩn</option>
+                    </select>
+                  </div>
+                </div>
+
+                <AchievementEditor achievements={achievements} onChange={setAchievements} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100 items-start">
+                   <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Đã phát hành</label>
+                    <label className="inline-flex items-center gap-3 cursor-pointer mt-1">
+                      <input type="checkbox" name="isReleased" value="true" defaultChecked={demo.isReleased} className="w-6 h-6 rounded border-stone-300 text-stone-900 focus:ring-stone-900 transition-all cursor-pointer" />
+                    </label>
+                  </div>
+
+                   <div>
+                     <PlaylistSelect selectedIds={playlistIds} onChange={setPlaylistIds} />
+                   </div>
+                </div>
+
+                {demo.secretKey && (demo.password || (appData?.globalPassword && !demo.isReleased)) && (
+                  <div className="bg-amber-50 border border-amber-250/60 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-5 mt-6 animate-[fade-in_0.3s_ease-out] w-full min-w-0 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:flex-1 min-w-0">
+                      <div className="w-12 h-12 bg-amber-100/75 text-amber-700 rounded-xl flex items-center justify-center font-bold shrink-0 mx-auto sm:mx-0 shadow-xs">
+                        <Lock className="w-6 h-6 text-amber-600" />
+                      </div>
+                      <div className="min-w-0 flex-1 text-center sm:text-left flex flex-col items-center sm:items-start">
+                        <div className="font-bold text-stone-800 text-sm tracking-tight">Secret Link (Chia sẻ trực tiếp xem không hỏi mật khẩu)</div>
+                        <div className="text-xs text-amber-800 font-mono select-all truncate w-full max-w-full mt-1.5 px-3 py-1.5 bg-amber-150/40 rounded-lg border border-amber-200/50">
+                          {formatShareUrl(window.location.origin + '/song/' + (demo.slug || demo.id) + '?secret=' + demo.secretKey)}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const baseUrl = '/song/';
+                        const dynamicId = demo.slug || demo.id;
+                        let url = window.location.origin + baseUrl + dynamicId;
+                        url = formatShareUrl(url);
+                        url += `?secret=${demo.secretKey}`;
+                        await copyToClipboard(url);
+                        setToast('Đã copy Secret Link!');
+                        setTimeout(() => setToast(''), 3000);
+                      }}
+                      className="w-full md:w-auto px-5 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-sm"
+                    >
+                      <Lock className="w-4 h-4" /> Copy Secret Link
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="flex flex-col gap-4 mt-8">
@@ -6565,7 +6790,7 @@ function AdminEditDemo() {
                     <FileText className="w-5 h-5 text-amber-500" />
                     {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                   </button>
-                  {demo.password && (
+                  {(demo.password || appData?.globalPassword) && !demo.isReleased && (
                     <button 
                       disabled={loading} 
                       type="button" 
@@ -6646,11 +6871,7 @@ function AdminPlaylistEdit() {
 
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
-    if (appData?.globalBaseUrl && url.startsWith('/uploads')) {
-       const base = appData.globalBaseUrl.startsWith('http') ? appData.globalBaseUrl : `https://${appData.globalBaseUrl}`;
-       return `${base}${url}`;
-    }
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
     return url;
   };
 
