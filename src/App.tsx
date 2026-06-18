@@ -297,7 +297,7 @@ function AdminFloatingControls({ onLogout }: { onLogout: () => void }) {
     <div className={
       isListeningPage
         ? "hidden md:flex md:fixed md:left-6 md:top-1/2 md:-translate-y-1/2 z-[100] md:flex-col md:gap-4 md:translate-x-0"
-        : "fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-row gap-4"
+        : "fixed top-6 mt-[env(safe-area-inset-top,0px)] left-1/2 -translate-x-1/2 z-[100] flex flex-row gap-4"
     }>
        {isAdminPage ? (
          <a 
@@ -1187,7 +1187,19 @@ function Home() {
                     onClick={(e) => {
                       if (demo.linkType === 'indirect') {
                         e.preventDefault();
-                        setActiveBioSong(demo);
+                        const indirectLinks = [
+                          demo.linkSpotify, 
+                          demo.linkApple, 
+                          demo.linkZing, 
+                          demo.linkYoutubeMusic, 
+                          demo.linkYoutube
+                        ].filter(l => !!l);
+                        
+                        if (indirectLinks.length === 1 && indirectLinks[0]) {
+                           window.open(indirectLinks[0], '_blank');
+                        } else {
+                           setActiveBioSong(demo);
+                        }
                       }
                     }}
                     className={`group relative rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-3 w-full ${demo.achievements?.length ? 'hover:shadow-[0_0_20px_rgba(251,191,36,0.25)]' : 'hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)]'}`}

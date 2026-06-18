@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Disc, Music, Apple, Youtube, Play, Share2, X, ExternalLink, ArrowLeft, Check, Edit3 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface IndirectBioCardProps {
   demo: {
@@ -144,6 +144,12 @@ export function IndirectBioCard({ demo, onClose, isStandalone = false }: Indirec
     },
   ].filter(l => !!l.url);
 
+  useEffect(() => {
+    if (isStandalone && links.length === 1 && links[0].url) {
+      window.location.replace(links[0].url);
+    }
+  }, [isStandalone, links]);
+
   const defaultImage = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80';
   const [bgImage, setBgImage] = useState(demo.coverUrl || defaultImage);
 
@@ -168,39 +174,63 @@ export function IndirectBioCard({ demo, onClose, isStandalone = false }: Indirec
     visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
   };
 
+  const navigate = useNavigate();
+
   const content = (
-    <div className="relative min-h-[100dvh] text-white flex flex-col items-center justify-center p-4 sm:p-8 select-none overflow-x-hidden">
+    <div 
+       className="relative min-h-[100dvh] text-white flex flex-col items-center p-4 sm:p-8 pt-24 pb-12 select-none overflow-x-hidden"
+       onClick={(e) => {
+         if (e.target === e.currentTarget) {
+            if (onClose) {
+              onClose();
+            } else if (isStandalone) {
+              navigate('/');
+            }
+         }
+       }}
+    >
       {/* Blurred Album Artwork Background */}
       <div 
-        className="fixed inset-0 z-0 bg-cover bg-center filter blur-3xl opacity-60 scale-110 pointer-events-none transition-all duration-1000 saturate-200"
+        className="absolute inset-0 z-0 bg-cover bg-center filter blur-3xl opacity-60 scale-110 transition-all duration-1000 saturate-200"
         style={{ backgroundImage: `url("${bgImage}")` }}
+      />
+      {/* Dimmer overlay for click outside */}
+      <div 
+        className="absolute inset-0 z-[5] cursor-pointer" 
+        onClick={() => {
+           if (onClose) {
+             onClose();
+           } else if (isStandalone) {
+             navigate('/');
+           }
+        }} 
       />
 
       {/* Floating Header Actions */}
-      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-30">
+      <div className="fixed top-6 mt-[env(safe-area-inset-top,0px)] left-4 right-4 sm:left-6 sm:right-6 flex items-center justify-between z-[50] pointer-events-auto">
         {onClose ? (
           <button 
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white/90 hover:text-white transition-all text-sm font-semibold backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95"
+            className="flex items-center justify-center gap-2 p-2.5 sm:px-4 sm:py-2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white/90 hover:text-white transition-all text-sm font-semibold backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
           >
-            <ArrowLeft className="w-4.5 h-4.5" /> Trở về
+            <ArrowLeft className="w-5 h-5 sm:w-4.5 sm:h-4.5" /> <span className="hidden sm:inline">Trở về</span>
           </button>
         ) : isStandalone ? (
           <Link 
             to="/"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white/90 hover:text-white transition-all text-sm font-semibold backdrop-blur-xl hover:scale-105 active:scale-95"
+            className="flex items-center justify-center gap-2 p-2.5 sm:px-4 sm:py-2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white/90 hover:text-white transition-all text-sm font-semibold backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
           >
-            <ArrowLeft className="w-4.5 h-4.5" /> Trang chủ
+            <ArrowLeft className="w-5 h-5 sm:w-4.5 sm:h-4.5" /> <span className="hidden sm:inline">Trang chủ</span>
           </Link>
         ) : <div />}
 
         <button 
           onClick={handleCopyLink}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white/90 hover:text-white transition-all text-sm font-semibold backdrop-blur-xl hover:scale-105 active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 p-2.5 sm:px-4 sm:py-2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white/90 hover:text-white transition-all text-sm font-semibold backdrop-blur-xl hover:scale-105 active:scale-95 cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
           title="Chia sẻ liên kết"
         >
-          {copied ? <Check className="w-4 h-4 text-emerald-400 animate-bounce" /> : <Share2 className="w-4 h-4 text-rose-400" />}
+          {copied ? <Check className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-400 animate-bounce" /> : <Share2 className="w-5 h-5 sm:w-4 sm:h-4 text-rose-400" />}
           <span className="hidden sm:inline">{copied ? 'Đã sao chép' : 'Chia sẻ'}</span>
         </button>
       </div>
@@ -210,7 +240,7 @@ export function IndirectBioCard({ demo, onClose, isStandalone = false }: Indirec
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 w-full max-w-[420px] bg-stone-950/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-2xl flex flex-col items-center mt-12 sm:mt-0"
+        className="relative z-10 w-full max-w-[420px] bg-stone-950/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-2xl flex flex-col items-center my-auto"
       >
         {/* Cover Art Accent */}
         <motion.div 
@@ -307,10 +337,8 @@ export function IndirectBioCard({ demo, onClose, isStandalone = false }: Indirec
   if (onClose) {
     // Rendered inside modal/overlay context on top of homepage
     return (
-      <div className="fixed inset-0 z-[1000] overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center animate-[fade-in_0.3s_ease-out]">
-        <div className="w-full min-h-screen">
-          {content}
-        </div>
+      <div className="fixed inset-0 z-[1000] overflow-y-auto bg-black/60 backdrop-blur-md animate-[fade-in_0.3s_ease-out]">
+        {content}
       </div>
     );
   }
