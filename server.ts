@@ -1,4 +1,5 @@
 import express from 'express';
+import fsSync from 'fs';
 import path from 'path';
 import fs from 'fs/promises';
 import crypto from 'crypto';
@@ -15,21 +16,37 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const firebaseConfig = {
-  projectId: "nice-momentum-trwfn",
-  appId: "1:439820764953:web:abcf8a172f204668bc2788",
-  apiKey: "AIzaSyAz8j_0SLubaQMiNw2ZnugPyzWPrvGYQyE",
-  authDomain: "nice-momentum-trwfn.firebaseapp.com",
-  firestoreDatabaseId: "ai-studio-55e9d594-1864-4eda-b3a6-811c2fea9f04",
-  storageBucket: "nice-momentum-trwfn.firebasestorage.app",
-  messagingSenderId: "439820764953",
-  measurementId: ""
-};
+let multiConfig: any = {};
+try {
+  const fileData = fsSync.readFileSync(path.join(process.cwd(), 'firebase-multi-configs.json'), 'utf-8');
+  multiConfig = JSON.parse(fileData);
+} catch (e) {
+  multiConfig = {
+    activeId: 'default',
+    configs: [{
+      id: 'default',
+      name: 'Mặc định (taimusic-96289)',
+      config: {
+        apiKey: "AIzaSyAcml_QfgGTH80OKmRVj2tWIomEQUUiHB0",
+        authDomain: "taimusic-96289.firebaseapp.com",
+        projectId: "taimusic-96289",
+        storageBucket: "taimusic-96289.firebasestorage.app",
+        messagingSenderId: "848155741386",
+        appId: "1:848155741386:web:4f5b5d826ce5fbbba8f833",
+        measurementId: "G-D4ZSK50GZ2",
+        firestoreDatabaseId: "default"
+      }
+    }]
+  };
+}
 
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp, "ai-studio-55e9d594-1864-4eda-b3a6-811c2fea9f04");
-const firebaseStorage = getStorage(firebaseApp);
-const DOC_REF = doc(db, 'app_data', 'main');
+let activeConfig = multiConfig.configs.find((c: any) => c.id === multiConfig.activeId) || multiConfig.configs[0];
+let firebaseConfig = activeConfig.config;
+
+let firebaseApp = initializeApp(firebaseConfig);
+let db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId || '(default)');
+let firebaseStorage = getStorage(firebaseApp);
+let DOC_REF = doc(db, 'app_data', 'main');
 
 const DATA_FILE = path.join(process.cwd(), 'data.json');
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
@@ -54,7 +71,7 @@ async function uploadLocalToCloud(localPath: string, filename: string, mimetype:
 
 async function uploadUrlOrFileToCloud(urlOrPath: string, globalBaseUrl?: string): Promise<string> {
   if (!urlOrPath) return '';
-  if (urlOrPath.includes('firebasestorage.googleapis.com')) return urlOrPath;
+  if (urlOrPath.includes(firebaseConfig.storageBucket)) return urlOrPath;
   if (urlOrPath.startsWith('data:')) return urlOrPath;
 
   let fileBuffer: Buffer | null = null;
@@ -271,6 +288,9 @@ async function loadData() {
     if (docSnap.exists()) {
       const data = docSnap.data();
       
+      if (!data.demos) data.demos = [];
+      if (!data.playlists) data.playlists = [];
+      
       if (data.adminPassword) {
         currentAdminPassword = data.adminPassword;
       } else {
@@ -322,10 +342,10 @@ async function loadData() {
 
       if (changed) {
          await setDoc(DOC_REF, JSON.parse(JSON.stringify(data)));
-         try {
-            await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
-         } catch (e) {}
       }
+      try {
+         await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      } catch (e) {}
 
       return data;
     }
@@ -337,6 +357,9 @@ async function loadData() {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
     const parsedData = JSON.parse(data);
+    
+    if (!parsedData.demos) parsedData.demos = [];
+    if (!parsedData.playlists) parsedData.playlists = [];
     
     if (parsedData.adminPassword) {
       currentAdminPassword = parsedData.adminPassword;
@@ -363,9 +386,17 @@ async function loadData() {
       });
     }
 
-    await setDoc(DOC_REF, parsedData); // upload to firebase for next time
+    try {
+      await setDoc(DOC_REF, parsedData); // upload to firebase for next time
+    } catch (e) {
+      console.error("Firebase migration error:", e);
+    }
     return parsedData;
-  } catch (error) {}
+  } catch (error: any) {
+    if (error.code !== 'ENOENT') {
+      console.error("Local data fallback error:", error);
+    }
+  }
 
   // Return default data
   return {
@@ -406,6 +437,10 @@ async function startServer() {
   app.set('trust proxy', 1);
   app.use(cors());
   
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
   // AI Studio bắt buộc dùng port 3000 để preview hoạt động.
   // Khi chạy trên VPS CloudPanel của bạn, mặc định sẽ dùng port 3333
   // hoặc thiết lập App Port: 3333 trực tiếp trên giao diện CloudPanel.
@@ -700,6 +735,49 @@ async function startServer() {
     res.json({ ...data, memberPassword: currentMemberPassword });
   });
 
+  app.get('/api/admin/firebase-configs', (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      const data = fsSync.readFileSync(path.join(process.cwd(), 'firebase-multi-configs.json'), 'utf-8');
+      res.json(JSON.parse(data));
+    } catch (e) {
+      res.json(multiConfig);
+    }
+  });
+
+  app.post('/api/admin/firebase-configs', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      const newConfig = req.body;
+      if (!newConfig.activeId || !newConfig.configs) {
+        return res.status(400).json({ error: 'Invalid config structure' });
+      }
+      
+      multiConfig = newConfig;
+      await fs.writeFile(path.join(process.cwd(), 'firebase-multi-configs.json'), JSON.stringify(multiConfig, null, 2));
+      
+      // Re-initialize Firebase
+      activeConfig = multiConfig.configs.find((c: any) => c.id === multiConfig.activeId) || multiConfig.configs[0];
+      firebaseConfig = activeConfig.config;
+      
+      // Attempt to re-initialize safely by giving app a random name so it doesn't conflict
+      const appName = 'app-' + Date.now();
+      firebaseApp = initializeApp(firebaseConfig, appName);
+      db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId || '(default)');
+      firebaseStorage = getStorage(firebaseApp);
+      DOC_REF = doc(db, 'app_data', 'main');
+      
+      res.json({ success: true, message: 'Đã chuyển đổi cấu hình Firebase thành công!' });
+    } catch (error: any) {
+      console.error('Lỗi khi đổi DB Firebase:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post('/api/profile', async (req, res) => {
     if (!isRequestAdmin(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -737,7 +815,7 @@ async function startServer() {
       logs.push("Bắt đầu đồng bộ hóa toàn bộ ảnh bìa cũ lên Firebase Storage...");
 
       // 1. Sync homeCoverUrl
-      if (data.homeCoverUrl && !data.homeCoverUrl.includes('firebasestorage.googleapis.com')) {
+      if (data.homeCoverUrl && !data.homeCoverUrl.includes(firebaseConfig.storageBucket)) {
         logs.push(`Đang xử lý Ảnh trang chủ (Home Cover): ${data.homeCoverUrl}`);
         const newUrl = await uploadUrlOrFileToCloud(data.homeCoverUrl, data.globalBaseUrl);
         if (newUrl !== data.homeCoverUrl) {
@@ -748,7 +826,7 @@ async function startServer() {
       }
 
       // 2. Sync ogImageUrl
-      if (data.ogImageUrl && !data.ogImageUrl.includes('firebasestorage.googleapis.com')) {
+      if (data.ogImageUrl && !data.ogImageUrl.includes(firebaseConfig.storageBucket)) {
         logs.push(`Đang xử lý Ảnh giới thiệu Facebook (OG Image): ${data.ogImageUrl}`);
         const newUrl = await uploadUrlOrFileToCloud(data.ogImageUrl, data.globalBaseUrl);
         if (newUrl !== data.ogImageUrl) {
@@ -764,7 +842,7 @@ async function startServer() {
           const demo = data.demos[i];
           
           // Đồng bộ ảnh bìa bài hát
-          if (demo.coverUrl && !demo.coverUrl.includes('firebasestorage.googleapis.com')) {
+          if (demo.coverUrl && !demo.coverUrl.includes(firebaseConfig.storageBucket)) {
             logs.push(`Đang xử lý Ảnh Bìa bài hát [${demo.title}]: ${demo.coverUrl}`);
             const newUrl = await uploadUrlOrFileToCloud(demo.coverUrl, data.globalBaseUrl);
             if (newUrl !== demo.coverUrl) {
@@ -775,7 +853,7 @@ async function startServer() {
           }
 
           // Đồng bộ file nhạc audio bài hát
-          if (demo.audioUrl && !demo.audioUrl.includes('firebasestorage.googleapis.com')) {
+          if (demo.audioUrl && !demo.audioUrl.includes(firebaseConfig.storageBucket)) {
             logs.push(`Đang xử lý file nhạc [${demo.title}]: ${demo.audioUrl}`);
             const newUrl = await uploadUrlOrFileToCloud(demo.audioUrl, data.globalBaseUrl);
             if (newUrl !== demo.audioUrl) {
@@ -791,7 +869,7 @@ async function startServer() {
       if (data.playlists && data.playlists.length > 0) {
         for (let i = 0; i < data.playlists.length; i++) {
           const playlist = data.playlists[i];
-          if (playlist.coverUrl && !playlist.coverUrl.includes('firebasestorage.googleapis.com')) {
+          if (playlist.coverUrl && !playlist.coverUrl.includes(firebaseConfig.storageBucket)) {
             logs.push(`Đang xử lý Danh sách phát [${playlist.title}]: ${playlist.coverUrl}`);
             const newUrl = await uploadUrlOrFileToCloud(playlist.coverUrl, data.globalBaseUrl);
             if (newUrl !== playlist.coverUrl) {

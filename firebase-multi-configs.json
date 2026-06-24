@@ -1,0 +1,33 @@
+{
+  "activeId": "old",
+  "configs": [
+    {
+      "id": "default",
+      "name": "Mặc định (taimusic-96289)",
+      "config": {
+        "projectId": "taimusic-96289",
+        "appId": "1:848155741386:web:4f5b5d826ce5fbbba8f833",
+        "apiKey": "AIzaSyAcml_QfgGTH80OKmRVj2tWIomEQUUiHB0",
+        "authDomain": "taimusic-96289.firebaseapp.com",
+        "firestoreDatabaseId": "default",
+        "storageBucket": "taimusic-96289.firebasestorage.app",
+        "messagingSenderId": "848155741386",
+        "measurementId": "G-D4ZSK50GZ2"
+      }
+    },
+    {
+      "id": "old",
+      "name": "DB cũ (Nice Momentum)",
+      "config": {
+        "projectId": "nice-momentum-trwfn",
+        "appId": "1:439820764953:web:abcf8a172f204668bc2788",
+        "apiKey": "AIzaSyAz8j_0SLubaQMiNw2ZnugPyzWPrvGYQyE",
+        "authDomain": "nice-momentum-trwfn.firebaseapp.com",
+        "firestoreDatabaseId": "ai-studio-55e9d594-1864-4eda-b3a6-811c2fea9f04",
+        "storageBucket": "nice-momentum-trwfn.firebasestorage.app",
+        "messagingSenderId": "439820764953",
+        "measurementId": ""
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles, Copy, ExternalLink } from 'lucide-react';
+import { Settings, Play, Music, Lock, ArrowLeft, Upload, Disc3, Plus, Trash2, Edit3, Globe, Camera, X, FileAudio, Share2, ListMusic, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Facebook, Instagram, Youtube, GripVertical, LogOut, ChevronRight, Monitor, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, Eye, EyeOff, FileText, Sparkles, Copy, ExternalLink, Database } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AppData, DemoSong, TemplateConfig, Achievement } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -171,8 +171,8 @@ function MemberLogin() {
     return (
       <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-4 relative overflow-hidden">
         {/* Glow effect matching platform design */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse"></div>
+        <div className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_top_left,rgba(147,51,234,0.15),transparent_50%)] pointer-events-none animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_bottom_right,rgba(225,29,72,0.15),transparent_50%)] pointer-events-none animate-pulse"></div>
         
         <div className="relative bg-neutral-900/50 border border-white/5 backdrop-blur-3xl p-8 rounded-[2rem] shadow-2xl max-w-md w-full text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-purple-500 to-rose-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
@@ -209,7 +209,7 @@ function MemberLogin() {
   return (
     <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-4 relative overflow-hidden">
       {/* Glow effect matching platform design */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-rose-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse"></div>
+      <div className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_center,rgba(225,29,72,0.15),transparent_50%)] pointer-events-none animate-pulse"></div>
       
       <div className="relative bg-neutral-900/50 border border-white/5 backdrop-blur-3xl p-8 rounded-[2rem] shadow-2xl max-w-sm w-full">
         <div className="text-center mb-6">
@@ -1666,7 +1666,7 @@ function CandyEffect() {
       {Array.from({ length: 20 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute text-xl md:text-2xl animate-snow"
+          className="absolute text-xl md:text-2xl animate-snow will-change-transform"
           style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${Math.random() * 10 + 5}s`,
@@ -1723,7 +1723,7 @@ function ChainEffect() {
       {Array.from({ length: 25 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute text-2xl md:text-3xl animate-snow drop-shadow-md"
+          className="absolute text-2xl md:text-3xl animate-snow will-change-transform drop-shadow-md"
           style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${Math.random() * 8 + 4}s`,
@@ -1745,7 +1745,7 @@ function NoteEffect() {
       {Array.from({ length: 20 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute text-2xl md:text-4xl animate-snow drop-shadow-sm text-stone-100"
+          className="absolute text-2xl md:text-4xl animate-snow will-change-transform drop-shadow-sm text-stone-100"
           style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${Math.random() * 12 + 6}s`,
@@ -1765,7 +1765,7 @@ function EightBitEffect() {
       {Array.from({ length: 30 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute w-4 h-4 bg-white animate-snow"
+          className="absolute w-4 h-4 bg-white animate-snow will-change-transform"
           style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${Math.random() * 10 + 2}s`,
@@ -1785,7 +1785,7 @@ function SnowEffect() {
       {Array.from({ length: 40 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute bg-white/30 rounded-full animate-snow"
+          className="absolute bg-white/30 rounded-full animate-snow will-change-transform"
           style={{
             left: `${Math.random() * 100}%`,
             width: `${Math.random() * 5 + 2}px`,
@@ -1827,7 +1827,7 @@ function BlossomEffect() {
       {Array.from({ length: 30 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute bg-pink-300 animate-snow opacity-70 shadow-[0_0_8px_rgba(244,114,182,0.4)]"
+          className="absolute bg-pink-300 animate-snow will-change-transform opacity-70 shadow-[0_0_8px_rgba(244,114,182,0.4)]"
           style={{
             left: `${Math.random() * 100}%`,
             width: `${Math.random() * 10 + 6}px`,
@@ -1849,7 +1849,7 @@ function LeavesEffect() {
       {Array.from({ length: 25 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute bg-yellow-600/30 animate-snow"
+          className="absolute bg-yellow-600/30 animate-snow will-change-transform"
           style={{
             left: `${Math.random() * 100}%`,
             width: `${Math.random() * 12 + 6}px`,
@@ -2004,8 +2004,8 @@ function StreetLightEffect() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
        <div className="absolute top-0 inset-x-0 h-[60vh] bg-gradient-to-b from-yellow-500/20 via-yellow-500/5 to-transparent mix-blend-overlay animate-flicker"></div>
-       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-400/10 blur-[100px] rounded-full animate-flicker" style={{ animationDelay: '0.2s' }}></div>
-       <div className="absolute top-[-5%] right-[-10%] w-[50%] h-[50%] bg-orange-500/10 blur-[120px] rounded-full animate-flicker" style={{ animationDelay: '0.5s' }}></div>
+       <div className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_top_left,rgba(250,204,21,0.1),transparent_50%)] animate-flicker" style={{ animationDelay: '0.2s' }}></div>
+       <div className="absolute top-0 right-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_top_right,rgba(249,115,22,0.1),transparent_50%)] animate-flicker" style={{ animationDelay: '0.5s' }}></div>
     </div>
   );
 }
@@ -2025,7 +2025,7 @@ function MysteriousEffect() {
       </div>
       
       {/* Gold glow around moon */}
-      <div className="absolute top-[-5%] right-[0%] w-[40vw] h-[40vw] min-w-[200px] min-h-[200px] bg-[#d4af37]/20 blur-[100px] rounded-full mix-blend-screen animate-flicker" style={{ animationDuration: '4s' }}></div>
+      <div className="absolute top-[-5%] right-[0%] w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.2),transparent_50%)] mix-blend-screen animate-flicker pointer-events-none" style={{ animationDuration: '4s' }}></div>
       
       {/* Light smoke */}
       <div className="absolute bottom-0 inset-x-0 h-[50vh] bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent blur-xl"></div>
@@ -2044,7 +2044,7 @@ function RetroNotesEffect() {
       {Array.from({ length: 25 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute text-xl sm:text-2xl animate-snow drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] text-[#a16207]"
+          className="absolute text-xl sm:text-2xl animate-snow will-change-transform drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] text-[#a16207]"
           style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${Math.random() * 10 + 6}s`,
@@ -2062,7 +2062,7 @@ function SunsetSunEffect() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Sunset gold sunset glow */}
-      <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[35vw] h-[35vw] min-w-[250px] min-h-[250px] rounded-full bg-gradient-to-t from-[#f97316] to-[#eab308] opacity-70 blur-[20px] shadow-[0_0_120px_rgba(249,115,22,0.8),0_0_240px_rgba(234,179,8,0.4)] animate-[pulse_5s_ease-in-out_infinite]"></div>
+      <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[35vw] h-[35vw] min-w-[250px] min-h-[250px] rounded-full bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.8),rgba(234,179,8,0.6)_50%,transparent_70%)] opacity-80 animate-[pulse_5s_ease-in-out_infinite]"></div>
       
       {/* Foggy warm layer */}
       <div className="absolute bottom-0 inset-x-0 h-[45vh] bg-gradient-to-t from-[#7c2d12]/30 via-[#7c2d12]/10 to-transparent blur-lg"></div>
@@ -2077,7 +2077,7 @@ function SunsetLeavesEffect() {
       {Array.from({ length: 30 }).map((_, i) => (
         <div 
           key={i} 
-          className={`absolute ${colors[i % colors.length]} animate-snow`}
+          className={`absolute ${colors[i % colors.length]} animate-snow will-change-transform`}
           style={{
             left: `${Math.random() * 100}%`,
             width: `${Math.random() * 14 + 10}px`,
@@ -2099,8 +2099,8 @@ function OceanWavesEffect() {
       {/* Wave layered background */}
       <div className="absolute bottom-0 inset-x-0 h-[120px] bg-gradient-to-t from-sky-450 via-sky-350 to-transparent opacity-30 animate-[pulse_6s_ease-in-out_infinite]"></div>
       {/* Ambient sky/sea radial lighting */}
-      <div className="absolute top-[40%] left-1/4 w-[50vw] h-[50vw] bg-sky-500/10 blur-[130px] rounded-full"></div>
-      <div className="absolute bottom-[10%] right-1/4 w-[40vw] h-[40vw] bg-cyan-700/10 blur-[100px] rounded-full animate-pulse" style={{ animationDuration: '8s' }}></div>
+      <div className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_center_left,rgba(14,165,233,0.15),transparent_50%)]"></div>
+      <div className="absolute bottom-0 right-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_bottom_right,rgba(14,116,144,0.15),transparent_50%)] animate-pulse" style={{ animationDuration: '8s' }}></div>
       
       {/* Waves animations dập dồn at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden opacity-25">
@@ -2194,10 +2194,10 @@ function PuzzleEffect() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-[1] opacity-75">
       {/* Colorful background ambient blur bubbles */}
-      <div className="absolute top-[10%] left-[10%] w-[45vw] h-[45vw] bg-pink-500/10 blur-[130px] rounded-full animate-pulse" style={{ animationDuration: '8s' }}></div>
-      <div className="absolute bottom-[10%] right-[10%] w-[45vw] h-[45vw] bg-purple-600/10 blur-[140px] rounded-full animate-pulse" style={{ animationDuration: '12s' }}></div>
-      <div className="absolute top-[35%] right-[20%] w-[38vw] h-[38vw] bg-cyan-500/10 blur-[110px] rounded-full animate-pulse" style={{ animationDuration: '10s' }}></div>
-      <div className="absolute bottom-[30%] left-[20%] w-[40vw] h-[40vw] bg-yellow-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDuration: '9s' }}></div>
+      <div className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_top_left,rgba(236,72,153,0.15),transparent_50%)] animate-pulse" style={{ animationDuration: '8s' }}></div>
+      <div className="absolute bottom-0 right-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_bottom_right,rgba(147,51,234,0.15),transparent_50%)] animate-pulse" style={{ animationDuration: '12s' }}></div>
+      <div className="absolute top-[20%] right-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_right,rgba(6,182,212,0.15),transparent_50%)] animate-pulse" style={{ animationDuration: '10s' }}></div>
+      <div className="absolute bottom-0 left-[20%] w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_bottom,rgba(234,179,8,0.1),transparent_50%)] animate-pulse" style={{ animationDuration: '9s' }}></div>
 
       {Array.from({ length: 30 }).map((_, i) => {
         const colorClass = colors[i % colors.length];
@@ -2206,7 +2206,7 @@ function PuzzleEffect() {
         return (
           <div 
             key={i} 
-            className={`absolute text-2xl sm:text-4xl animate-snow select-none ${colorClass}`}
+            className={`absolute text-2xl sm:text-4xl animate-snow will-change-transform select-none ${colorClass}`}
             style={{
               left: `${Math.random() * 100}%`,
               transform: `rotate(${randomRot}deg) scale(${randomScale})`,
@@ -2351,7 +2351,7 @@ function CheeringEffect() {
           wave.items.map((hat, i) => (
             <div
               key={`${wave.id}-${i}`}
-              className="absolute text-5xl md:text-6xl drop-shadow-xl"
+              className="absolute text-5xl md:text-6xl drop-shadow-xl will-change-transform"
               style={{
                 left: hat.left,
                 bottom: '-20%',
@@ -2376,7 +2376,7 @@ function CheeringEffect() {
           burst.items.map((conf, i) => (
             <div
               key={`${burst.id}-${i}`}
-              className={`absolute ${conf.color} ${conf.isSquare ? 'w-2 h-2' : 'w-1.5 h-3'}`}
+              className={`absolute ${conf.color} ${conf.isSquare ? 'w-2 h-2' : 'w-1.5 h-3'} will-change-transform`}
               style={{
                 left: conf.isLeft ? '-10%' : '110%',
                 bottom: conf.bottom,
@@ -2425,12 +2425,12 @@ function FireworksEffect() {
             style={{ left: `${left}%` }}
           >
              {/* Rocket shooting up */}
-             <div className="absolute bottom-0 w-1 rounded-full bg-orange-300" style={{
+             <div className="absolute bottom-0 w-1 rounded-full bg-orange-300 will-change-transform" style={{
                 animation: `shootUp ${2 + Math.random()}s cubic-bezier(0.25, 1, 0.5, 1) infinite`,
                 animationDelay: `${Math.random() * 4}s`,
              }}></div>
              {/* Explosion ping */}
-             <div className="absolute" style={{
+             <div className="absolute will-change-transform" style={{
                 bottom: `${40 + Math.random() * 40}vh`,
                 animation: `blowUp ${2 + Math.random()}s ease-out infinite`,
                 animationDelay: `${Math.random() * 4}s`,
@@ -4200,10 +4200,223 @@ function AdminTemplateEdit({ config, demos, onBack, onSave, isPCPreviewMode, set
     );
 }
 
+function AdminDatabaseSettings() {
+  const [configsData, setConfigsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [editingConfigId, setEditingConfigId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<any>(null);
+
+  useEffect(() => {
+    fetchConfigs();
+  }, []);
+
+  const fetchConfigs = async () => {
+    try {
+      const res = await fetch('/api/admin/firebase-configs', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setConfigsData(data);
+      } else {
+        setError('Không thể lấy danh sách cấu hình Firebase');
+      }
+    } catch (e) {
+      setError('Lỗi kết nối máy chủ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSwitch = async (id: string) => {
+    if (!configsData) return;
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const newConfigsData = { ...configsData, activeId: id };
+      const res = await fetch('/api/admin/firebase-configs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newConfigsData)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConfigsData(newConfigsData);
+        setSuccess('Đã chuyển DB Firebase thành công! (Vui lòng tải lại trang để thấy dữ liệu mới)');
+      } else {
+        setError(data.error || 'Lỗi khi chuyển DB');
+      }
+    } catch (e) {
+      setError('Lỗi kết nối máy chủ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!configsData || !editForm) return;
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      let updatedConfigs = [...configsData.configs];
+      if (editingConfigId === 'new') {
+        updatedConfigs.push({ ...editForm, id: Date.now().toString() });
+      } else {
+        const idx = updatedConfigs.findIndex(c => c.id === editingConfigId);
+        if (idx >= 0) updatedConfigs[idx] = editForm;
+      }
+      const newConfigsData = { ...configsData, configs: updatedConfigs };
+      
+      const res = await fetch('/api/admin/firebase-configs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newConfigsData)
+      });
+      if (res.ok) {
+        setConfigsData(newConfigsData);
+        setSuccess('Đã lưu cấu hình Firebase!');
+        setEditingConfigId(null);
+        setEditForm(null);
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Lỗi khi lưu cấu hình');
+      }
+    } catch (e) {
+      setError('Lỗi kết nối máy chủ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !configsData) return <div className="text-stone-500">Đang tải...</div>;
+
+  if (editingConfigId && editForm) {
+    return (
+      <div className="space-y-6 max-w-2xl">
+        <div className="flex items-center gap-2 mb-4">
+          <button onClick={() => { setEditingConfigId(null); setEditForm(null); }} className="p-2 hover:bg-stone-200 rounded-lg text-stone-500">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h2 className="text-2xl font-bold text-stone-900">{editingConfigId === 'new' ? 'Thêm cấu hình mới' : 'Chỉnh sửa cấu hình'}</h2>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">Tên gợi nhớ (VD: DB cũ, Mặc định...)</label>
+            <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Project ID</label>
+              <input type="text" value={editForm.config.projectId} onChange={e => setEditForm({...editForm, config: {...editForm.config, projectId: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">API Key</label>
+              <input type="text" value={editForm.config.apiKey} onChange={e => setEditForm({...editForm, config: {...editForm.config, apiKey: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">App ID</label>
+              <input type="text" value={editForm.config.appId} onChange={e => setEditForm({...editForm, config: {...editForm.config, appId: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Auth Domain</label>
+              <input type="text" value={editForm.config.authDomain} onChange={e => setEditForm({...editForm, config: {...editForm.config, authDomain: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Storage Bucket</label>
+              <input type="text" value={editForm.config.storageBucket} onChange={e => setEditForm({...editForm, config: {...editForm.config, storageBucket: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Messaging Sender ID</label>
+              <input type="text" value={editForm.config.messagingSenderId} onChange={e => setEditForm({...editForm, config: {...editForm.config, messagingSenderId: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Measurement ID</label>
+              <input type="text" value={editForm.config.measurementId || ''} onChange={e => setEditForm({...editForm, config: {...editForm.config, measurementId: e.target.value}})} className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Firestore Database ID (mặc định là default)</label>
+              <input type="text" value={editForm.config.firestoreDatabaseId || ''} onChange={e => setEditForm({...editForm, config: {...editForm.config, firestoreDatabaseId: e.target.value}})} placeholder="default" className="w-full px-4 py-2 bg-stone-100 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900" />
+            </div>
+          </div>
+          
+          {error && <p className="text-red-500 text-sm font-medium mt-2">{error}</p>}
+          
+          <div className="pt-4 flex gap-3">
+            <button disabled={loading} onClick={handleSaveEdit} className="px-6 py-2 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 disabled:opacity-50">
+              Lưu Lại
+            </button>
+            <button onClick={() => { setEditingConfigId(null); setEditForm(null); }} className="px-6 py-2 bg-stone-200 text-stone-800 rounded-xl font-bold hover:bg-stone-300">
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold mb-2 text-stone-900">Quản Lý Cơ Sở Dữ Liệu</h2>
+          <p className="text-sm text-stone-500">Chuyển đổi giữa các Firebase config (DB mới / DB cũ) an toàn.</p>
+        </div>
+        <button onClick={() => {
+          setEditingConfigId('new');
+          setEditForm({ name: '', config: { projectId: '', apiKey: '', appId: '', authDomain: '', storageBucket: '', messagingSenderId: '', measurementId: '', firestoreDatabaseId: 'default' } });
+        }} className="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 text-sm">
+          <Plus className="w-4 h-4" /> Thêm DB mới
+        </button>
+      </div>
+
+      {success && <div className="p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 font-medium">{success}</div>}
+      {error && <div className="p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 font-medium">{error}</div>}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {configsData?.configs?.map((c: any) => {
+          const isActive = c.id === configsData.activeId;
+          return (
+            <div key={c.id} className={`p-5 rounded-2xl border-2 transition-all ${isActive ? 'border-blue-500 bg-blue-50/30' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-lg text-stone-900 flex items-center gap-2">
+                    {c.name} {isActive && <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Đang dùng</span>}
+                  </h3>
+                  <p className="text-sm text-stone-500 font-mono mt-1">{c.config.projectId}</p>
+                </div>
+                <button onClick={() => { setEditingConfigId(c.id); setEditForm({...c}); }} className="p-2 text-stone-400 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg">
+                  <Edit3 className="w-4 h-4" />
+                </button>
+              </div>
+              
+              {!isActive && (
+                <button disabled={loading} onClick={() => handleSwitch(c.id)} className="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold rounded-xl text-sm disabled:opacity-50 transition-colors">
+                  Dùng DB này
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard() {
   const [data, setData] = useState<AppData | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'|'security'|'templates'>('demos');
+  const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'|'security'|'templates'|'database'>('demos');
   const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'drafts' | 'playlists' | 'trash' | 'landing_pages'>('released');
   const [draggedItemIdx, setDraggedItemIdx] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -4600,6 +4813,11 @@ function AdminDashboard() {
               effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
             } ${activeTab === 'security' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Bảo Mật">
               <Lock className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Bảo Mật</span>}
+            </button>
+            <button onClick={() => setActiveTab('database')} className={`flex items-center transition-colors ${
+              effectiveSidebarCollapsed ? 'justify-center w-10 h-10 rounded-xl mx-auto' : 'justify-start w-full gap-3 px-4 py-3 rounded-xl font-medium'
+            } ${activeTab === 'database' ? 'bg-stone-900 text-white' : 'hover:bg-stone-200 text-stone-600'}`} title="Cơ Sở Dữ Liệu">
+              <Database className="w-5 h-5" /> {!effectiveSidebarCollapsed && <span>Database (Firebase)</span>}
             </button>
           </div>
         </aside>
@@ -5541,6 +5759,10 @@ function AdminDashboard() {
                 </form>
               </div>
             </div>
+          )}
+
+          {activeTab === 'database' && (
+            <AdminDatabaseSettings />
           )}
         </main>
       </div>
