@@ -1327,6 +1327,36 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
      }
   });
 
+  app.post('/api/demos/:id/duplicate', async (req, res) => {
+     if (!isRequestAdmin(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+     }
+     const data = await loadData();
+     const originalDemo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
+     if (originalDemo) {
+        const newId = Math.random().toString(36).substring(2, 9);
+        const originalSlug = originalDemo.slug || originalDemo.id;
+        let newSlug = originalSlug + '-copy-' + Math.random().toString(36).substring(2, 6);
+        
+        const newDemo = {
+           ...originalDemo,
+           id: newId,
+           slug: newSlug,
+           title: originalDemo.title + ' (Copy)',
+           createdAt: new Date().toISOString(),
+           isReleased: false,
+           isDraft: true,
+           deleted: false,
+           deletedAt: undefined
+        };
+        data.demos.push(newDemo);
+        await saveData(data);
+        res.json(newDemo);
+     } else {
+        res.status(404).json({ error: 'Not found' });
+     }
+  });
+
   app.post('/api/admin/reorder-demos', express.json(), async (req, res) => {
      if (!isRequestAdmin(req)) {
         return res.status(401).json({ error: 'Unauthorized' });

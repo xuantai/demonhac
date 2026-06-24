@@ -2671,7 +2671,6 @@ function PlaylistPlayer() {
   }, [id, currentSong]);
 
   if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t.load}</div>;
-  if (error || !playlist) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Error: {error || 'Playlist not found'}</div>;
   if (isProtected) return (
      <div className="min-h-screen bg-stone-950 flex items-center justify-center p-4 relative overflow-hidden">
         {protectedInfo.coverUrl && (
@@ -2698,6 +2697,7 @@ function PlaylistPlayer() {
         </div>
      </div>
   );
+  if (error || !playlist) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Error: {error || 'Playlist not found'}</div>;
 
   return (
     <div 
@@ -4684,6 +4684,26 @@ function AdminDashboard() {
     loadData();
   };
 
+  const handleDuplicate = async (id: string) => {
+    try {
+       const res = await fetch(`/api/demos/${id}/duplicate`, {
+         method: 'POST',
+         headers: {
+           'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+         }
+       });
+       if (res.ok) {
+          setToast('Đã tạo bản sao thành công! (Nằm ở mục Bản nháp)');
+          setTimeout(() => setToast(''), 3000);
+          loadData();
+       } else {
+          alert('Lỗi khi duplicate bản ghi.');
+       }
+    } catch (err) {
+       console.error(err);
+    }
+  };
+
   const handleRestore = async (type: 'song' | 'playlist', id: string) => {
     const endpoint = type === 'song' ? `/api/demos/${id}/restore` : `/api/playlists/${id}/restore`;
     
@@ -5075,8 +5095,8 @@ function AdminDashboard() {
                       <Plus className="w-4 h-4" /> Tạo Playlist
                     </button>
                   ) : demosSubTab !== 'trash' ? (
-                    <Link to="/admin/new" className="bg-stone-900 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-stone-800 transition-colors shadow-sm font-bold" title="Tạo mới bài viết">
-                      <Plus className="w-4 h-4" /> Tạo bài hát
+                    <Link to="/admin/new" className="bg-stone-900 text-white px-4 py-2 rounded-xl flex items-center justify-center hover:bg-stone-800 transition-colors shadow-sm font-bold" title="Tạo mới bài viết">
+                      <Plus className="w-5 h-5" />
                     </Link>
                   ) : null}
                 </div>
@@ -5115,6 +5135,9 @@ function AdminDashboard() {
                           <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
                             <button type="button" onClick={() => handleShare(demo.slug || demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Chia sẻ Link">
                                <Globe className="w-4 h-4" />
+                            </button>
+                            <button type="button" onClick={() => handleDuplicate(demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Nhân bản">
+                               <Copy className="w-4 h-4" />
                             </button>
                             <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
                                <Edit3 className="w-4 h-4" />
@@ -5200,6 +5223,9 @@ function AdminDashboard() {
                                  <Lock className="w-4 h-4 text-amber-500" />
                               </button>
                             )}
+                            <button type="button" onClick={() => handleDuplicate(demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Nhân bản">
+                               <Copy className="w-4 h-4" />
+                            </button>
                             <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
                                <Edit3 className="w-4 h-4" />
                             </Link>
@@ -5288,6 +5314,9 @@ function AdminDashboard() {
                                  <Lock className="w-4 h-4 text-amber-500" />
                               </button>
                             )}
+                            <button type="button" onClick={() => handleDuplicate(demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Nhân bản">
+                               <Copy className="w-4 h-4" />
+                            </button>
                             <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
                                <Edit3 className="w-4 h-4" />
                             </Link>
@@ -5360,6 +5389,9 @@ function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+                            <button type="button" onClick={() => handleDuplicate(demo.id)} className="text-stone-500 hover:bg-stone-100 p-2 rounded-lg transition-colors" title="Nhân bản">
+                               <Copy className="w-4 h-4" />
+                            </button>
                             <Link to={`/admin/edit/${demo.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa">
                                <Edit3 className="w-4 h-4" />
                             </Link>
@@ -6904,9 +6936,39 @@ function AdminEditDemo() {
   return (
     <div className="min-h-screen bg-stone-100 text-stone-900 font-sans py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <Link to="/admin" className="inline-flex items-center gap-2 text-stone-500 hover:text-stone-900 font-medium mb-8 transition-colors">
-          <ArrowLeft className="w-5 h-5" /> Trở về Dashboard
-        </Link>
+        <div className="flex items-center justify-between mb-8">
+          <Link to="/admin" className="inline-flex items-center gap-2 text-stone-500 hover:text-stone-900 font-medium transition-colors">
+            <ArrowLeft className="w-5 h-5" /> Trở về Dashboard
+          </Link>
+          <button 
+            type="button" 
+            onClick={async () => {
+              try {
+                 const res = await fetch(`/api/demos/${demo.id}/duplicate`, {
+                   method: 'POST',
+                   headers: {
+                     'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
+                   }
+                 });
+                 if (res.ok) {
+                    const newDemo = await res.json();
+                    setToast('Đã tạo bản sao thành công! Đang chuyển hướng...');
+                    setTimeout(() => {
+                      setToast('');
+                      navigate(`/admin/edit/${newDemo.id}`);
+                    }, 1500);
+                 } else {
+                    alert('Lỗi khi duplicate bản ghi.');
+                 }
+              } catch (err) {
+                 console.error(err);
+              }
+            }}
+            className="bg-stone-200 text-stone-700 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-stone-300 transition-colors shadow-sm font-bold text-sm"
+          >
+            <Copy className="w-4 h-4" /> Nhân bản
+          </button>
+        </div>
         
         <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-xl shadow-stone-200/50">
           <h1 className="text-3xl font-bold mb-6">Chỉnh Sửa Demo</h1>
