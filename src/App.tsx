@@ -2158,13 +2158,15 @@ function EightBitGameEffect() {
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-55">
       {/* Scanline pattern for CRT/arcade experience */}
       <div className="absolute inset-0 bg-[#000]/10 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,_rgba(0,0,0,0.15)_50%)] bg-[size:100%_4px]" />
-      <div className="absolute top-[20%] left-1/4 w-[50vw] h-[50vw] bg-pink-500/10 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[20%] right-1/4 w-[40vw] h-[40vw] bg-emerald-500/10 blur-[100px] rounded-full animate-pulse" style={{ animationDuration: '6s' }}></div>
+      
+      {/* Optimized radial gradients replacing expensive CSS blurs */}
+      <div className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_top_left,rgba(236,72,153,0.15),transparent_50%)]"></div>
+      <div className="absolute bottom-0 right-0 w-[100vw] h-[100vh] bg-[radial-gradient(ellipse_at_bottom_right,rgba(16,185,129,0.15),transparent_50%)]"></div>
       
       {Array.from({ length: 28 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute text-xl sm:text-3xl animate-snow drop-shadow-[0_3px_6px_rgba(236,72,153,0.6)] font-mono select-none"
+          className="absolute text-xl sm:text-3xl animate-snow drop-shadow-[0_3px_6px_rgba(236,72,153,0.6)] font-mono select-none will-change-transform"
           style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${Math.random() * 8 + 5}s`,
@@ -3247,7 +3249,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
   if (!unlocked) {
     return (
       <div 
-        className={`min-h-screen px-4 py-12 flex flex-col items-center justify-center ${themeClasses} transition-colors duration-1000 relative overflow-hidden`}
+        className={`min-h-[100dvh] px-4 py-12 flex flex-col items-center justify-center ${themeClasses} transition-colors duration-1000 relative overflow-hidden`}
         style={{ backgroundColor: customConfig?.bgColor || undefined }}
       >
         <motion.div 
@@ -3340,7 +3342,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
 
   return (
     <div 
-      className={`min-h-full min-w-full px-4 py-8 ${themeClasses} transition-colors duration-1000 relative ${forceMobile ? 'overflow-hidden' : ''}`}
+      className={`min-h-[100dvh] min-w-full px-4 py-8 ${themeClasses} transition-colors duration-1000 relative ${forceMobile ? 'overflow-hidden' : ''}`}
       style={{ backgroundColor: customConfig?.bgColor || undefined }}
     >
       <svg width="0" height="0" className="absolute pointer-events-none">
