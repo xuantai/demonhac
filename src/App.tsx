@@ -4520,6 +4520,8 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'demos'|'playlists'|'profile'|'socials'|'security'|'templates'|'database'>('demos');
   const [demosSubTab, setDemosSubTab] = useState<'released' | 'demos' | 'drafts' | 'playlists' | 'trash' | 'landing_pages'>('released');
   const [draggedItemIdx, setDraggedItemIdx] = useState<number | null>(null);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     type: 'song' | 'playlist';
@@ -4548,6 +4550,18 @@ function AdminDashboard() {
     window.location.href = '/';
   };
 
+  const renderPagination = (totalItems: number) => {
+     const totalPages = Math.ceil(totalItems / itemsPerPage);
+     if (totalPages <= 1) return null;
+     return (
+        <div className="flex justify-center items-center gap-2 mt-6">
+           <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="p-2 rounded-lg bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-50">&lt;</button>
+           <span className="text-sm font-bold text-stone-600 px-3">{currentPage} / {totalPages}</span>
+           <button type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)} className="p-2 rounded-lg bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-50">&gt;</button>
+        </div>
+     );
+  };
+
   // Passwords Tab States
   const [oldAdminPass, setOldAdminPass] = useState('');
   const [newAdminPass, setNewAdminPass] = useState('');
@@ -4563,6 +4577,10 @@ function AdminDashboard() {
   const effectiveSidebarCollapsed = isSidebarCollapsed || isPCPreviewMode;
   
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [demosSubTab]);
 
   const loadData = () => {
     fetch('/api/admin/data', {
@@ -5022,6 +5040,16 @@ function AdminDashboard() {
                 </div>
 
                 <div className="flex items-center gap-2 self-end md:self-auto">
+                  <select 
+                    value={itemsPerPage} 
+                    onChange={e => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }} 
+                    className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-bold text-stone-700 outline-none hover:border-stone-300 transition-colors cursor-pointer"
+                  >
+                    <option value={10}>10 bài</option>
+                    <option value={20}>20 bài</option>
+                    <option value={50}>50 bài</option>
+                    <option value={100}>100 bài</option>
+                  </select>
                   {demosSubTab === 'playlists' ? (
                     <button
                       type="button"
@@ -5066,7 +5094,9 @@ function AdminDashboard() {
                       <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
                         <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả các dòng để sắp xếp thứ tự
                       </div>
-                      {landingList.map((demo, idx) => (
+                      {landingList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((demo, localIdx) => {
+                        const idx = (currentPage - 1) * itemsPerPage + localIdx;
+                        return (
                         <div
                           key={demo.id}
                           className="border border-stone-100 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-stone-50/50 transition-all shadow-sm"
@@ -5094,7 +5124,9 @@ function AdminDashboard() {
                             </button>
                           </div>
                          </div>
-                      ))}
+                        );
+                      })}
+                      {renderPagination(landingList.length)}
                     </div>
                   );
                 })()}
@@ -5109,7 +5141,9 @@ function AdminDashboard() {
                       <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
                         <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả các dòng bài hát để sắp xếp thứ tự hiển thị ưu tiên ngoài trang chủ
                       </div>
-                      {releasedList.map((demo, idx) => (
+                      {releasedList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((demo, localIdx) => {
+                        const idx = (currentPage - 1) * itemsPerPage + localIdx;
+                        return (
                         <div
                           key={demo.id}
                           draggable
@@ -5174,7 +5208,9 @@ function AdminDashboard() {
                             </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
+                      {renderPagination(releasedList.length)}
                     </div>
                   );
                 })()}
@@ -5189,7 +5225,9 @@ function AdminDashboard() {
                       <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
                         <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả các dòng bài hát để sắp xếp thứ tự hiển thị ưu tiên ngoài trang chủ
                       </div>
-                      {demoList.map((demo, idx) => (
+                      {demoList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((demo, localIdx) => {
+                        const idx = (currentPage - 1) * itemsPerPage + localIdx;
+                        return (
                         <div
                           key={demo.id}
                           draggable
@@ -5258,7 +5296,9 @@ function AdminDashboard() {
                             </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
+                      {renderPagination(demoList.length)}
                     </div>
                   );
                 })()}
@@ -5273,7 +5313,9 @@ function AdminDashboard() {
                       <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
                         <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả để sắp xếp thứ tự hiển thị bản nháp
                       </div>
-                      {draftList.map((demo, idx) => (
+                      {draftList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((demo, localIdx) => {
+                        const idx = (currentPage - 1) * itemsPerPage + localIdx;
+                        return (
                         <div
                           key={demo.id}
                           draggable
@@ -5326,7 +5368,9 @@ function AdminDashboard() {
                             </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
+                      {renderPagination(draftList.length)}
                     </div>
                   );
                 })()}
@@ -5341,7 +5385,8 @@ function AdminDashboard() {
                       <div className="text-xs text-stone-400 mb-2 italic px-1 flex items-center gap-1">
                         <GripVertical className="w-3.5 h-3.5 shrink-0" /> Kéo thả để sắp xếp thứ tự hiển thị playlist ưu tiên ngoài trang chủ
                       </div>
-                      {playlistList.map((pl, idx) => {
+                      {playlistList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((pl, localIdx) => {
+                        const idx = (currentPage - 1) * itemsPerPage + localIdx;
                         const songCount = (data.demos || []).filter(d => 
                            !d.deleted && ((d.playlistIds && d.playlistIds.includes(pl.id)) || 
                            (pl.songIds && pl.songIds.includes(d.id)))
@@ -5397,6 +5442,7 @@ function AdminDashboard() {
                           </div>
                         );
                       })}
+                      {renderPagination(playlistList.length)}
                     </div>
                   );
                 })()}
@@ -5405,7 +5451,12 @@ function AdminDashboard() {
                   const trashedDemos = data.demos?.filter(d => d.deleted) || [];
                   const trashedPlaylists = (data.playlists || []).filter(p => p.deleted);
                   
-                  if (trashedDemos.length === 0 && trashedPlaylists.length === 0) {
+                  const allTrashed = [
+                     ...trashedDemos.map(d => ({ ...d, _type: 'song' as const })),
+                     ...trashedPlaylists.map(p => ({ ...p, _type: 'playlist' as const }))
+                  ].sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+
+                  if (allTrashed.length === 0) {
                     return (
                       <div className="text-center py-16 border rounded-2xl border-stone-200 bg-stone-50 flex flex-col items-center justify-center gap-3">
                         <Trash2 className="w-12 h-12 text-stone-350" />
@@ -5434,59 +5485,31 @@ function AdminDashboard() {
                         </div>
                       </div>
 
-                      {trashedDemos.length > 0 && (
-                        <div>
-                          <h4 className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2 px-1">Bài viết trong thùng rác ({trashedDemos.length})</h4>
-                          <div className="space-y-2">
-                            {trashedDemos.map(demo => (
-                              <div key={demo.id} className="border border-stone-100 p-3 rounded-xl flex items-center justify-between gap-3 bg-white shadow-sm hover:bg-stone-50/30 transition-all">
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-bold text-stone-800 text-sm md:text-base truncate">{demo.title}</span>
-                                  <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-400">
-                                    <span>{demo.isReleased ? 'Bài viết ra rồi' : 'Demo'}</span>
-                                    <span>•</span>
-                                    <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] md:text-xs">{getRemainingDays(demo.deletedAt)}</span>
-                                  </div>
+                      <div>
+                        <h4 className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2 px-1">Các mục trong thùng rác ({allTrashed.length})</h4>
+                        <div className="space-y-2">
+                          {allTrashed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item: any) => (
+                            <div key={`${item._type}-${item.id}`} className="border border-stone-100 p-3 rounded-xl flex items-center justify-between gap-3 bg-white shadow-sm hover:bg-stone-50/30 transition-all">
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-stone-850 text-sm md:text-base truncate">{item.title || '(Chưa đặt tiêu đề)'}</span>
+                                <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-400">
+                                  <span>{item._type === 'playlist' ? 'Playlist' : (item.isReleased ? 'Bài viết ra rồi' : 'Demo / Nháp')}</span>
+                                  <span>•</span>
+                                  <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] md:text-xs">{getRemainingDays(item.deletedAt)}</span>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRestore('song', demo.id)}
-                                  className="text-stone-700 hover:bg-stone-100 border border-stone-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-sm transition-colors"
-                                >
-                                  Khôi phục
-                                </button>
                               </div>
-                            ))}
-                          </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRestore(item._type, item.id)}
+                                className="text-stone-700 hover:bg-stone-100 border border-stone-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-sm transition-colors"
+                              >
+                                Khôi phục
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      )}
-
-                      {trashedPlaylists.length > 0 && (
-                        <div>
-                          <h4 className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2 px-1">Playlist trong thùng rác ({trashedPlaylists.length})</h4>
-                          <div className="space-y-2">
-                            {trashedPlaylists.map(pl => (
-                              <div key={pl.id} className="border border-stone-100 p-3 rounded-xl flex items-center justify-between gap-3 bg-white shadow-sm hover:bg-stone-50/30 transition-all">
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-bold text-stone-850 text-base truncate">{pl.title}</span>
-                                  <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-400">
-                                    <span>Playlist</span>
-                                    <span>•</span>
-                                    <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] md:text-xs">{getRemainingDays(pl.deletedAt)}</span>
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRestore('playlist', pl.id)}
-                                  className="text-stone-700 hover:bg-stone-100 border border-stone-200 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-sm transition-colors"
-                                >
-                                  Khôi phục
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                        {renderPagination(allTrashed.length)}
+                      </div>
                     </div>
                   );
                 })()}
