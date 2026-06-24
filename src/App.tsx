@@ -4693,9 +4693,12 @@ function AdminDashboard() {
          }
        });
        if (res.ok) {
-          setToast('Đã tạo bản sao thành công! (Nằm ở mục Bản nháp)');
-          setTimeout(() => setToast(''), 3000);
-          loadData();
+          const newDemo = await res.json();
+          setToast('Đã tạo bản sao thành công! Đang chuyển hướng...');
+          setTimeout(() => {
+            setToast('');
+            navigate(`/admin/edit/${newDemo.id}`);
+          }, 1000);
        } else {
           alert('Lỗi khi duplicate bản ghi.');
        }
