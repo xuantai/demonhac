@@ -2816,7 +2816,7 @@ function PlaylistPlayer() {
   );
 }
 
-function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext, previewConfig, previewData }: any = {}) {
+function DemoPlayer({ songIdP, playlistId, playlistSongs, setNextSong, onEnd, onAlmostEnded, playlistContext, previewConfig, previewData }: any = {}) {
   const { lang } = useContext(LanguageContext);
   const t = translations[lang] || translations['vi'];
   const paramsId = useParams().id;
