@@ -8,6 +8,9 @@ export interface Playlist {
   id: string;
   title: string;
   songIds?: string[];
+  isDraft?: boolean;
+  password?: string;
+  secretLink?: string;
 }
 
 export interface Achievement {

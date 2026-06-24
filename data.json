@@ -1,0 +1,1231 @@
+{
+  "releasedSongs": [],
+  "playlists": [
+    {
+      "title": "Album MậpMờ",
+      "songIds": [
+        "1780672442345",
+        "1780677880890",
+        "1780677038417",
+        "1780676677123",
+        "1780618493637",
+        "1780618434608",
+        "1780682174364",
+        "1780781537464",
+        "1780782605057",
+        "1780783310943",
+        "1780786684987",
+        "1780787045738"
+      ],
+      "id": "1780774046282",
+      "coverUrl": "https://tài.com/uploads/1780696733254-995717249-1780696733262.webp"
+    },
+    {
+      "title": "Nhạc Phim",
+      "id": "1780780944981"
+    },
+    {
+      "title": "EP Để Anh Làm Gió Nâng Niu Em Mỗi Ngày",
+      "id": "1780780976185"
+    },
+    {
+      "deletedAt": 1780951656417,
+      "id": "1780951602617",
+      "deleted": true,
+      "title": "ssssss"
+    },
+    {
+      "id": "1781270950760",
+      "title": "Chỉ sáng tác"
+    }
+  ],
+  "globalBaseUrl": "tài.com",
+  "demos": [
+    {
+      "isDraft": false,
+      "coverUrl": "/uploads/1781270903944-61797470-1781270903946.webp",
+      "achievements": [
+        {
+          "type": "youtube_trending",
+          "value": "1"
+        },
+        {
+          "type": "youtube_views",
+          "value": "16M"
+        },
+        {
+          "type": "spotify_streams",
+          "value": "10M"
+        },
+        {
+          "value": "",
+          "type": "tiktok_viral"
+        }
+      ],
+      "playlistIds": [
+        "1781270950760"
+      ],
+      "singer": "Hà Nhi",
+      "isReleased": true,
+      "lyrics": "Verse:\nMỗi ngày của em khép lại bằng cảm giác bất an\nMỗi đêm em trằn trọc cùng những nỗi cô đơn ngập tràn\nNhững tin nhắn thưa dần\nNhững quan tâm thờ ơ\nTiếng yêu bỗng lạ lẫm\nkhông như ngày xưa\nÔ cửa vuông còn vương thêm nhiều hạt mưa phất phơ\nMỗi em ôm cuộc tình với những nỗi lo âu vẩn vơ\nNếu có ngày vụn vỡ\nChắc không ai bất ngờ\nNiềm tin trong em đã chết\nTừ bao giờ\n\nChorus :\nVì em chưa bao giờ khóc\nNên anh cứ nghĩ em không buồn\nEm chưa bao giờ khóc\nNên em tổn thương anh chẳng coi là điều bận tâm\nVì em chưa bao giờ khóc\nAnh nhẹ lòng mỗi khi nghe câu \"em ổn mà\" phải không ?\nTại anh vô tư chẳng để tâm\nHay em chẳng đáng quan trọng ?\n\n\nEm thường nép mình trong những khoảng trời riêng khóc thôi\nThế nên anh chẳng thế thấy nước mắt em đã từng rơi\nEm vẫn luôn tìm cách\nAnh chỉ tìm lý do\nTình yêu trong ta cứ thế\ndần phai mờ\n\nChorus :\nVì em chưa bao giờ khóc\nNên anh cứ nghĩ em không buồn\nEm chưa bao giờ khóc\nNên em tổn thương anh chẳng coi là điều bận tâm\nVì em chưa bao giờ khóc\nAnh nhẹ lòng mỗi khi nghe câu \"em ổn mà\" phải không ?\nTại anh vô tư chẳng để tâm\nHay em chẳng đáng quan trọng ?\n\nBridge:\nĐiều gì khiến chúng ta ngày càng cách xa, em không biết nữa.\nKết thúc bằng một nỗi đau, còn hơn nỗi đau chẳng thể kết thúc.\n\nChorus: \nVì em chưa bao giờ khóc\nNỗi đau em giấu riêng trong lòng\nEm chưa bao giờ khóc\nKhi hai chúng ta có cuộc tình mình em vun đắp\nVì tình yêu luôn là thế\nNgỡ là mãi mãi nhưng sau cùng chẳng thể đến với nhau\nTừ nay em không còn bận tâm\nAnh không còn đáng quan trọng\nTừ nay anh không cần bận tâm\nEm sẽ buông !\n",
+      "id": "1781270983793",
+      "composer": "A.C Xuân Tài",
+      "author": "",
+      "status": "public",
+      "createdAt": 1781270983793,
+      "template": "3",
+      "releaseYear": "2023",
+      "backgroundUrl": "/uploads/1781271181028-357969834-1781271181053.webp",
+      "secretKey": "63c781e409e6f69c",
+      "audioUrl": "/uploads/1781270905105-551698412.mp3",
+      "slug": "vi-em-chua-bao-gio-khoc",
+      "password": "",
+      "title": "Vì Em Chưa Bao Giờ Khóc"
+    },
+    {
+      "author": "",
+      "composer": "A.C Xuân Tài, Changg",
+      "status": "public",
+      "template": "4",
+      "createdAt": 1780672442345,
+      "backgroundUrl": "/uploads/1780696754752-626688899-1780696754753.webp",
+      "releaseYear": "2026",
+      "secretKey": "efd8170419221096",
+      "slug": "sieu-ban-than",
+      "audioUrl": "/uploads/1780672392169-990475394.mp3",
+      "password": "",
+      "title": "Siêu Bạn Thân",
+      "videoUrl": "https://www.youtube.com/watch?v=Dr8JBA6Nb-4",
+      "isDraft": false,
+      "coverUrl": "/uploads/1780696733254-995717249-1780696733262.webp",
+      "achievements": [
+        {
+          "value": "410K",
+          "type": "youtube_views"
+        },
+        {
+          "type": "spotify_streams",
+          "value": "180K"
+        }
+      ],
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "singer": "A.C Xuân Tài, Changg",
+      "lyrics": "Tại sao phải thức đêm\nmải mê ngắm hình ai đó\nnhớ nhung hết mọi con ngõ\nta đã từng dạo quanh lúc tan ca\n\nvì em quá nhút nhát hay sao\nđợi anh chỉ để nói lời chào\nbộ anh cứ muốn ta giữ nguyên vậy sao?\n\npre:\nđứa pha trò\nđứa giả đò\nliếc mắt nhìn rồi vờ chẳng quan tâm\nCảm xúc thất thường, khó đo lường, nói không cần mà lòng cứ vấn vương\nĐèn xanh đã bật rồi nhưng anh chẳng nổ máy\nCứ giả vờ mình chẳng hề lung lay\nnhưng tha thiết mỏi mòn, mong anh tỏ bày,,,\n\nchorus:\nVì là ai đó cướp đi\nCả trái tim này và lý trí\nMột mình em ôm giấc mơ\nNỗi nhớ anh lạ kỳ\n\nVì là con gái\nThế nên em sẽ chỉ chờ anh nói ra\nLời cam kết cho ai ta không thể rời xa\n\ncoda:\nchẳng phải người yêu hay bạn thân\nngót ngét là qua đi thời tân\nthấy ghét mà không sao làm ngơ, ú u u ù\n\ncó thể là anh trai của em\ncó thể là thanh mai của anh\ncó thể là siêu cấp bạn thân?\n\nVerse 2:\nCó quá lắm lý do để ta bào chữa sự chậm trễ này\nCứ thế cứ đắn đo hết đêm đến ngày\nAnh sợ càng để lâu, ta lại quen với vị trí này\nNhiều lần muốn nhắn nhắn\nRồi lại băn khoăn\nSợ ngộ nhận lại căng căng, cực lăn tăn\nLiệu đối phương\nCũng thích hay chỉ đơn giản thân hơn mức bình thường\nGọi là siêu bạn thân đấy\nthế thì thật thảm thương\nMà nếu như\nLiều ngỏ lời, biết đâu được mình lại thành đôi\nThất bại thì thôi\nVẫn hơn ân hận cả đời\n\nEnding:\nChẳng một ai hiểu ý ai\nnên chúng ta đành mập mờ mãi\nChặng đường \"bạn thân\" đến \"yêu\" bỗng nhiên sao thật dài\n\nchẳng 1 ai dám nói ra\nthả trôi vụn tình kia rất xa\nthì thôi ta đành mang tâm tư vào bài ca",
+      "id": "1780672442345",
+      "brief": "Bài hát oke\r\n- nghe được\r\n--Giọng Nam nữ oke\r\n--Giọng Nam nữ oke\r\n--Giọng Nam nữ oke",
+      "isReleased": true
+    },
+    {
+      "password": "",
+      "audioUrl": "/uploads/1780677833785-950549488.mp3",
+      "slug": "xa-mat-chang-cach-long",
+      "title": "Xa Mặt Chẳng Cách Lòng",
+      "createdAt": 1780677880890,
+      "template": "6",
+      "author": "",
+      "status": "public",
+      "composer": "A.C Xuân Tài",
+      "secretKey": "47fdc644bd0147bf",
+      "releaseYear": "2026",
+      "backgroundUrl": "/uploads/1780677963271-665809308-1780677963420.webp",
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "isReleased": true,
+      "id": "1780677880890",
+      "lyrics": "Verse 1:\nNắng đã lên\nAnh thì đã dậy rồi\nEm giờ đã dậy chưa hay ngủ nữa\nMới đó mà\nĐã nhiều tiếng trôi qua\nMới gặp mà cứ ngỡ yêu xa\n\nEm sửa sang đầu tóc\nXong thì em make up\nSao nhìn như gấu trúc thế này\nChắc tại thức khuya mãi\nKhông tại anh thì ai\nCứ chuyện trò cả đêm lệch hết múi giờ\n\nSao vừa xa mà đã nhớ thế này\nTâm hồn trên chín tầng mây, em không biết đâu, tại anh đấy\nMong gần nhau để được nhõng nhẽo này, được nắm tay\nThích anh nuông chiều, mong anh ở đây\n\nXa mặt nhưng mà chẳng hề cách lòng,\nChỉ là thiếu chút hơi ấm\nKhi đêm xuống đông dài lạnh căm\nXa mặt nhưng mà chẳng hề cách lòng\ndù nhớ mong\nLắng nghe hai nhịp tim đang cùng đập\n\nVerse 2:\nOh baby cứ xa là nhớ, anh mong anh cứ đếm từng giờ, em tan ca sẽ thấy anh chờ\nThấp thoáng bóng dáng em đằng xa, thấy anh cười tít mắt bước ra , vui như em bé nhận được quà\n\nLeo lên xe nhanh nhanh anh vút ga\nĐã thấy lâu dẫu chỉ mới hôm qua\nChỉ mong đường về nha cứ thế thêm xa để mình gần nhau mãi\n\nNhìn bầu trời đẹp tựa một bức tranh\nTrên con đường từng ngọn đèn lấp lánh\nVì có em có anh, mãi luôn song hành\n\nChẳng cần nói, chỉ cần em cảm nhận thôi\nAnh chỉ mong rằng em luôn mỉm cười\nDù khi mình không gần nhau, hay dù anh chẳng thể thật nhanh tìm đến em khi em giận dỗi\nGiữa thành phố, có một đôi môi kề môi,\nMong thời gian ngừng trôi để ta gần nhau nhiều thêm chút nữa thôi, người ơi\nÔi trời khuya rồi ha, thôi đành phải chia xa đưa em về nhà\n\nChorus :\nSao vừa xa mà đã nhớ thế này\nTâm hồn trên chín tầng mây, em không biết đâu, tại anh đấy\nMong gần nhau để được nhõng nhẽo này, được nắm tay\nThích anh nuông chiều, mong anh ở đây\n\nXa mặt nhưng mà chẳng hề cách lòng,\nChỉ là thiếu chút hơi ấm\nKhi đêm xuống đông dài lạnh căm\nXa mặt nhưng mà chẳng hề cách lòng\ndù nhớ mong\nLắng nghe hai nhịp tim đang cùng đập\n\nSao vừa xa mà nỗi nhớ đến nhanh\nMỗi dòng tin nhắn từ anh\nLàm thế giới em ngập màu xanh\nĐôi lần em giận anh cũng bởi thèm được dỗ dành\nChỉ mong sao được ôm trong lòng anh\n\nXa mặt nhưng mà chẳng hề cách lòng,\nChỉ là thiếu chút hơi ấm\nKhi đêm xuống đông dài lạnh căm\nXa mặt nhưng mà chẳng hề cách lòng\ndù nhớ mong\nLắng nghe hai nhịp tim đang cùng đập\n\nending:\nMỗi ngày xa là thử thách chúng mình cùng bước qua\nkhoảng cách xa nhưng tình yêu chưa từng xa",
+      "singer": "A.C Xuân Tài, Bảo Trâm Ryy",
+      "isDraft": false,
+      "coverUrl": "/uploads/1780677871567-341047636-1780677871567.webp",
+      "achievements": []
+    },
+    {
+      "createdAt": 1780677038417,
+      "template": "11",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "author": "",
+      "secretKey": "2c0ab685b28a6314",
+      "releaseYear": "2026",
+      "backgroundUrl": "",
+      "password": "",
+      "audioUrl": "/uploads/1780677246609-324651776.mp3",
+      "slug": "tinh-het-em-tan",
+      "title": "Tình Hết Đêm Tàn",
+      "coverUrl": "/uploads/1780677020959-242270443-1780677020960.webp",
+      "isDraft": false,
+      "achievements": [],
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "isReleased": true,
+      "lyrics": "Verse:\nBa chai khiến anh mơ hồ\nLạc trong miên man những nỗi nhớ\nTừng vụn tình đã xác xơ\nCòn anh cứ chẳng tin vẫn ôm đợi chờ\nCòn nhiều bỡ ngỡ\ntừng ngày chơ vơ\nSao không nói ra cứ mập mờ\nCuộc tình lỡ cỡ\nTỉnh tỉnh mơ mơ\nSau bao lần đau vẫn chưa ngừng khờ\n\nĐêm ơi chớ có chóng tàn\nĐể hơi men cho tim anh được thở than\nĐêm ơi đêm có thấy không\nChẳng ai bên cạnh ta ngoài ly rượu nồng\nBầu trời quá lớn\nMột người cô đơn\nBao nhiêu ký ức đến từng cơn\nĐời đùa quá trớn\nCòn gì cay hơn\nNhưng ai cũng phải lớn\n\nPre:\nBuông lơi thân trôi, anh rơi giữa đêm chơi vơi\nTim ơi, đừng tiếc nuối, vì em sẽ quên nhanh thôi\n\nChorus:\nTrăng lên sáng, nhớ đến nàng\nCon tim vỡ nát dưới ánh vàng\nDư vị trên môi anh đắng chát\nTừng giọt sầu tràn ngập không gian\n\nEm nay khuất xa chân trời\nTheo cuộc sống mới em mong đợi\nAnh lạc trong ký ức miên man\nGiữa thành phố cơn say mơ màng\ntình hết đêm tàn\n\nDrop ( house )\n\nVerse 2:\nMập mờ, tỉnh rồi mơ\nMình thì chờ, nàng thì bỏ lại mình rồi bơ\nLiêu xiêu giữa con phố, tự giận mình vì già đầu rồi mà vẫn còn ngố\nCó những tiếng thầm thi\nCứ phải tiếc làm gì\nQuên chuyện tình ấy đi\nCó những tiếng ồn ào\nKhiến lòng ta cồn cào\nKhiến đầu ta nghĩ suy\n\nCứ mong manh mình mập mập mờ mờ,\nrồi lại\nNhức đầu như đang chơi một bàn cờ\nthôi đành\nCất đi một cuộc tình trót lầm lỡ\nkhi trời sáng\nSẽ không nghĩ không nhắc đến nữa\n\npre:\nTình tàn đêm cũng tan chỉ còn mình ta vương sầu\nTừng giọt cay đắng môi ngỡ xoa dịu đi nỗi đau\nĐời đâu có mấy khi dễ như mình vẫn mong cầu\nNhiều khi kết thúc nhanh vẫn hơn để lún quá sâu\n\nChorus:\nTrăng lên sáng, nhớ đến nàng\nCon tim vỡ nát dưới ánh vàng\nDư vị trên môi anh đắng chát\nTừng giọt sầu tràn ngập không gian\n\nEm nay khuất xa chân trời\nTheo cuộc sống mới em mong đợi\nAnh lạc trong ký ức miên man\nGiữa thành phố cơn say mơ màng\ntình hết đêm tàn\n\nDrop ( house )",
+      "id": "1780677038417",
+      "singer": "A.C Xuân Tài"
+    },
+    {
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "isReleased": true,
+      "lyrics": "verse:\nLại một ngày nữa tâm tư ngổn ngang\nLiệu mình nên cố thêm hay dừng lại\nDẫu biết rằng\nEm chỉ tìm anh lúc buồn\nMà sao vẫn cứ hi vọng\n\nTừng dòng suy nghĩ níu đôi bàn chân\nThà rằng dứt khoát một lần để không ân hận\nĐể anh bước đi không còn phân vân\nCuộc tình này, anh biết chẳng có cơ hội cho anh nữa\nĐành mang hết tâm ý, trả em cho người em thương\nchorus:\nTạm biệt tình đơn phương\nTạm biết một điều ước anh không có được\nTạm biệt những ký ức quá đỗi thân thuộc\nGiờ thì anh sẽ chọn cô đơn, còn em chọn người tốt hơn\nTừng hạt mưa đang rơi\nChuyện mình cũng kết thúc ở đây mất rồi\nChờ ngày mưa sẽ hết nắng lên cuối trời\nNgày mà hai chúng mình nếu bất chợt nhìn thấy nhau\nCả hai vẫn sẽ mỉm cười\n\nverse:\nDù rằng người ấy không phải là anh\nDù rằng năm tháng sau ngày sẽ không chung đường\nThật tâm chúc em luôn được yêu thương\nDù một người khác sẽ thay anh trên hành trình sắp tới\nAnh vẫn thấy may mắn, khi đã từng bên cạnh em thôi\nchorus:\nTạm biệt tình đơn phương\nTạm biết một điều ước, anh không có được\nTạm biệt những ký ức quá đỗi thân thuộc\nGiờ thì anh sẽ chọn cô đơn, còn em chọn người tốt hơn\nTừng hạt mưa đang rơi\nChuyện mình cũng kết thúc ở đây mất rồi\nChờ ngày mưa sẽ hết nắng lên cuối trời\nNgày mà hai chúng mình nếu bất chợt nhìn thấy nhau\nCả hai vẫn sẽ mỉm cười\n\nBridge:\nAnh sẽ ôm lấy những tháng ngày tuyệt vời ấy\nDù em chẳng bao giờ biết đã có người yêu em như vậy\nVì khi đã chân thành yêu\nChỉ mong được thấy người mình yêu hạnh phúc\n\nEnding:\nTạm biệt người anh thương\nTạm biệt em cô gái nắng mưa thất thường\nTạm biệt từng tin nhắn lúc không ngủ được\nDù rằng ta sẽ chẳng thành đôi\nnhưng rồi ai cũng sẽ ổn thôi\nTừng hạt mưa đang rơi\nChuyện mình cũng kết thúc ở đây mất rồi\nChờ ngày mưa sẽ hết nắng lên cuối trời\nNgày mà hai chúng mình nếu bất chợt nhìn thấy nhau\nCả hai vẫn sẽ mỉm cười",
+      "id": "1780676677123",
+      "singer": "A.C Xuân Tài",
+      "coverUrl": "/uploads/1780676527266-936783501-1780676527276.webp",
+      "isDraft": false,
+      "achievements": [],
+      "password": "",
+      "audioUrl": "/uploads/1780676629891-87560308.mp3",
+      "slug": "tam-biet-tinh-on-phuong",
+      "title": "Tạm Biệt Tình Đơn Phương",
+      "createdAt": 1780676677123,
+      "template": "7",
+      "status": "public",
+      "composer": "A.C Xuân Tài, Huỳnh Toàn",
+      "author": "",
+      "secretKey": "cefa06058d123fc6",
+      "releaseYear": "2026",
+      "backgroundUrl": "/uploads/1781359768617-879790203-1781359768647.webp"
+    },
+    {
+      "title": "Một Thời Khắc Khác (OST Hoàng Tử Quỷ)",
+      "slug": "mot-thoi-khac-khac-ost-hoang-tu-quy",
+      "audioUrl": "/uploads/1780673130959-121652462.mp3",
+      "password": "",
+      "backgroundUrl": "",
+      "releaseYear": "2025",
+      "secretKey": "824223343316e77e",
+      "author": "",
+      "composer": "A.C Xuân Tài, DT Tập Rap",
+      "status": "public",
+      "template": "3",
+      "createdAt": 1780673154283,
+      "singer": "A.C Xuân Tài, DT Tập Rap",
+      "id": "1780673154283",
+      "lyrics": "Verse 1:\nTrong thế gian vội vã, đâu biết ai cùng ta trọn đời\nAnh cứ như chàng ngốc, ôm giấc mơ viển vông xa xôi\nDuyên khiến ta gặp gỡ, cũng khiến anh vụn vỡ ngậm ngùi\nMây của trời\nChỉ ghé ngang anh một thời\n\nGiá như em chẳng cười trong lần anh bước tới\nChưa kịp lưu luyến, chưa kịp thương mến, không ai mở lời\nGiá như ta biết nhau vào một thời khắc khác\nNgày chẳng có vấn vương gì\nDuyên lỡ rồi\nHẹn kiếp sau\nTa gặp lại\n\nBao lâu con tim như tù đày\nMịt mờ sương, lang thang như kẻ mù vậy\nMột nhành cây một loài hoa\nNgười vội đến, rồi vội xa\nChỉ vì một nụ cười năm ấy\nMà ta dành cả đời đắm say\nRồi một ngày người vụt bay hoà vào làn mây\nDù cho đau ta vẫn mơ ánh mắt hững hờ\nThiên ngôn lửng lơ sao ta vẫn chờ\nTự tạo dựng bức màn như một cái cớ\nDuyên đành nợ vì ta mãi dại khờ\nSợi tơ hồng đứt đoạn vẫn chưa đủ hay sao\nNhất niệm tâm bất loạn tơ vương cứ bay cao\nMôi này nở nụ cười, nhưng lòng đang xiết đau\nKiếp này lỡ phụ người, xin hẹn nàng kiếp sau\n\nVerse 2:\nBầu trời màu tối đen, ta vẫy vùng giữa bóng đêm\nCô độc vọng sương tàn, nguyệt khuyết\nChẳng cần điều gì lớn lao phi thưởng\nTa cũng chỉ khao khát yêu thương\nCảm xúc đâu có lỗi, chỉ thoáng khắc thôi\nẨn náu góc tối một mình cũng quen rồi\nBàn tay trót lầm lỡ, chìm đắm giấc mơ\nTrở về một thực tại tan vỡ\n\nGiữa mênh mông đất trời, không một ai dẫn lối\nMây mù giăng kín, nỗi sầu câm nín, xác xơ niềm tin\nGiá như ta tái sinh, vào một thời khắc khác\nNgày ta có những yên bình\nTa có người\nNgười có ta\nsuốt cuộc đời\n\nChorus 3:\nGiá như em chẳng cười trong lần anh bước tới\nChưa kịp lưu luyến, chưa kịp thương mến, không ai mở lời\nGiá như ta biết nhau vào một thời khắc khác\nNgày chẳng có vấn vương gì\nDuyên lỡ rồi\nHẹn kiếp sau\nTa gặp lại",
+      "isReleased": true,
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "achievements": [],
+      "isDraft": false,
+      "coverUrl": "/uploads/1780673302881-21057417-1780673302885.webp"
+    },
+    {
+      "singer": "A.C Xuân Tài",
+      "lyrics": "Một non sông gấm hoa, Bắc Trung Nam về chung một nhà\nLòng tự hào xiết bao, Khắp nơi nơi ngập sắc cờ sao\nBản hùng ca cất lên, chiến công ngàn đời sau ghi khắc\nVẻ vang đất trời, Rạng rỡ quê hương Việt Nam\n\nNhững con đường mới, những công trình mới, những đôi mắt rạng ngời\nTừ miền quê tới đảo ngoài khơi, bình yên trong tiếng cười\nNhững điều thường thấy, đã được đổi lấy, bởi xương máu bao người\nChàng trai cô gái tuổi đôi mươi, chẳng ngại hi sinh cuộc đời\n\nKiên dũng, những binh đoàn, luôn nhìn về phía trước\nBất khuất, không nản lòng, quyết băng sông, vượt núi cao\nTrường Sơn vẫy tay chào, cây rừng che tháp pháo\nGiữa bom đạn muôn trùng gian lao, phất ngọn cờ bay cao\n\nChorus:\nMột non sông gấm hoa, Bắc Trung Nam về chung một nhà\nLòng tự hào xiết bao, Khắp nơi nơi ngập sắc cờ sao\nBản hùng ca cất lên, chiến công ngàn đời sau ghi khắc\nVẻ vang đất trời, Rạng rỡ quê hương Việt Nam\n\nLời 2:\nNước ta từ ấy, đã thật đổi thay, vươn tầm tóc từng ngày\nChẳng còn tiếng súng, trời quang mây, bồ câu tung cánh bay\nVua Hùng dựng nước, chiến công đời trước, mãi trong trái tim này\nĐể ta êm ấm ngày hôm nay, triệu người ngã xuống nơi đây\n\nMưa nắng, gió bạc đầu, quân và dân vẫn bước\nHiên ngang, trong bão đạn, khiến bao quân thù khiếp kinh\nĐược sống giữa thời bình, nhớ ơn một thời chiến chinh\nDưới cờ đỏ sao vàng phấp phới, truyền thống anh hùng tiếp nối\n\nMột non sông gấm hoa, Bắc Trung Nam về chung một nhà\nLòng tự hào xiết bao, Khắp nơi nơi ngập sắc cờ sao\nBản hùng ca cất lên, chiến công ngàn đời sau ghi khắc\nVẻ vang đất trời, Rạng rỡ quê hương Việt Nam\n\nMàu cờ đỏ thắm tươi, thấm oai linh hùng anh một thời\nCùng chung tay đắp xây, đất nước ta vị thế đổi thay\nĐể Việt Nam tiến lên, vững cơ đồ vươn ra thế giới\nVẻ vang đất trời, Rạng rỡ quê hương Việt Nam",
+      "id": "1780677641340",
+      "isReleased": true,
+      "playlistIds": [],
+      "achievements": [],
+      "coverUrl": "/uploads/1780677635556-818122780-1780677635557.webp",
+      "isDraft": false,
+      "title": "Vẻ Vang Việt Nam",
+      "slug": "ve-vang-viet-nam",
+      "audioUrl": "/uploads/1780677624674-303607327.mp3",
+      "password": "",
+      "backgroundUrl": "",
+      "releaseYear": "2025",
+      "secretKey": "a97c43131d973a72",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "template": "8",
+      "createdAt": 1780677641340
+    },
+    {
+      "title": "Anh Đã Tìm Được Em",
+      "password": "",
+      "slug": "anh-a-tim-uoc-em",
+      "audioUrl": "/uploads/1780682899122-678833006.mp3",
+      "secretKey": "70e37f0a541cacd4",
+      "backgroundUrl": "",
+      "releaseYear": "2022",
+      "template": "12",
+      "createdAt": 1780682972309,
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "author": "",
+      "lyrics": "V1:\nAnh đã tìm được em, giữa thế gian bao người\nNgay từ giây phút ấy, khi mà anh trông thấy em cười\nNgày rồi lại ngày trôi, anh nghĩ suy rất nhiều\nMong một ngày em sẽ, đáp lại anh một tiếng yêu\n\nMình sánh đôi chỉ thế thôi cũng khiến tim bồi hồi\nGiữa nắng mai là bóng hai đứa mình kề vai\nĐường có xa thì chúng ta vẫn vui khi gần nhau\nCòn bé con mà đã mơ lúc bạc đầu\n\nĐK\n\nĐể anh làm gió nâng niu em mỗi ngày\nCho anh làm cơn mưa nhẹ vương tóc em bay\nChờ khi mình lớn bầu trời xanh hơn\nTa sẽ về cùng nhau một nhà\n\nV2\nNhớ không em, lần đầu gặp nhau, mình ngại ngùng bỡ ngỡ\nAnh chẳng nghĩ chúng ta như là bây giờ\nNhớ không em, lần đầu cầm tay, mình thẹn thùng vẩn vơ\nKhiến em lỡ mang nhiều mộng mơ\n\nMình sánh đôi chỉ thế thôi cũng khiến tim bồi hồi\nGiữa nắng mai là bóng hai đứa mình kề vai\nĐường có xa thì chúng ta vẫn vui khi gần nhau\nCòn bé con mà đã mơ lúc bạc đầu\n\nĐK\n\nĐể anh làm gió nâng niu em mỗi ngày\nCho anh làm cơn mưa nhẹ vương tóc em bay\nChờ khi mình lớn bầu trời xanh hơn\nTa sẽ về cùng nhau một nhà\n\nĐK\n\nĐể anh làm gió nâng niu em mỗi ngày\nCho anh làm cơn mưa nhẹ theo gió vút bay\nChờ khi mình lớn bầu trời xanh hơn\nTa sẽ về cùng nhau một nhà\n\nAnh sẽ về cùng em một nhà",
+      "id": "1780682972309",
+      "isReleased": true,
+      "singer": "A.C Xuân Tài",
+      "playlistIds": [
+        "1780780976185"
+      ],
+      "achievements": [],
+      "isDraft": false,
+      "coverUrl": "/uploads/1780682961297-646695165-1780682961313.webp"
+    },
+    {
+      "lyrics": "Verse:\nAnh muốn đưa em theo anh về quê được không\nCũng đã khá lâu rồi anh vẫn chưa về thăm\nTạm rời xa những xô bồ nơi này\nTạm quên buồn lo giày xéo ta bao ngày\n\nAnh muốn đưa em dạo quanh thành Vinh ngày nắng\nAnh muốn cho em nhìn ngắm thành Vinh ngày mưa\nĐược cùng nhau bước qua làn sương lạnh\nThành phố hiện lên mờ ảo giống bức tranh\n\nChorus:\nChầm chậm cùng anh êm đềm lướt qua nơi bình yên quê nhà\nMàu bằng lăng tím mềm ôm một thời thướt tha\nDòng Lam uốn lượn bao mùa mong nhớ\nDẫu ai xa vẫn chờ\n\nChầm chậm cùng anh êm đềm lướt qua những con phố xa xa\nCùng nhau ngắm nhìn những hàng quán xá tập nập người qua\nAnh ước em sẽ cảm nhận hết\nSẽ yêu nơi mà anh lớn lên\n\nCoda:\nAnh từng mơ khi mà anh lớn\nHai ta đã trưởng thành hơn\nSẽ đưa em cùng đi trốn\nVề quê anh ta dùng chung bữa cơm\n\nchududu\n\nBố mẹ anh chắc sẽ vui lắm\nMong đưa em về ra mắt\nÔng bà anh suốt ngày cứ nhắc\nSao bao năm chẳng thấy dẫn ai về\nÔng bà cũng đã già lắm rồi\n\nVerse 2:\nAnh muốn đưa em dạo qua đường Lê Hồng Phong\nNơi có thanh xuân anh còn mãi lưu trong lòng\nNgày nào anh vẫn đang còn thơ dại\nMà nay mạnh mồm đòi chăm sóc cho ai\n( cho em chứ ai )\n\nChorus:\nChậm chậm cùng anh êm đềm lướt qua nơi bình yên quê nhà\nMàu bằng lăng tím mềm ôm một thời thướt tha\nDòng Lam uốn lượn bao mùa mong nhớ\nDẫu ai xa vẫn chờ\n\nChầm chậm cùng anh êm đềm lướt qua những con phố xa xa\nCùng nhau ngắm nhìn những hàng quán xá tập nập người qua\nAnh ước em sẽ cảm nhận hết\nSẽ yêu nơi mà anh lớn lên\n\nCoda:\nBố mẹ anh chắc sẽ vui lắm\nMong đưa em về ra mắt\nÔng bà anh suốt ngày cứ nhắc\nSao bao năm chẳng thấy dẫn ai về\nchudodoo\n\nChorus:\nChậm chậm cùng anh êm đềm lướt qua nơi bình yên quê nhà\nMàu bằng lăng tím mềm ôm một thời thướt tha\nDòng Lam uốn lượn bao mùa mong nhớ\nDẫu ai xa vẫn chờ\n\nChầm chậm cùng anh êm đềm lướt qua những con phố xa xa\nCùng nhau ngắm nhìn những hàng quán xá tập nập người qua\nAnh ước em sẽ cảm nhận hết\nSẽ yêu nơi mà anh lớn lên\n\nEnd.\n\nAnh chẳng mong những điều to lớn đâu\nChỉ ước bên nhau đến mãi mãi về sau\nGật đầu nhé\nEm nhỏ bé\nAnh thề\nSẽ chở che em suốt cuộc đời",
+      "id": "1780683546375",
+      "isReleased": true,
+      "singer": "A.C Xuân Tài",
+      "playlistIds": [
+        "1780780976185"
+      ],
+      "achievements": [],
+      "coverUrl": "/uploads/1780683523950-523451745-1780683523957.webp",
+      "isDraft": false,
+      "title": "Chầm Chậm Cùng Anh",
+      "password": "",
+      "slug": "cham-cham-cung-anh",
+      "audioUrl": "/uploads/1780683527709-464341205.mp3",
+      "secretKey": "835054ba666a87ee",
+      "backgroundUrl": "",
+      "releaseYear": "2022",
+      "template": "13",
+      "createdAt": 1780683546375,
+      "status": "public",
+      "author": "",
+      "composer": "A.C Xuân Tài"
+    },
+    {
+      "password": "",
+      "audioUrl": "/uploads/1780954207452-310583835.mp3",
+      "slug": "vuot-vu-mon",
+      "title": "Vượt Vũ Môn",
+      "createdAt": 1780954240117,
+      "template": "17",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "author": "",
+      "secretKey": "9228c2f9818258d7",
+      "releaseYear": "2024",
+      "backgroundUrl": "",
+      "playlistIds": [],
+      "isReleased": true,
+      "id": "1780954240117",
+      "lyrics": "Verse ( Mai Xuân Thứ ):\nLại thêm một cuốn vở hết trang sau đêm dài thức trắng\nVẫn sáng ánh đèn bàn giữa căn phòng vắng\nTừng kỳ thi cứ nối tiếp nhau, những ngày lo lắng\nVẫn thế không nản lòng, dẫu mưa, dù nắng\n\nPrechorus ( A.C Xuân Tài ):\nNhìn lại mình đã cố gắng bao lâu rồi\nChỉ còn một chút nữa thôi\nNiềm tin trong tim vẫn luôn sục sôi\nMột lần rực rỡ sau tháng năm miệt mài\nDù vinh quang hay có thất bại\nthì thanh xuân chẳng một phút giây phí hoài\n\nChorus:\nMình cùng chinh phục thử thách cuối\nĐích đến kia đã rất gần rồi\nĐiều kỳ diệu sẽ tới, xứng đáng với những cố gắng, những giọt mồ hôi\n\nRồi một ngày bình minh sáng chói\nVượt vũ môn bay lên bầu trời\nNở nụ cười chiến thắng, bước lên hiên ngang ghi danh trên đỉnh cao, đầy tự hào\n\nVerse 2 ( Pittu Quyên ):\nSẽ ổn thôi, hãy tự tin lên\nChông gai chỉ khiến ta mạnh mẽ thêm\nHãy vươn đến những ước mơ mà ta đã nỗ lực ngày đêm\nKhông phụ lòng mẹ cha, thầy cô dạy dỗ ta\nKhông phụ lòng bản thân đêm ngày cố gắng\nHãy cứ khát khao, dù kết quả thế nào\nthì mai này khi nhìn lại vẫn khiến ta tự hào\n\nChorus:\nMình cùng chinh phục thử thách cuối\nĐích đến kia đã rất gần rồi\nĐiều kỳ diệu sẽ tới, xứng đáng với những cố gắng, những giọt mồ hôi\n\nRồi một ngày bình minh sáng chói\nVượt vũ môn bay lên bầu trời\nNở nụ cười chiến thắng, bước lên hiên ngang ghi danh trên đỉnh cao, đầy tự hào\n\nCoda:\nTa đã trải qua, một hành trình dài với những mệt nhoài\nCó những khoảnh khắc, muốn gục ngã nhưng đã kịp đứng dậy vươn vai\n\nNhững giọt mồ hôi rơi trên trang sách những lúc ôn bài\nSẽ đánh đổi cho, những giọt nước mắt rơi xuống khi thất bại\n\nHãy vững niềm tin, vì bạn mạnh mẽ hơn thế rất nhiều\nHẹn gặp lại, ngày cá chép vượt vũ môn hóa rồng\n\nChorus:\nMình cùng chinh phục thử thách cuối\nĐích đến kia đã rất gần rồi\nĐiều kỳ diệu sẽ tới, xứng đáng với những cố gắng, những giọt mồ hôi\n\nRồi một ngày bình minh sáng chói\nVượt vũ môn bay lên bầu trời\nNở nụ cười chiến thắng, bước lên hiên ngang ghi danh trên đỉnh cao, đầy tự hào",
+      "singer": "A.C Xuân Tài, Mai Xuân Thứ, Pittu Quyên",
+      "coverUrl": "/uploads/1780954140473-595935727-1780954140486.webp",
+      "isDraft": false,
+      "achievements": []
+    },
+    {
+      "achievements": [
+        {
+          "value": "1M",
+          "type": "spotify_streams"
+        },
+        {
+          "type": "tiktok_viral",
+          "value": ""
+        },
+        {
+          "type": "youtube_views",
+          "value": "550K"
+        }
+      ],
+      "isDraft": false,
+      "coverUrl": "/uploads/1781271774586-883003977-1781271774589.webp",
+      "isReleased": true,
+      "id": "1781271829196",
+      "lyrics": "Mew:\nCòn điều gì để ta nhớ nữa\nCòn điều gì đằng sau cơn mưa\nMà gieo vấn vương đến bây giờ\n\n\nVậy là chuyện mình đã kết thúc\nVào một chiều nhẹ nhàng không mây\nNghẹn ngào nói câu chia tay\n\n\nNhiều người vẫn nói\nCó tình nào chẳng tan đâu\nCòn bao điều dang dở ta chẳng kịp với nhau\n\n\nNgày lại ngày trôi\nNỗi buồn chẳng thể thêm vơi\nChỉ tiếc một câu giờ lỡ nhau cả một đời\n\n\nĐã bao nhiêu lần yêu đậm sâu\nĐã bao nhiêu lần nhớ, muộn sầu\nĐã bao nhiêu đêm về bàn tay em khoác lên đôi bờ vai này\nĐã bao nhiêu lần ta giận nhau\nTừng là tất cả cớ sao lại cách xa\nChẳng ai hiểu ai\nChẳng ai nói thêm 1 lời\n\n\nA.C Xuân Tài\nĐêm cô đơn con tim anh đau hơn đôi môi run theo cơn mưa ướt đẫm vai\nCố níu lấy những ký ức lúc ấy đã quý giá biết mấy, đến khi mệt nhoài\nAnh ước gì\nChẳng phải vì\nMột phút lầm lỡ thế thôi mà bỏ lỡ nhau\n\n\nEm ơi anh nhớ lắm\nBàn tay anh ta em đã nắm\nSẽ quên anh như chẳng còn tồn tại\nHằn sâu trong tìm những vết cắt không phai\nvà sẽ mãi chẳng thể lành lại\nPhải chăng câu chuyện ta đành an bài\n\nChorus:\nĐã bao nhiêu lần yêu đậm sâu\nĐã bao nhiêu lần nhớ, muộn sầu\nĐã bao nhiêu đêm về bàn tay em khoác lên đôi bờ vai này\nĐã bao nhiêu lần ta giận nhau\nTừng là tất cả cớ sao lại cách xa\nChẳng ai hiểu ai\nChẳng ai nói thêm 1 lời\n\nEnding:\nThế là ta đã xa thật sao\nNhững ký ức hôm nào.\nNắng chẳng bên cạnh mưa được sao ?\nDẫu có chút tiếc nuối ta vẫn quay bước\nDấu đí chút nước mắt tan về phía trên mi lần cuối ta quay đầu mỉm cười với nhau",
+      "singer": "Mew, A.C Xuân Tài",
+      "playlistIds": [],
+      "secretKey": "6758cf785071ad0c",
+      "releaseYear": "2023",
+      "backgroundUrl": "",
+      "createdAt": 1781271829198,
+      "template": "13",
+      "author": "",
+      "composer": "A.C Xuân Tài, Huỳnh Toàn",
+      "status": "public",
+      "title": "Đã Bao Lần",
+      "password": "",
+      "audioUrl": "/uploads/1781271772282-260316793.mp3",
+      "slug": "a-bao-lan"
+    },
+    {
+      "achievements": [
+        {
+          "type": "youtube_views",
+          "value": "6M"
+        }
+      ],
+      "coverUrl": "/uploads/1781272524992-681182480-1781272524993.webp",
+      "isDraft": false,
+      "singer": "(S)TRONG Trọng Hiếu",
+      "lyrics": "Verse:\nChạm vào một ánh mắt\nSay như ngàn tia nắng dịu êm\nChạm vào nụ cười em\nAnh quên đi mọi thứ trên đời\n\nChẳng thể nào cố giấu \nKhông thể nào ngừng nghĩ về em\nLà người duy nhất khiến anh yêu đến nổ tung.\n\nPre-Chorus:\nLại gần đây ôm anh thật lâu\nNhẹ nhàng bàn tay đan vào nhau\nMặc kệ thế giới chúng ta vô hình, tan biến trong nhau\n\nDù phải xa trăm năm biển sâu\nChỉ cần anh biết em đang ở đâu\nBuồn vui nước mắt cất trong anh này\nAnh vẫn ngay đây\n\nChorus:\nYêu là dù cả thế gian có quay lưng lại\nMình vẫn giữ tay nhau chẳng rời xa đâu\nTa cùng biến mất theo nhau tới tận cùng\nVà ở lại bên nhau thật lâu\n\nEm là điều quý giá nhất anh có trong đời\nGửi tặng trái tim này dành riêng em thôi\nAnh thả những nhớ thương theo gió lên trời \nRằng anh yêu em người ơi\nWe are invisible \n\nEnding:\nYêu là dù cả thế gian quay lưng lại\nYêu là dù cả thế gian quay lưng lại\nMình vẫn giữ tay nhau chẳng rời xa",
+      "id": "1781272664824",
+      "isReleased": true,
+      "playlistIds": [
+        "1781270950760"
+      ],
+      "backgroundUrl": "",
+      "releaseYear": "2019",
+      "secretKey": "32ca356f18e87e11",
+      "author": "",
+      "composer": "(S)TRONG Trọng Hiếu, Tăng Nhật Tuệ, A.C Xuân Tài",
+      "status": "public",
+      "template": "12",
+      "createdAt": 1781272664824,
+      "title": "Yêu Là... (Invisible)",
+      "slug": "yeu-la-invisible",
+      "audioUrl": "/uploads/1781272524919-159941576.mp3",
+      "password": ""
+    },
+    {
+      "title": "Học Tiếng Mèo Kêu",
+      "password": "",
+      "slug": "hoc-tieng-meo-keu",
+      "audioUrl": "/uploads/1781278909290-993767689.mp3",
+      "secretKey": "8481263a13338499",
+      "backgroundUrl": "",
+      "releaseYear": "2018",
+      "template": "5",
+      "createdAt": 1781279059083,
+      "status": "public",
+      "author": "",
+      "composer": "Tiểu Phan Phan, Tiểu Phong Phong, A.C Xuân Tài",
+      "id": "1781279059082",
+      "lyrics": "Chorus:\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm chỉ muốn ôm anh nhõng nhẽo\nAizo meo meo meo meo mèo\nỒ nhịp tim em bùm bum đập\nBời thầm yêu nụ cười xấu xa\nVì anh yêu em không nói\nNên em meo meo\nVerse:\nMỗi sáng sớm\nLuôn mong cái ôm của em\nThèm được giữ mãi\nNhững giây phút ở cạnh nhau\nEm quan trọng đến nhường nào\nAnh tin em biết cực kỳ rõ mà\nBởi em là nữ chính của đời anh\n\nNhưng đôi khi\nEm lười biếng như mèo kia\nThỉnh thoảng buồn chán\nSẽ phá đám chọc tức anh\nNhưng anh thì vẫn nhẫn nại\nVẫn luôn dịu dàng\nCho em xuyến xao\nVà em luôn mong ước\nLàm mèo con của anh\n\nChorus:\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm chỉ muốn ôm anh nhõng nhẽo\nAizo meo meo meo meo mèo\nỒ nhịp tim em bùm bum đập\nBời thầm yêu nụ cười xấu xa\nVì anh yêu em không nói\nNên em meo meo\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm mặc chiếc áo anh hay mang\nĐể mãi lưu giữ hương vị người\nThèm làm bé mèo con bên anh\nDúi đầu vào lòng anh ngủ say\nCùng nhau ta mơ\nGiấc mơ của chúng mình\n\nVerse 2:\nCó đôi khi\nEm lười biếng như mèo kia\nThỉnh thoảng buồn chán\nSẽ phá đám chọc tức anh\nNhưng anh thì vẫn nhẫn nại\nVẫn luôn dịu dàng\nCho em xuyến xao\nVà em luôn mong ước\nLàm mèo con của anh\n\nChorus:\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm chỉ muốn ôm anh nhõng nhẽo\nAizo meo meo meo meo mèo\nỒ nhịp tim em bùm bum đập\nBời thầm yêu nụ cười xấu xa\nVì anh yêu em không nói\nNên em meo meo\n\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm mặc chiếc áo anh hay mang\nĐể mãi lưu giữ hương vị người\nThèm làm bé mèo con bên anh\nDúi đầu vào lòng anh ngủ say\nCùng nhau ta mơ\nGiấc mơ của chúng mình\n\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm chỉ muốn ôm anh nhõng nhẽo\nAizo meo meo meo meo mèo\nỒ nhịp tim em bùm bum đập\nBời thầm yêu nụ cười xấu xa\nVì anh yêu em không nói\nNên em meo meo\n\nMình bắt chước loài mèo kêu nha\nKêu cùng anh méo meo meo meo\nEm mặc chiếc áo anh hay mang\nĐể mãi lưu giữ hương vị người\nThèm làm bé mèo con bên anh\nDúi đầu vào lòng anh ngủ say\nCùng nhau ta mơ\nGiấc mơ của chúng mình",
+      "isReleased": true,
+      "singer": "A.C Xuân Tài, Lý Phương Thanh",
+      "playlistIds": [],
+      "achievements": [
+        {
+          "type": "tiktok_viral",
+          "value": ""
+        },
+        {
+          "type": "youtube_views",
+          "value": "10M"
+        },
+        {
+          "value": "43.5M",
+          "type": "zing_streams"
+        }
+      ],
+      "coverUrl": "/uploads/1781279075333-425899897-1781279075336.webp",
+      "isDraft": false
+    },
+    {
+      "template": "7",
+      "createdAt": 1781295064041,
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "secretKey": "ca6f8be9152737d3",
+      "backgroundUrl": "",
+      "releaseYear": "2016",
+      "password": "",
+      "slug": "con-mua-tuoi-thanh-xuan-ost-thang-5-e-danh-",
+      "audioUrl": "/uploads/1781294924330-618371907.mp3",
+      "title": "Cơn Mưa Tuổi Thanh Xuân ( OST Tháng 5 Để Dành )",
+      "isDraft": false,
+      "coverUrl": "/uploads/1781294928740-48814498-1781294928741.webp",
+      "achievements": [
+        {
+          "value": "700K",
+          "type": "youtube_views"
+        }
+      ],
+      "playlistIds": [
+        "1780780944981",
+        "1781270950760"
+      ],
+      "lyrics": "Cơn mưa ùa về từng hạt ướt bay theo những đoạn đường\nXuyên qua màn mưa học trò tiễn nhau chia xa mái trường\nCô nữ sinh nhìn mưa thầm ước\nĐâu biết tôi đằng sau cứ ngó nghiêng\nNhư muốn nói điều gì còn dở dang\n\nSao quên ngày nào thuở còn nghĩ suy vu vơ dại khờ\nMỗi sáng đến lớp tìm hình bóng ai cứ thế mong chờ\nCó chút thương ẩn vào trang sách\nCó những nỗi niềm chẳng thể nói ra\nThời gian trôi làm sao níu giữ\n\nĐK:\nPhải chăng giọt mưa ngâu là lần cuối\nCủa khoảng thời gian trong veo xa rồi\nMột thời của những rung động bồi hồi\nTuổi xuân nơi anh có em chung đôi\n\nKhoảnh khắc gần nhau anh chưa từng nói\nTừng lời mà tim anh luôn khắc sâu\nTiếng em cười đã đi xa rồi\n\nĐa đi đa\n\nTôi ơi dại khờ thời gian cứ đi không sao tìm lại\nPhân vân làm chi để năm tháng qua cơn mơ thêm dài\nTrót nhớ thương để rồi xa mãi\nTrên chuyến xe cuộc đời vụt mất nhau\nNhư bong bóng tan theo những giọt mưa\n\nĐK:\nNếu như ngày ấy anh không lặng im\nChẳng để thời gian trôi qua vội vàng\nLiệu rằng người đi hay sẽ dừng lại\nHoàng hôn buông xuống sánh đôi bên ai\n\nMột mai gặp nhau có ai còn nhớ\nKỷ niệm ngày xưa bên nhau dưới mưa\nKhúc ca này, những tâm tư này\n\nĐi về đâu hỡi những ước hẹn\nNhững cái xoa đầu những nụ cười bẽn lẽn\nGiọt mưa rơi mang theo nhớ thương\nChẳng còn những phút bên nhau lúc tan trường\nTìm nơi đâu những kỷ niệm bé con.",
+      "id": "1781295064035",
+      "isReleased": true,
+      "singer": "Lynk Lee"
+    },
+    {
+      "isDraft": false,
+      "coverUrl": "/uploads/1781295311483-142359540-1781295311485.webp",
+      "achievements": [
+        {
+          "type": "youtube_views",
+          "value": "1.2M"
+        },
+        {
+          "value": "3M",
+          "type": "zing_streams"
+        }
+      ],
+      "playlistIds": [
+        "1781270950760",
+        "1780780944981"
+      ],
+      "lyrics": "Verse:\nAnh nhận ra chúng ta bỏ lỡ nhau rồi\nNay mình xa, mỗi người ở mỗi thế giới\nAnh nhận ra chúng ta bỏ lỡ duyên trời\nMưa nặng hạt, anh nhớ em không nguôi\n\nPre\nAnh còn nhớ em vẫn thường nép vai anh thì thầm bên tai\nTừng dòng ký ức khi xưa đâu dễ có thể nhạt phai\nLiệu rằng em nơi phương xa ấy có đang nhìn về nơi anh\nRồi lại ôm nỗi buồn, lệ rơi\n\nChorus:\nMình bỏ lỡ nhau rồi mảnh tình duyên nay vỡ đôi\nNgày tháng sau này không còn có em trong cuộc đời\nMàn đêm buông xuống anh ngẩn ngơ, chẳng dám tin rằng không còn em\nNhìn về đâu anh cũng thấy em, chỉ toàn em\n\nMình bỏ lỡ nhau rồi, lời hẹn năm xưa đã thôi\nMọi thứ vẫn đây, khung trời ấy, nhưng em đâu rồi ?\nTừng là tất cả trong nhau nhưng bây giờ, chỉ còn lại tiếc nuối\nMưa buồn cứ rơi theo từng nỗi nhớ người",
+      "id": "1781295442192",
+      "isReleased": true,
+      "singer": "Hải Nam",
+      "template": "11",
+      "createdAt": 1781295442192,
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "secretKey": "5fc4cc0ea5570454",
+      "backgroundUrl": "",
+      "releaseYear": "2020",
+      "password": "",
+      "slug": "bo-lo-nhau-roi-ost-hoang-quy-muoi-",
+      "audioUrl": "/uploads/1781295438980-778603199.mp3",
+      "title": "Bỏ Lỡ Nhau Rồi ( OST Hoàng Quý Muội )"
+    },
+    {
+      "template": "15",
+      "createdAt": 1781371801632,
+      "composer": "A.C Xuân Tài, Deus Tiến Đạt",
+      "author": "",
+      "status": "public",
+      "secretKey": "5450e3dda4362c45",
+      "backgroundUrl": "/uploads/1781371783376-265005231-1781371783379.webp",
+      "releaseYear": "2019",
+      "password": "",
+      "slug": "7-ty-nguoi",
+      "audioUrl": "/uploads/1781370124198-461785778.mp3",
+      "title": "7 Tỷ Người",
+      "isDraft": false,
+      "coverUrl": "/uploads/1781370186658-768173633-1781370186668.webp",
+      "achievements": [
+        {
+          "value": "1.6M",
+          "type": "youtube_views"
+        },
+        {
+          "type": "zing_streams",
+          "value": "5M"
+        }
+      ],
+      "playlistIds": [],
+      "id": "1781371801631",
+      "lyrics": "[Verse] \nThế giới có 7 tỷ người\nSao ẩn mình nơi đâu chẳng tìm được em ơi\nChờ em tận bao nhiêu mùa bánh chưng rồi\nMà sao anh chưa thấy em hỡi người\n( Em ở đâu )\nĐang ở đâu\n( Gấu ơi đang ở đâu )\n\nBắc thang lên hỏi ông trời\nÔng giấu người yêu con ở nơi nào ông ơi\nÔng trả lời duyên con chưa tới\nYêu đương gì, đời còn phơi phới\nChẳng phải tìm, tự dưng đến thôi \n\nNgỡ xa chân trời đầu ngờ ngay trước mắt\nBỗng đâu cô nàng cũng là bạn lâu năm\nĐánh rơi nụ cười\nLàm trái tim rối bời\nTrời ơi\n\n[Chorus]\nNgày thương tháng nhớ năm mong, về bên anh được không ?\nĐường duyên dẫu có long đong, nhưng tình anh vẫn mênh mông\n7 Tỷ người trên thế giới anh chỉ cần em thôi\nNhà còn bao việc mà anh vẫn thích em.\n\nVì anh cứ thế lông bông, nhiều mối tối nằm không,\nChạy đi khắp chốn nơi xa nên tìm em không ra\nChắc do duyên trời, lỡ thương em rồi\nGiờ anh sẽ nghĩ cách để thế giới thêm một cặp đôi\n\n[Drop]\n[Rap] ( Deus ):\nThế giới này có 7 tỷ người\nCho anh hỏi là em muốn trốn đâu?\nKhông trả lời mà em chỉ cười (à)\n5 Châu 4 bể kiểu gì chả gặp nhau\nEm nói là, ta chỉ nên làm bạn (oh nooo)\nAnh không thể để uổng phí (my babe)\nVì sân chơi cuộc tình anh muốn đơn giản\nĐã gặp được em là anh phải thuổng đi\nCuộc đời của anh sẽ là cuộc đời của em\nVà cuộc đời của ta sẽ là cuộc đời của nhau\nAi bảo em dám mang thương nhớ đến\nBây giờ mà không chịu là con tim sẽ úa màu\nEm có thể lừa anh, nói dối cả bố mẹ\nNhưng đâu thể bẻ lái được trái tim (trúng tim đen)\nKhoảnh khắc này là sao, em nói đi nào\nĐóng tâm trí lại ngay, để tình ta là thước phim\n\nVerse 2:\nSau bao năm anh mới thực sự mở lòng mình để ( đón thính bay vô )\nNếu em không chê anh sẽ gửi tặng em những yêu thương ( Siêu to khổng lồ )\nEm vẫn xinh xắn tuy\nthường chẳng gặp may mắn gì\nĐể tay đây anh nắm đi\nRồi cuộc đời em sẽ thắm vì \nAnh sẽ tới xóa tan đi những xui xẻo\n( Định mệnh của ta là phải có nhau )\nChỉ có những điều ngọt ngào và trong veo\nỞ bên em thôi\nChờ tiếng yêu cất lời\nTrời ơi\n\n[Chorus]\nNgày thương tháng nhớ năm mong, về bên anh được không ?\nĐường duyên dẫu có long đong, nhưng tình anh vẫn mênh mông\n7 Tỷ người trên thế giới anh chỉ cần em thôi\nNhà còn bao việc mà anh vẫn thích em.\n\nVì anh cứ thế lông bông, nhiều mối tối nằm không,\nChạy đi khắp chốn nơi xa nên tìm em không ra\nChắc do duyên trời, lỡ thương em rồi\nGiờ anh sẽ nghĩ cách để thế giới thêm một cặp đôi\n\n\n[Drop]",
+      "isReleased": true,
+      "singer": "A.C Xuân Tài, Deus Tiến Đạt"
+    },
+    {
+      "password": "",
+      "audioUrl": "/uploads/1781371878313-38165480.mp3",
+      "slug": "7-ty-nguoi-solo-version-",
+      "title": "7 Tỷ Người ( OST Who Are You )",
+      "createdAt": 1781371954287,
+      "template": "10",
+      "author": "",
+      "status": "public",
+      "composer": "A.C Xuân Tài",
+      "secretKey": "bacbb109541c823a",
+      "releaseYear": "2022",
+      "backgroundUrl": "/uploads/1781371887968-940144017-1781371887971.webp",
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "isReleased": true,
+      "id": "1781371954286",
+      "lyrics": "Thế giới có 7 tỷ người\nSao ẩn mình nơi đâu chẳng tìm được em ơi\nChờ em đợi em cũng đã lâu rồi\nMà sao anh chưa thấy em, hỡi người ơi\nĐang ở đâu\nEm ơi đang ở đâu\n\nBắc thang lên hỏi ông trời\nÔng giấu người yêu con ở nơi nào ông ơi\nÔng trả lời duyên con chưa tới\nYêu đương gì, đời còn phơi phới\nChẳng phải tìm, tự dưng đến thôi\n\nNgỡ xa chân trời đầu ngờ ngay trước mắt\nBỗng đâu một người khiến lòng ta bâng khuâng\nĐánh rơi nụ cười\nLàm trái tim rối bời\nTrời ơi\n\nNgày thương tháng nhớ năm mong, về bên anh được không ?\nĐường duyên dẫu có long đong, tình anh vẫn mênh mông\n7 Tỷ người trên thế giới anh chỉ cần em thôi\nNhà còn bao việc mà anh vẫn thích em.\n\nVì anh cứ thế lông bông, nhiều mối tối nằm không,\nChạy đi khắp chốn nơi xa nên tìm em không ra\nChắc do duyên trời, lỡ thương em rồi\nGiờ anh sẽ nghĩ cách để thế giới thêm một cặp đôi\n\nNhìn nắng ươm vàng, thả vào tóc em nhẹ nhàng\nAnh mơ màng nhìn theo ngỡ ngàng\nNày em đừng đi, để anh ngân nga tặng em\nMột vài khúc ca\n\nChữ duyên do trời, nhưng phận là do ta\nTính em chân thành không ghẹo nguyệt trêu hoa\nChỉ mong em cười\nVà mãi bên trọn đời\nNgười ơi\n\nNgày thương tháng nhớ năm mong, về bên anh được không ?\nĐường duyên dẫu có long đong, nhưng tình anh vẫn mênh mông\n7 Tỷ người trên thế giới anh chỉ cần em thôi\nNhà còn bao việc mà anh vẫn thích em.\n\nVì anh cứ thế lông bông, nhiều mối tối nằm không,\nChạy đi khắp chốn nơi xa nên tìm em không ra\nChắc do duyên trời, lỡ thương em rồi\nGiờ anh sẽ nghĩ cách để thế giới thêm một cặp đôi\n\nNgày thương tháng nhớ năm mong, về bên anh được không ?\nĐường duyên dẫu có long đong, nhưng tình anh vẫn mênh mông\n7 Tỷ người trên thế giới anh chỉ cần em thôi\nNhà còn bao việc mà anh vẫn thích em.\n\nVì anh cứ thế lông bông, nhiều mối tối nằm không,\nChạy đi khắp chốn nơi xa nên tìm em không ra\nChắc do duyên trời, lỡ thương em rồi\nGiờ anh sẽ nghĩ cách để thế giới thêm một cặp đôi\n\nThế gian bao người anh chỉ thương một người\nGiờ anh sẽ nghĩ cách để thế giới thêm 2 người yêu nhau",
+      "singer": "A.C Xuân Tài",
+      "coverUrl": "/uploads/1781371885642-627081382-1781371885644.webp",
+      "isDraft": false,
+      "achievements": []
+    },
+    {
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "isReleased": true,
+      "id": "1781372762741",
+      "lyrics": "Verse:\nLạc giữa không gian của tuổi 18 ấy\nBình yên ngập tràn nụ cười chúng ta thơ ngây\nMột thời mộng mơ\nLấm lem dại khờ\nNhững gương mặt hồn nhiên trong chiều tan lớp\n\nMàu mắt em mang trọn một màu nỗi nhớ\nĐể tim của anh chợt rung khẽ theo vu vơ\nĐể rồi ngẩn ngơ\nCứ ngóng cứ chờ\nMột ngày chỉ vui khi nhìn thấy người\n\nChorus:\nGió vẫn hát thay anh từng lời yêu thương\nNhững con đường quen cũng đủ làm ai vấn vương\nNắng mưa cùng nhau đi khắp nơi hoà cùng gió trời\nTay anh này ngại gì em không nắm\n\nVà cậu bé ấy hằng ngày vẫn luôn mơ mỗi ngày lại bên em\nĐể luôn được ngắm nghía rồi nghịch tóc mềm\nCủa em công chúa nhỏ bé ơi\nNgười là thanh xuân đẹp nhất\nCủa anh một thời\n\nVerse 2:\nLà lúc đôi tay chợt chạm nhẹ đôi tay\nLà khi tựa đầu vào nhau ngắm bông heo may\nLà chiều hoàng hôn\nThấp thoáng 2 người\nThẹn thùng nhìn nhau cười ngẩn ngơ\n\nChorus:\nĐã có lúc anh mong ngừng thời gian trôi\nĐể không phải lớn ta được gần nhau mãi thôi\nCó anh sẻ chia bao nỗi buồn rồi cũng sẽ vơi\nVai anh này dựa vào đi em hỡi\n\nDù rằng mỗi khi ngồi cạnh nhau em thích bắt nạt và trêu anh\nCũng hay giận hờn và còn chọc tức anh\nMà anh không những không buồn mà còn thấy vui\nChỉ mình em được phép làm vậy thôi\nNhững tháng ngày dần trôi qua, niềm thương anh giữ trong lòng\nEm không biết dù ai cũng biết\n\nGió vẫn hát thay anh từng lời yêu thương\nNhững con đường quen cũng đủ làm ai vấn vương\nNắng gió đi cùng nhau đi suốt nẻo đường\nTay anh này ngại gì em không nắm\n\nVà cậu bé ấy hằng ngày vẫn luôn mơ mỗi ngày lại bên em\nĐể luôn được ngắm nghía rồi nghịch tóc mềm\nCủa em cô công chúa nhỏ bé ơi\nNgười là thanh xuân đẹp nhất\nCủa anh một thời",
+      "singer": "A.C Xuân Tài",
+      "isDraft": false,
+      "coverUrl": "/uploads/1781372557947-719256585-1781372557950.webp",
+      "achievements": [
+        {
+          "type": "youtube_views",
+          "value": "400K"
+        },
+        {
+          "value": "1.5M",
+          "type": "zing_streams"
+        }
+      ],
+      "password": "",
+      "audioUrl": "/uploads/1781372576688-761272685.mp3",
+      "slug": "nam-o-chung-ta-18-ost-nam-o-chung-ta-18-",
+      "title": "Năm Đó Chúng Ta 18",
+      "createdAt": 1781372762742,
+      "template": "7",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "secretKey": "f775e66da4d7654d",
+      "releaseYear": "2019",
+      "backgroundUrl": ""
+    },
+    {
+      "achievements": [],
+      "isDraft": false,
+      "coverUrl": "/uploads/1781372928123-867721998-1781372928126.webp",
+      "singer": "A.C Xuân Tài",
+      "isReleased": true,
+      "id": "1781373089417",
+      "lyrics": "verse:\nNếu chúng ta chưa từng gặp\nThì mọi thứ có lẽ tốt hơn\nEm lại hồn nhiên như ban đầu\nKhông còn trầm tư vì anh\n\nNếu chúng ta chưa từng gặp\nMỗi đêm về em không thao thức\nChẳng còn tủi thân hay khóc thầm \nmỗi khi anh không ở bên\n\nNếu khi xưa\nTiếng yêu chẳng ai bắt đầu\nNếu chẳng từng gieo thương nhớ \ntim sẽ chẳng đau\nChẳng phải xa nhau\n\nGiá như mình\nChưa gặp gỡ\nVà mọi thứ chỉ là cơn mơ\nNhững năm tháng qua chợt hoá chưa bao giờ\nChẳng ai vấn vương đợi chờ\n\nGiá như mình\nChẳng từng gặp gỡ thì giờ đây sẽ không ai nuối tiếc\nDòng người vô thường cứ cuốn trôi\nAnh ngẩn ngơ giữa góc phố ngày còn đôi\nCố gom những mảnh hồi ức\nTừng ngỡ như một đời\n\nverse 2:\nNếu chúng ta chưa từng gặp\nThì mọi thứ sẽ như trước kia\nEm lại nhìn cơn mưa đầu mùa\nMơ về một câu chuyện yêu\n\nNếu chúng ta chưa từng gặp\nSẽ xuất hiện một người tốt hơn\nChe chở em, thương em hết lòng\nSẽ không khiến em phải đau\n\nBước bao lâu\nCũng quay về nơi bắt đầu\nCuộc đời là những ngã rẽ không còn chạm nhau\nEm đang nơi đâu\n\nGiá như mình\nChưa gặp gỡ\nVà mọi thứ chỉ là cơn mơ\nTháng năm đã qua chợt hoá chưa bao giờ\nChẳng ai vấn vương đợi chờ\n\nChorus:\nGiá như mình\nChẳng từng gặp gỡ thì giờ đây sẽ không ai nuối tiếc\nDòng người vô thường cứ cuốn trôi\nAnh ngẩn ngơ giữa góc phố ngày còn đôi\nCố gom những mảnh hồi ức\nTừng ngỡ như một đời\n\nBridge:\nSẽ đến lúc vết thương kia lành\nVà em sẽ thôi đợi anh\nChúng ta của ngày sau chẳng còn đau lúc nghĩ về\nMột góc hồi ức đã xa\n\nChorus:\nGiá như mình\nChưa gặp gỡ\nVà mọi thứ chỉ như giấc mơ\nTháng năm đã qua chợt hoá chưa bao giờ\nChẳng ai, chẳng ai vương vấn\n\nGiá như mình\nChẳng từng gặp gỡ thì giờ đây sẽ không ai nuối tiếc\nDòng người vô thường cứ cuốn trôi\nAnh ngẩn ngơ giữa góc phố ngày còn đôi\nCố gom những mảnh hồi ức\nTừng ngỡ như một đời",
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "releaseYear": "2020",
+      "backgroundUrl": "",
+      "secretKey": "9287de6c74028e88",
+      "composer": "A.C Xuân Tài",
+      "author": "",
+      "status": "public",
+      "createdAt": 1781373089418,
+      "template": "12",
+      "title": "Nếu Chúng Ta Chưa Từng Gặp ( OST Hoàng Quý Muội )",
+      "audioUrl": "/uploads/1781373070901-808417654.mp3",
+      "slug": "neu-chung-ta-chua-tung-gap-ost-hoang-quy-muoi-",
+      "password": ""
+    },
+    {
+      "releaseYear": "2020",
+      "backgroundUrl": "",
+      "author": "",
+      "title": "Sau 30",
+      "linkType": "direct",
+      "audioUrl": "/uploads/1781373801706-51932447.mp3",
+      "password": "",
+      "achievements": [
+        {
+          "type": "youtube_views",
+          "value": "630K"
+        },
+        {
+          "value": "2.2M",
+          "type": "zing_streams"
+        }
+      ],
+      "coverUrl": "/uploads/1781373592731-842077938-1781373592732.webp",
+      "singer": "A.C Xuân Tài, MiiNa, Duy Andy",
+      "isReleased": true,
+      "linkSpotify": "",
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "linkZing": "",
+      "secretKey": "b7295273423d1dd7",
+      "status": "public",
+      "composer": "A.C Xuân Tài, Duy Andy",
+      "linkYoutube": "",
+      "createdAt": 1781373812928,
+      "template": "10",
+      "slug": "sau-30-2928",
+      "linkYoutubeMusic": "",
+      "isDraft": false,
+      "id": "1781373812928",
+      "lyrics": "Verse:\nSao cứ đứng đấy lặng thinh\nHay là lại vừa thất tình\nYêu đương gì mà cứ mấy bữa lại cãi nhau linh đình\n\nThôi quên anh ta dần đi\nXem ra cũng chẳng tốt gì\nĐời còn bao nhiêu con trai chẳng cần luyến tiếc làm gì\n\nPre:\nTrái đất này vẫn quay dù bà có khóc hay cười\nChỉ có tôi lo lắng thôi mỗi khi bà buồn hay vui\nDẫu nắng mưa, sớm trưa, buồn bực chi cứ nói tôi\nChẳng thể yên tâm khi nhìn thấy bà yếu đuối\n\nChorus:\nHay là...\nNếu như sau 30 hai ta vẫn cứ còn độc thân\nVậy thì bỏ cuộc đi thôi, số phận rồi, tốt nhất ta nên thành đôi\nVì\nNếu như sau 30 bà cứ nhất quyết không chịu tôi\nThì chẳng còn một ai trên đời thương bà hiểu bà nữa đâu\nBà sẽ ế suốt đời\n\nVerse 2:\nSáng sớm làm ly coffee\nĐến tối ăn bánh cookie\nTôi vẫn ổn mà chứ đâu như ai cứ đơn phương hoài\n\nNhưng sao ông không chịu nói\nCô ta đi mất rồi\nChẳng hiểu sao cứ phân vân để rồi mất đi cơ hội\n\nPre:\nChẳng có ai cứ hoài chờ đợi mãi một người\nKhi nghĩ ta chẳng thiết tha sẽ không khỏi lòng chơi vơi\nNếu lỡ mai, thích ai, cần lời khuyên cứ nói tôi\nChẳng thể yên tâm khi đời ông toàn tăm tối\n\nChorus:\nHay là...\nNếu như sau 30 hai ta vẫn cứ còn độc thân\nVậy thì bỏ cuộc đi thôi, số phận rồi, tốt nhất ta nên thành đôi\nVì\nNếu như sau 30 ông cứ nhất quyết không chịu tôi\nThì chẳng còn một ai trên đời thương ông hiểu ông nữa đâu\nÔng sẽ ế suốt đời\n\nRap:\nGiỡn thì giỡn á dị đó\nMà để tui nói điều này bà nghe nà (ahh)\nNam nữ thọ thọ bất tương thân\nLỡ đâu vương vấn tui cũng không biết đường mần\nNghe từ sáng rồi lại từ chiều\nNghe bà lý sự về nhiều điều\nTim thì cứ feel feel xíu xiu\nThôi chờ bà ế, sau 30 mới yêu\nKhuyên thì khuyên zậy thôi chứ ai mong\nSau 30 thì ai ngóng ai trông\nNếu tới đó mà bà vẫn ế chổng mông\nThì tui đây sẽ vẫn mong chờ bà động lòng\nSau 30 à, Sau 30 nha\nSau 30 mà chưa có bồ là tui xí à nghen\n\nChorus:\nNếu như sau 30 hai ta vẫn cứ còn độc thân\nVậy thì bỏ cuộc đi thôi, số phận rồi, tốt nhất ta nên thành đôi\nVì\nNếu như sau 30 cậu cứ nhất quyết không chịu tôi\nThì chẳng còn một ai trên đời thương cậu hiểu cậu nữa đâu\nCậu sẽ ế suốt đời\n\n\nAfter 30, if both of us are still alone\nSo let it be, it's destiny, the story of you and me\nCuz if after 30, your answer is still a \"No\"\nThere're no one in this world that know you like me\nYou'll be forever alone",
+      "linkApple": ""
+    },
+    {
+      "secretKey": "9aa927559e51cb99",
+      "releaseYear": "2020",
+      "backgroundUrl": "/uploads/1781463382016-749515989-1781463382020.webp",
+      "createdAt": 1781463152944,
+      "template": "12",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "title": "Phải Chăng Trưởng Thành Là Chia Ly",
+      "password": "",
+      "audioUrl": "/uploads/1781463068955-311829918.mp3",
+      "slug": "phai-chang-truong-thanh-la-chia-ly",
+      "achievements": [
+        {
+          "type": "zing_streams",
+          "value": "2.8M"
+        }
+      ],
+      "coverUrl": "/uploads/1781463063956-887500279-1781463063960.webp",
+      "isDraft": false,
+      "isReleased": true,
+      "id": "1781463152943",
+      "lyrics": "Verse 1:\nTôi ngày ấy, tôi một thời thơ ngây\nChiều hoàng hôn dần buông dõi theo làn tóc ai bay\nNiềm hạnh phúc nhỏ nhoi mỗi ngày\nLà được nhìn thấy em như vậy\nThương em thương cả khung trời mộng mơ\n\nEm ngày ấy, vô tư tựa những đám mây\nNgại ngùng bên cạnh anh, em kể chuyện nắng, chuyện mưa\nEm mong đừng lớn lên, sợ bỏ quên ta của ngày xưa\nĐể bàn tay anh, tay em chạm nhẹ mỗi trưa\n\nPre:\nGiữa những tháng năm êm đềm, là tôi mỗi chiều đợi em\nCố vờ như tình cờ đi chung trên đoạn đường thân quen\nĐôi khi tôi ôm đàn ngồi ngẩn ngơ nghĩ vài câu hát\nvề em, và tôi viết những dòng đầu tiên\n\nChorus:\nTự hỏi phải chăng trưởng thành là chia ly\nTừng giọt ký ức theo mưa cuốn đi\nTự hỏi những dại khờ năm ấy\nTại sao khiến tim đau đến như vậy\n\nGiấc mơ năm nào đành dở dang\nMàu hoàng hôn xưa phôi pha mùa cũ khuất xa\nGóc phố thênh thang người lại qua\nRiêng anh một mình lạc lõng giữa khung trời\nNhớ ai nhớ ai\nTại sao anh cứ hoài thương mãi một người\n\nVerse 2: \nXa rồi đấy, tháng năm dài theo gió bay\nChỉ còn anh và anh ôm từng nỗi nhớ đong đầy \nAi cũng phải lớn lên, chẳng còn ai của những ngày xưa\nGiờ bàn tay anh, tay em ngược đường nắng mưa \n\nGiữa thế giới bao nhiêu người, liệu em có còn đợi tôi\nNhư tôi đã ngờ nghệch đợi em suốt một thời xa xôi\nĐôi khi tôi tự nghĩ cuộc đời tôi như một tiểu thuyết\nmà em là người viết những dòng đầu tiên\n\nTự hỏi những con đường mình từng đi qua\nLiệu người quên chưa cơn mưa ướt nhoà\nTự hỏi sao tình đầu đẹp thế\nĐể sau biết bao lâu vẫn mơ về\n\nGiấc mơ năm nào đành dở dang\nMàu hoàng hôn xưa phôi pha mùa cũ khuất xa\nGóc phố thênh thang người lại qua\nRiêng anh một mình lạc lõng giữa khung trời\nNhớ ai nhớ ai\nTại sao anh cứ hoài thương mãi một người\n\nPhải chăng trưởng thành là chia ly\nNày mưa ngừng đi\nNhững dại khờ năm nào\nLà những giấc mơ anh còn mãi đi tìm\n\n~phiêu~\nTìm một giấc mơ dở dang\nMàu hoàng hôn xưa phôi pha mùa cũ khuất xa\nGóc phố thênh thang người lại qua\nRiêng anh một mình lạc lõng giữa khung trời\nNhớ ai mãi\n Phải chăng trưởng thành là chia ly",
+      "singer": "A.C Xuân Tài",
+      "playlistIds": []
+    },
+    {
+      "password": "",
+      "audioUrl": "/uploads/1781463861527-260382655.mp3",
+      "slug": "me-co-thay-khong",
+      "title": "Mẹ Có Thấy Không",
+      "createdAt": 1781463865638,
+      "template": "7",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "author": "",
+      "secretKey": "dd8217e0ede57161",
+      "releaseYear": "2025",
+      "backgroundUrl": "",
+      "playlistIds": [
+        "1781270950760"
+      ],
+      "isReleased": true,
+      "lyrics": "( Verse )\nKhi con vẫn còn nhỏ lắm\nMẹ thường hỏi con\nvề điều con mơ ước khi con lớn\nĐiều con ước, lúc ấy thật giản đơn\nChỉ ước sau này xinh như mẹ\nNgười con yêu nhất trên đời\n\nKhi con lớn thêm một chút,\nMẹ thường dặn con\nphải tự chăm sóc tốt cho bản thân\nVì mẹ lo, nếu lỡ mai này khi\nđến lúc mẹ phải xa con rồi\nThì con sẽ sống thế nào\n\n( Chorus )\nNgày tháng trôi nhanh,\nCon buộc phải học cách trưởng thành\nMột cuộc sống không còn có mẹ bên cạnh\nVà con tự thấy\nMình đã bước những bước dài thật đấy\nĐể chạm tới nơi này dưới ánh đèn kia\n\nMẹ có thấy không\nCon của mẹ đứng trước đám đông\nThật rạng rỡ với cặp mắt xinh như mẹ\nMẹ chờ con nhé\nCon sẽ bước những bước dài hơn thế\nThật tỏa sáng như ngàn ánh sao\nđể mẹ luôn luôn tự hào\n\n( Verse 2 )\n\nCon đã sống những ngày rất cô đơn,\nNhiều khi một mình con vẫn khóc khi đêm xuống\nTừng ký ức ấm áp của ngày xưa còn có mẹ ở bên\nQuá êm đềm,\nLàm con mạnh mẽ thêm\n\n( Chorus )\nNgày tháng trôi nhanh,\nCon buộc phải học cách trưởng thành\nMột cuộc sống không còn có mẹ bên cạnh\nVà con tự thấy\nMình đã bước những bước dài thật đấy\nĐể chạm tới nơi này dưới ánh đèn kia\n\nMẹ có thấy không\nCon của mẹ đứng trước đám đông\nThật rạng rỡ với cặp mắt xinh như mẹ\nMẹ chờ con nhé\nCon sẽ bước những bước dài hơn thế\nThật tỏa sáng như ngàn ánh sao\nđể mẹ luôn luôn tự hào\n\nEnding:\nDù lớn bao nhiêu\nVẫn một tình yêu, vẫn dõi theo\nVì con gái luôn nhỏ bé trong tim mẹ\nMẹ mong con sẽ\nChạm tới những ước mơ con từng vẽ\nThành công của con là ước mơ của mẹ\n\nMẹ có thấy không\nCon của mẹ đứng trước đám đông\nThật rạng rỡ với cặp mắt xinh như mẹ\nMẹ chờ con nhé\nCon sẽ bước những bước dài hơn thế\nThật tỏa sáng như ngàn ánh sao\nđể mẹ luôn luôn tự hào",
+      "id": "1781463865637",
+      "singer": "Ngọc Khánh Chi",
+      "coverUrl": "/uploads/1781463592255-47545952-1781463592263.webp",
+      "isDraft": false,
+      "achievements": []
+    },
+    {
+      "title": "Lời Ru Của Bà",
+      "audioUrl": "/uploads/1781464062602-887385558.mp3",
+      "slug": "loi-ru-cua-ba",
+      "password": "",
+      "releaseYear": "2021",
+      "backgroundUrl": "",
+      "secretKey": "ed5d2a85f610522f",
+      "composer": "A.C Xuân Tài",
+      "author": "",
+      "status": "public",
+      "createdAt": 1781464068807,
+      "template": "12",
+      "singer": "A.C Xuân Tài",
+      "isReleased": true,
+      "id": "1781464068806",
+      "lyrics": "Verse:\n1 2 3 mở ra bức tranh năm nào\nKhoảng trời xưa chờ tôi bước vào\nDưới nền nhà bập bõm đôi chân tôi dần tập bò tập đi\nBà bồng tôi dạo qua khắp nơi xóm làng\nCười giòn tan bà thương như cục vàng\nHồn nhiên cánh tay tôi vuốt tóc bà nhẹ nhàng\nRồi trưa cứ lim dìm với câu ca bà ru\n\nÀ ơi\nÀ à ơi\nMây trắng xa xa ruộng lúa bao la những cánh cò bay\n\nChorus:\nBà thương cháu trưa nay chẳng ngủ yên\nVì ve râm ran ve hát liên miên\nVì bố đi xa còn chưa về nhà\nCháu yêu ơi cháu hãy mau ngủ đi\n\nBà thương cháu tay bà chẳng nghỉ ngơi\nQuạt nan thong dong phơ phất bên nôi\nĐể cháu miên man vào giấc mơ xa\nCháu lớn nhanh đủ sức che chở bà\nBà ơi.\n\nLời 2\n\nVerse:\nRồi thời gian dần qua bức tranh phai nhoà\nMột mình tôi ở nơi rất xa\nBầu trời vẫn trong lành như giấc mơ ngày nào\nChỉ là vắng đi câu hát thân thương bà ru\n\nÀ ơi\nÀ à ơi\nCâu hát ngân nga theo cháu đi xa thế giới mở ra\n\nChorus:\nBà thương cháu bên đây chẳng người thân\nChẳng ai quan tâm lo lắng ân cần\nBữa sáng ra sao, liệu có quên ăn ?\nCháu yêu ơi, bà nhớ cháu nhiều lần\n\nBà thương cháu bao lâu chẳng về thăm\nBà lo nơi xa cuộc sống nhọc nhằn\nDù tháng năm trôi , dù lớn nhiều rồi\nCháu vẫn cứ, là cháu của bà thôi\nBà ơi",
+      "playlistIds": [],
+      "achievements": [],
+      "isDraft": false,
+      "coverUrl": "/uploads/1781464039126-409257318-1781464039128.webp"
+    },
+    {
+      "isDraft": false,
+      "coverUrl": "/uploads/1781464229841-827404143-1781464229843.webp",
+      "achievements": [
+        {
+          "type": "zing_streams",
+          "value": "3.1"
+        },
+        {
+          "type": "youtube_views",
+          "value": "150K"
+        }
+      ],
+      "playlistIds": [],
+      "isReleased": true,
+      "id": "1781464318350",
+      "lyrics": "Verse 1:\nNắng buông dần\nChỉ còn một mình anh giữa phố\nNhư mọi lần\nNgậm ngùi tìm về nơi xưa hẹn hò\n \nAnh nâng cung đàn\nThả trôi theo mây ngàn\nNhững khúc ca còn viết dở dang\n\nAnh mơ về\nKhoảng trời của dòng kỳ ức cũ\nTa ngồi kề\nCùng nhìn bầu trời nhắm mắt nguyện cầu\n\nEm mơ sau này\nMình luôn luôn như vậy\nMơ ngôi nhà nhỏ bé sum vầy\n\nChorus:\nVậy mà\nNgười theo gió mây\nCòn anh bơ vơ mãi nơi này\nMỗi phút giây\nDài thật dài chẳng thể nào khoả lấp đi hồi ức chúng ta đã từng\nNgôi nhà trong mơ giờ chẳng còn em nữa\n\nĐường xưa nhớ em \nGiờ đây xanh xao lá rơi nhiều\nAnh nhớ em\nNơi đâu quanh anh cũng đều thấp thoáng hình bóng em, khiến anh yếu mềm\nMưa thổn thức trong đêm\nĐể nỗi nhớ em nhiều thêm\n\nVerse 2:\nMột chiều mưa tầm tã\nMột người chia ly một người\nBàn chân ai đi vội vã\nLệ tràn mi nhưng gượng cười  \n\nThì thôi hai ta phải xa nhau rồi\nChẳng còn ai bên đời\nMỗi đứa ở hai phương trời\nBiết hay không người ơi\n\nNỗi nhớ đi theo anh bao nhiêu tháng ngày dài anh chẳng thể nào đếm hết\nKhúc hát anh đã viết mang mang tên ngôi nhà mà hai ta vẫn luôn từng mơ\nMột người thì vẫn mãi ngân nga\nMột người thì cất bước đi xa \nMột người vẫn thương\nMột người đã chẳng còn vấn vương\n\nChorus:\nVậy mà\nNgười theo gió mây\nCòn anh bơ vơ mãi nơi này\nMỗi phút giây\nDài thật dài chẳng thể nào khoả lấp đi hồi ức chúng ta đã từng\nNgôi nhà trong mơ giờ chẳng còn em nữa\n\nĐường xưa nhớ em \nGiờ đây xanh xao lá rơi nhiều\nAnh nhớ em\nNơi đâu quanh anh cũng đều thấp thoáng hình bóng em, khiến anh yếu mềm\nMưa thổn thức trong đêm\nĐể nỗi nhớ em nhiều thêm\n\nVậy mà\nNgười theo gió mây\nCòn anh bơ vơ mãi nơi này\nMỗi phút giây\nDài thật dài chẳng thể nào khoả lấp đi hồi ức chúng ta đã từng\nNgôi nhà trong mơ giờ chẳng còn em nữa\n\nĐường xưa nhớ em \nGiờ đây xanh xao lá rơi nhiều\nAnh nhớ em\nNơi đâu quanh anh cũng đều thấp thoáng hình bóng em, khiến anh yếu mềm\nMưa thổn thức trong đêm\nĐể nỗi nhớ em nhiều thêm",
+      "singer": "A.C Xuân Tài, Rum",
+      "createdAt": 1781464318351,
+      "template": "1",
+      "status": "public",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "secretKey": "fa4ba005f561b614",
+      "releaseYear": "2020",
+      "backgroundUrl": "",
+      "password": "",
+      "audioUrl": "/uploads/1781464226986-869887797.mp3",
+      "slug": "nguoi-theo-gio-may",
+      "title": "Người Theo Gió Mây"
+    },
+    {
+      "id": "1781465099114",
+      "lyrics": "Verse 1:\nCơn mưa ùa về từng hạt ướt bay theo những đoạn đường\nXuyên qua màn mưa học trò tiễn nhau chia xa mái trường\nCô nữ sinh nhìn mưa thầm ước\nĐâu biết tôi đằng sau cứ ngó nghiêng\nNhư muốn nói\nĐiều gì còn dở dang\nSao quên ngày sao thuở còn nghĩ suy vu vơ dại khờ\nMỗi sáng đến lớp tìm hình bóng ai cứ thế mong chờ\nCó chút thương ẩn vào trang sách\nCó những nỗi niềm chẳng thể nói ra\nThời gian trôi\nLàm sao níu giữ\n\nChorus:\nPhải chăng giọt mưa ngâu là lần cuối\nCủa khoảng thời gian trong veo xa rồi\nMột thời của những rung động bồi hồi\nTuổi xuân nơi anh có em chung đôi\nKhoảnh khắc gần nhau anh chưa từng nói\nTừng lời mà tim anh luôn khắc sâu\nTiếng em cười\nĐã đi xa rồi\nLa li la\n\nVerse 2:\nTôi ơi dại khờ thời gian cứ đi không sao tìm lại\nPhân vân làm chi để năm tháng qua cơn mơ thêm dài\nTrót nhớ thương để rồi xa mãi\nTrên chuyến xe cuộc đời vụt mất nhau như bong bóng\nTan theo những giọt mưa\n\nChorus:\nNếu như ngày ấy anh không lặng im, chẳng để thời gian trôi qua vội vàng\nLiệu rằng người đi hay sẽ dừng lại, hoàng hôn buông xuống sánh đôi bên ai\nMột mai gặp nhau có ai còn nhớ, kỷ niệm ngày xưa bên nhau dưới mưa\nKhúc ca này\nNhững tâm tư này\n\nBridge:\nĐi về đâu hỡi những ước hẹn, những cái xoa đầu, những nụ cười bẽn lẽn\nGiọt mưa rơi mang theo nhớ thương\nChẳng còn những phút bên nhau lúc tan trường\nTìm nơi đâu, những kỷ niệm bé con\n\nChorus:\nNếu như ngày ấy anh không lặng im, chẳng để thời gian trôi qua vội vàng\nLiệu rằng người đi hay sẽ dừng lại, hoàng hôn buông xuống sánh đôi cùng ai\nMột mai gặp nhau có ai còn nhớ, kỷ niệm ngày xưa bên nhau dưới mưa\nKhúc ca này\nNhững tâm tư này\nĐi về đâu",
+      "isReleased": true,
+      "singer": "A.C Xuân Tài",
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "achievements": [],
+      "isDraft": false,
+      "coverUrl": "/uploads/1781465095155-864656860-1781465095167.webp",
+      "title": "Cơn Mưa Tuổi Thanh Xuân",
+      "password": "",
+      "slug": "con-mua-tuoi-thanh-xuan",
+      "audioUrl": "/uploads/1781465090583-859613315.mp3",
+      "secretKey": "d82bea67a50c1b08",
+      "backgroundUrl": "",
+      "releaseYear": "2016",
+      "template": "7",
+      "createdAt": 1781465099115,
+      "status": "public",
+      "author": "",
+      "composer": "A.C Xuân Tài"
+    },
+    {
+      "template": "7",
+      "createdAt": 1781465849494,
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "secretKey": "f9c4fbe5f507cdba",
+      "backgroundUrl": "/uploads/1781465837221-469441835-1781465837223.webp",
+      "releaseYear": "2020",
+      "password": "",
+      "slug": "phai-chang-truong-thanh-la-chia-ly-9493",
+      "audioUrl": "/uploads/1781465761796-583927948.mp3",
+      "title": "Phải Chăng Trưởng Thành Là Chia Ly",
+      "coverUrl": "/uploads/1781465781220-672447568-1781465781226.webp",
+      "isDraft": false,
+      "achievements": [
+        {
+          "type": "youtube_views",
+          "value": "820K"
+        }
+      ],
+      "playlistIds": [
+        "1781270950760"
+      ],
+      "lyrics": "Verse 1:\nTôi ngày ấy, tôi một thời thơ ngây\nChiều hoàng hôn dần buông dõi theo làn tóc ai bay\nNiềm hạnh phúc nhỏ nhoi mỗi ngày\nLà được nhìn thấy em như vậy\nThương em thương cả khung trời mộng mơ\n\nEm ngày ấy, vô tư tựa những đám mây\nNgại ngùng bên cạnh anh, em kể chuyện nắng, chuyện mưa\nEm mong đừng lớn lên, sợ bỏ quên ta của ngày xưa\nĐể bàn tay anh, tay em chạm nhẹ mỗi trưa\nPre:\nGiữa những tháng năm êm đềm, là tôi mỗi chiều đợi em\nCố vờ như tình cờ đi chung trên đoạn đường thân quen\nĐôi khi tôi ôm đàn ngồi ngẩn ngơ nghĩ vài câu hát\nvề em, và tôi viết những dòng đầu tiên\nChorus:\nTự hỏi phải chăng trưởng thành là chia ly\nTừng giọt ký ức theo mưa cuốn đi\nTự hỏi những dại khờ năm ấy\nTại sao khiến tim đau đến như vậy\n\nGiấc mơ năm nào đành dở dang\nMàu hoàng hôn xưa phôi pha mùa cũ khuất xa\nGóc phố thênh thang người lại qua\nRiêng anh một mình lạc lõng giữa khung trời\nNhớ ai nhớ ai\nTại sao anh cứ hoài thương mãi một người\n\nVerse 2:\nXa rồi đấy, tháng năm dài theo gió bay\nChỉ còn anh và anh ôm từng nỗi nhớ đong đầy\nAi cũng phải lớn lên, chẳng còn ai của những ngày xưa\nGiờ bàn tay anh, tay em ngược đường nắng mưa\n\nGiữa thế giới bao nhiêu người, liệu em có còn đợi tôi\nNhư tôi đã ngờ nghệch đợi em suốt một thời xa xôi\nĐôi khi tôi tự nghĩ cuộc đời tôi như một tiểu thuyết\nmà em là người viết những dòng đầu tiên\n\nChorus:\nTự hỏi những con đường mình từng đi qua\nLiệu người quên chưa cơn mưa ướt nhoà\nTự hỏi sao tình đầu đẹp thế\nĐể sau biết bao lâu vẫn mơ về\n\nGiấc mơ năm nào đành dở dang\nMàu hoàng hôn xưa phôi pha mùa cũ khuất xa\nGóc phố thênh thang người lại qua\nRiêng anh một mình lạc lõng giữa khung trời\nNhớ ai nhớ ai\nTại sao anh cứ hoài thương mãi một người\n\nPhải chăng trưởng thành là chia ly\nNày mưa ngừng đi\nNhững dại khờ năm nào\nLà những giấc mơ anh còn mãi đi tìm\n\nEnding:\nTìm một giấc mơ dở dang\nMàu hoàng hôn xưa phôi pha mùa cũ khuất xa\nGóc phố thênh thang người lại qua\nRiêng anh một mình lạc lõng giữa khung trời\nNhớ ai mãi\nPhải chăng trưởng thành là chia ly",
+      "id": "1781465849493",
+      "isReleased": true,
+      "singer": "Lynk Lee"
+    },
+    {
+      "isReleased": true,
+      "id": "1781465373570",
+      "lyrics": "Em lại nhớ anh rồi\nNhớ những chiều mưa rơi\nAnh chạy xe qua đón em về\nMình cười đùa thật vui dưới cơn mưa kia\n\nAnh cũng nhớ em rồi\nNhớ những lần tay nắm chặt tay\nNhớ những nụ hôn cuối ngày\nNhớ những lần em nói “yêu anh”\n\nChorus:\nMình yêu thêm lần nữa được không\nVì chuyện mình còn đang dở dang\nMình yêu thêm lần nữa nhé em\nLàm sao yên lòng khi anh chẳng ở bên\n\nRời xa nhau là những khổ đau\nVậy thì ta phải giữ được nhau\nTìm được nhau đã quá khó khăn\nLiệu ta có thể đưa đôi tay nhau lại\nYêu lần nữa không?\n\nLời 2:\n\nTa lại nhớ nhau rồi\nNhớ những lần môi đã kề môi\nNhớ những lần hẹn mỗi tối\nNhớ những ngày có em bên đời\n\nChorus:\nMình yêu thêm lần nữa được không\nVì chuyện mình còn đang dở dang\nMình yêu thêm lần nữa nhé anh\nVì em vẫn còn nhớ anh suốt đêm ngày\n\nRời xa nhau là những khổ đau\nVậy thì ta phải giữ được nhau\nTìm được nhau đã quá khó khăn\nLiệu ta có thể đưa đôi tay nhau lại\nYêu lần nữa không ?",
+      "singer": "A.C Xuân Tài, Thanh Maii",
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "achievements": [],
+      "coverUrl": "/uploads/1781465271375-364393649-1781465271380.webp",
+      "isDraft": false,
+      "title": "Yêu Lần Nữa Không",
+      "password": "",
+      "audioUrl": "/uploads/1781465275377-692821963.mp3",
+      "slug": "yeu-lan-nua-khong",
+      "secretKey": "34970c10757a3208",
+      "releaseYear": "2022",
+      "backgroundUrl": "",
+      "createdAt": 1781465373571,
+      "template": "14",
+      "author": "",
+      "status": "public",
+      "composer": "Thanh Maii"
+    },
+    {
+      "slug": "lieu-nguoi-co-thay",
+      "audioUrl": "/uploads/1781465446879-230786880.mp3",
+      "password": "",
+      "title": "Liệu Người Có Thấy",
+      "status": "public",
+      "author": "",
+      "composer": "A.C Xuân Tài, Thanh Maii",
+      "template": "3",
+      "createdAt": 1781465537509,
+      "backgroundUrl": "",
+      "releaseYear": "2022",
+      "secretKey": "531e342f5da60de5",
+      "playlistIds": [],
+      "singer": "A.C Xuân Tài, Thanh Maii",
+      "id": "1781465537508",
+      "lyrics": "Verse:\nCó tiếng ai thở dài\ntrong màn đêm\nVì có tiếng yêu vụng dại\nĐã lỡ buông lời\n\nLặng lẽ phía khung cửa nhỏ\nCó ai ngồi\nNhìn mãi xa xăm\nKhóc thầm\n\nChorus:\nLiệu người có thấy\nThấy tiếng lòng thở than\nVà thấy con tim hoang tàn\nTình tan tình tan tình tan tình suy\n\nLiệu người có thấy\nThấy đôi mắt kẻ say\nVà thấy đôi vai hao gầy\nVì vì ai… vì anh\n\nGiờ còn ở đây\nMột trái tim đầy tổn thương\nMột đôi mắt lệ ướt buồn\nSầu vương, sầu vương trên mi\n\nVerse 2:\nCó ánh sao là lạ\nNhư là em\nỞ mãi phía xa bầu trời\nChỉ sáng một mình\n\nLặng lẽ phía khung cửa nhỏ\nVẫn em ngồi\nCùng những tâm tư\nKhông lời\n\nChorus:\nLiệu người có thấy\nThấy tiếng lòng thở than\nVà thấy con tim hoang tàn\nTình tan tình tan tình tan tình suy\n\nLiệu người có thấy\nThấy đôi mắt kẻ say\nVà thấy đôi vai hao gầy\nVì vì ai… vì anh\n\nGiờ còn lại đây\nMột trái tim đầy tổn thương\nMột đôi mắt lệ ướt buồn\nSầu vương, sầu vương trên mi\n\nEnding:\nChẳng một ai thấy\nThấy nỗi buồn của em\nThấy mưa rơi bên thềm\nCạnh em, cạnh em, cạnh em, chỉ em\n\nChẳng một ai thấy\nThấy em vẫn ngồi đây\nNỗi cô đơn vương đầy\nướt đẫm ướt đẫm ướt đẫm bàn tay\n\nRồi em sẽ thấy\nThế giới vẫn lặng lẽ quay\nRồi sẽ có một ngày\nAi đó vì em, cần em, chở che cho em..",
+      "isReleased": true,
+      "coverUrl": "/uploads/1781465450333-510905568-1781465450336.webp",
+      "isDraft": false,
+      "achievements": []
+    },
+    {
+      "achievements": [],
+      "coverUrl": "/uploads/1781466080650-90368561-1781466080654.webp",
+      "isDraft": false,
+      "singer": "A.C Xuân Tài",
+      "isReleased": true,
+      "id": "1781466123502",
+      "lyrics": "Verse:\nAnh nhận ra chúng ta bỏ lỡ nhau rồi\nNay mình xa, mỗi người ở mỗi thế giới\nAnh nhận ra chúng ta bỏ lỡ duyên trời\nMưa nặng hạt, anh nhớ em không nguôi\n\nPre:\nAnh còn nhớ em vẫn thường nép vai anh thì thầm bên tai\nTừng dòng ký ức khi xưa đâu dễ có thể nhạt phai\nLiệu rằng em nơi phương xa ấy có đang nhìn về nơi anh\nRồi lại ôm nỗi buồn, lệ rơi\n\nChorus:\nMình bỏ lỡ nhau rồi mảnh tình duyên nay vỡ đôi\nNgày tháng sau này không còn có em trong cuộc đời\nMàn đêm buông xuống anh ngẩn ngơ, chẳng dám tin rằng không còn em\nNhìn về đâu anh cũng thấy em, chỉ toàn em\n\nMình bỏ lỡ nhau rồi, lời hẹn năm xưa đã thôi\nMọi thứ vẫn đây, khung trời ấy, nhưng em đâu rồi ?\nTừng là tất cả trong nhau nhưng bây giờ, chỉ còn lại tiếc nuối\nMưa buồn cứ rơi theo từng nỗi nhớ người",
+      "playlistIds": [
+        "1780780944981"
+      ],
+      "releaseYear": "2020",
+      "backgroundUrl": "",
+      "secretKey": "d652ba60ea490bb0",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "createdAt": 1781466123502,
+      "template": "11",
+      "title": "Bỏ Lỡ Nhau Rồi",
+      "audioUrl": "/uploads/1781466107363-563562162.mp3",
+      "slug": "bo-lo-nhau-roi",
+      "password": ""
+    },
+    {
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "id": "1780618434608",
+      "lyrics": "Người về liệu nhớ tôi không\r\nTôi thì ngày nhớ đêm mong về người\r\nĐem tình gửi đến xa xôi\r\nCho thuyền gặp bến, cho trầu gặp vôi\r\nNắng mưa là chuyện của trời\r\nTương tư là chuyện của tôi yêu nàng\r\nGửi vào câu thơ, vào lời ca í a\r\n\r\nNguyện chờ hạ tới sang đông\r\nMong sao dệt mối tơ hồng thành đôi\r\nMưa dầm liệu thấm hay trôi\r\nĐêm nằm thầm nhớ, ngày ngồi mộng mơ\r\nCứ gieo thêm một chữ chờ\r\nThao thức về một nàng thơ\r\nAi ngờ phận duyên đến bất ngờ\r\n\r\nDịu dàng em bước qua\r\nKhóe môi cười nghiêng, em thướt tha\r\nNgàn đôi mắt, dõi theo sau đôi chân nàng ta\r\nNgàn hoa thắm cũng ghen thua xinh\r\nNgàn vì sao kém phần lung linh\r\nNụ cười em làm bừng lên sắc hương thanh bình\r\n\r\nRồi ngẩn ngơ, ối a, chút tâm tình anh chưa nói ra\r\nPhải làm sao, cứ tơ vương chín thương mười nhớ\r\nSao không nói, cứ làm thinh,\r\nEm còn xinh cớ sao một mình\r\nThắm duyên nhau, anh nguyện lòng bắc chiếc cầu tình\r\n\r\nHỡi em gì ơi\r\nĐã mấy xuân rồi\r\nCó ai đò đưa, có ai tính tang tình cùng em chưa\r\n\r\nNhân duyên gặp gỡ\r\nBiết đến bao giờ\r\ncó thương thì thương, chưa thương thì nói để anh còn chờ\r\n\r\n( drop )\r\n\r\nLời 2:\r\n\r\nNhìn nắng ươm vàng thả vào tóc em nhẹ nhàng\r\nAnh mơ màng ngỡ mùa xuân sang\r\nNhìn anh thật thà chất phác, xứng đôi cô gái chân phương là nàng\r\nNghe tim mình rộn vang, những khúc nhạc tang tính tang\r\n\r\nEm bước qua, một hính bóng thướt tha, nụ cười sáng tựa trời mây\r\nMê nước da, nàng chợt đứng trước ta để lại nỗi nhớ vơi đầy\r\nHồn anh như đang lạc lối lung lay rồi chìm vào đôi mắt em nồng say\r\nNói em hay\r\nlời anh muốn tỏ bày\r\ngửi trọn vào trong câu ca này\r\n\r\nDịu dàng em bước qua\r\nKhóe môi cười nghiêng, em thướt tha\r\nNgàn đôi mắt, dõi theo sau đôi chân nàng ta\r\nNgàn hoa thắm cũng ghen thua xinh\r\nNgàn vì sao kém phần lung linh\r\nNụ cười em làm bừng lên sắc hương thanh bình\r\n\r\nRồi ngẩn ngơ, ối a, chút tâm tình anh chưa nói ra\r\nPhải làm sao, cứ tơ vương chín thương mười nhớ\r\nSao không nói, cứ làm thinh\r\nEm còn xinh cớ sao một mình\r\nThắm duyên nhau, anh nguyện lòng bắc chiếc cầu tình\r\n\r\nHỡi em gì ơi\r\nĐã mấy xuân rồi\r\nCó ai đò đưa, có ai tính tang tình cùng em chưa\r\n\r\nNhân duyên gặp gỡ\r\nBiết đến bao giờ\r\nCó thương thì thương, chưa thương thì nói để anh còn chờ\r\n\r\n( drop )",
+      "singer": "A.C Xuân Tài",
+      "coverUrl": "/uploads/1780618391470-781089684.png",
+      "password": "123321",
+      "slug": "chiec-cau-tinh",
+      "audioUrl": "/uploads/1780618387361-573930963.mp3",
+      "title": "Chiếc Cầu Tình",
+      "template": "1",
+      "createdAt": 1780618434608,
+      "composer": "A.C Xuân Tài",
+      "author": "",
+      "status": "public",
+      "secretKey": "f5464f3584f31cd5",
+      "backgroundUrl": ""
+    },
+    {
+      "slug": "nhung-ngay-xa-nhau",
+      "audioUrl": "/uploads/1780618472231-275003879.mp3",
+      "password": "123321",
+      "title": "Yêu Những Ngày Xa",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "template": "3",
+      "createdAt": 1780618493637,
+      "backgroundUrl": "/uploads/1780696845179-666671691-1780696845418.webp",
+      "releaseYear": "2026",
+      "secretKey": "8bb0826f09545672",
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "singer": "Đinh Mạnh Ninh",
+      "lyrics": "[Verse 1]\nNhững ngày xa\nAnh đã nghĩ suy nhiều về\nChuyện tình ta\nDù em đã bao lần bảo rằng đừng lo em vẫn ổn mà\nNhưng thật lòng anh có thể nhận ra\n\nTừng ngày qua\nCảm xúc cũng xa lạ và\nMình vội vã\nTrong thế giới riêng ta phải tập làm quen cuộc sống chẳng có nhau\nAnh biết em tủi thân hằng đêm\nAnh muốn được làm mây bay theo gió tới bên em\nĐể lau đi những nỗi buồn của em\n\nChorus:\nBiết sau đôi môi em cười là những suy tư chẳng thể vơi\nBiết khi em buồn anh chẳng thế tới bên em vỗ về\nBiết đêm đông em se lạnh chẳng thế nắm tay\nBiết em đau chẳng thể nào ôm anh khóc\n\nNhìn nắng trên cao anh nghĩ về nỗi cô đơn của ngày mưa\nChắc em sẽ chạnh lòng khi chiều xuống không ai đón đưa\nNhớ nhau ta ngậm ngùi đếm ngày tháng sớm trưa\nChờ ngày đôi ta gặp lại\nĐể chặt tay ôm siết bõ những ngày xa\n\n[Verse 2]\nNhững ngày xa\nAnh vẫn ngắm sao rơi và\nTưởng tượng ra\nĐâu đó phía chân trời là nụ cười em ấm áp hiện ra\nAnh lại, nhớ em thiết tha\n\nTừng ngày qua\nQuen lễ tết một mình\nĐợi từng dòng tin\nNhìn nhau qua màn hình\nChẳng thể chạm vào nhau, tim thật đau\nAnh chẳng thể nào ngừng nghĩ về em\nNgày cứ thế rồi lại đêm, thật trống vắng khi không em\nHãy vững tin chờ anh, em nhé\n\nChorus:\nBiết sau đôi môi em cười là những suy tư chẳng thể vơi\nBiết khi em buồn anh chẳng thế tới bên em vỗ về\nBiết đêm đông em se lạnh chẳng thế nắm tay\nBiết em đau chẳng thể nào ôm anh khóc\n\nNhìn nắng trên cao anh nghĩ về nỗi cô đơn của ngày mưa\nChắc em sẽ chạnh lòng khi chiều xuống không ai đón đưa\nNhớ nhau ta ngậm ngùi đếm ngày tháng sớm trưa\nChờ ngày đôi ta gặp lại\nĐể chặt tay ôm siết bõ những ngày xa",
+      "id": "1780618493637",
+      "isReleased": false,
+      "isDraft": false,
+      "coverUrl": "/uploads/1781428857661-587897696-1781428857681.webp",
+      "achievements": []
+    },
+    {
+      "coverUrl": "/uploads/1780682405737-578741259-1780682405744.webp",
+      "achievements": [],
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "isReleased": false,
+      "linkSpotify": "",
+      "singer": "A.C Xuân Tài, secret",
+      "author": "",
+      "releaseYear": "",
+      "backgroundUrl": "",
+      "password": "",
+      "audioUrl": "/uploads/1780682118482-790330618.mp3",
+      "linkType": "direct",
+      "title": "Ai Sẽ Là Người Ngỏ Lời",
+      "isDraft": false,
+      "linkYoutubeMusic": "",
+      "linkApple": "",
+      "id": "1780682174364",
+      "lyrics": "Verse:\nCứ bên nhau vậy thôi\nCũng đã lâu rồi\nChẳng thể đếm bao nhiêu ngày trôi\nTim cứ rối bời\nNhiều lần ánh mắt khẽ va nhau, \nNhững cái xoa đầu,\nEm thường nói, gu của em cực giống tôi\n\nBỗng nhiên ối dồi ôi\nThôi chết tôi rồi\nSao chỉ mới xa một ngày thôi\nMà lòng chơi vơi\nMột nỗi nhớ chẳng nói thành lời\nEm liệu cũng thương tôi\nHay chỉ muốn, mập mờ vậy cho vui thôi\n\nChorus:\nNếu cứ mãi như thế\nai mới sẽ là người ngỏ lời và\nNgày lại ngày như thế\nai mới sẽ là người ngỏ lời nà\nAnh không nói ra\nEm cũng không nói ra \nThì chuyện của ta, ranh giới ấy không sao vượt qua, haiza\n\nEm kiêu sa như thế\nNên anh vẫn chưa dám ngỏ lời nà\nBật nhiều đèn xanh thế\nĐang mong anh là người ngỏ lời à ?\nTrong lòng đang lửa cháy rồi mà sao chẳng dám cầm tay\nĐến bên anh và nghe kỹ đây\nNhững câu anh ngỏ lời\n\nOk, thôi anh ngỏ lời này,\nAnh biết em cũng đang chờ đợi\n\nVerse 2:\nOne to tree\nThôi thì vô tư đi\nKhông phải chần chừ gì \nAnh sẽ làm dù kỳ\nKể cả tỏ tình trên ti vi\nAnh biết cơ hội đã tới tay\nMuốn nói cho cả thế giới này\nTình cảm anh đã giấu thật sâu\nTừ lâu, ôm niềm đau\nchìm sâu, vì em đâu có thấu, lets go\n\n\nChorus:\nNếu cứ mãi như thế\nai mới sẽ là người ngỏ lời và\nNgày lại ngày như thế\nai mới sẽ là người ngỏ lời nà\nAnh không nói ra\nEm cũng không nói ra \nThì chuyện của ta, ranh giới ấy không sao vượt qua, haiza\n\nEm kiêu sa như thế\nNên anh vẫn chưa dám ngỏ lời nà\nBật nhiều đèn xanh thế\nĐang mong anh là người ngỏ lời à ?\nTrong lòng đang lửa cháy rồi mà sao chẳng dám cầm tay\nĐến bên anh và nghe kỹ đây\nNhững câu anh ngỏ lời\n\nRAP ( Linh Thộn )\n\nƠ kìa ô là sao, bao thời gian cùng nhau ( bé ơi )\nDo nàng đang làm cao, hay là đang nàm thao\nDon't you wanna be my girl,\nGần đây trông anh như ất ơ\nvì ngày không em, sáng với đêm\nTim này đau đau đau, yeah\n\nỨ béo nhưng em mập mờ, \noh baby ơi anh nhức nhối\nCứ ngỡ sau hôm vừa rồi là chúng ta đang bay phấp phới\nYêu nhau tới nơi rồi sao trông em cứ giống như trêu đùa thôi\nEm hãy mau nói cho anh nghe nào\n\nYêu hay không yêu ?\nYêu hay không yêu ?\nMình là bạn thân hay thân yêu ?\nSiêu thân hay yêu luân ?\nLà yêu hay không yêu, hay yêu như không yêu thì hãy nói\nSao em ngó lơ ?\n\nChorus:\nNếu cứ mãi như thế\nai mới sẽ là người ngỏ lời \nvà ngày lại ngày như thế\nai mới sẽ là người ngỏ lời \nAnh không nói ra\nEm cũng không nói ra \nThì chuyện của ta, phải làm sao đây ?\n\nEm kiêu sa như thế\nNên anh vẫn chưa dám ngỏ lời nà\nBật nhiều đèn xanh thế\nĐang mong anh là người ngỏ lời à ?\nTrong lòng đang lửa cháy rồi mà sao chẳng dám cầm tay\nĐến bên anh và nghe kỹ đây\nNhững câu anh ngỏ lời",
+      "createdAt": 1780682174364,
+      "template": "15",
+      "linkYoutube": "",
+      "status": "public",
+      "composer": "A.C Xuân Tài, secret",
+      "secretKey": "2e21087bece18927",
+      "linkZing": "",
+      "slug": "ai-se-la-nguoi-ngo-loi"
+    },
+    {
+      "coverUrl": "/uploads/1780781417157-320212502-1780781417228.webp",
+      "singer": "A.C Xuân Tài, Hannie",
+      "id": "1780781537464",
+      "lyrics": "Nhắc đến những ngày đầu tiên\r\nNgày nắng xuyên qua bầu trời\r\nNgày em còn mộng mơ\r\nChưa từng nhung nhớ\r\nTâm hồn thả vào gió lay\r\n\r\nAnh như mưa rào nhẹ bay\r\nDịu mát tim em đã bao ngày\r\nChợt rung động một chút\r\nlạc nhịp một phút\r\nCứ thế ta tìm thấy nhau\r\n\r\nPre:\r\nChẳng thể ngờ một người giỏi giang đến vậy\r\nLại ấp úng trước em thế này\r\nNgày từng ngày \r\nAnh cứ thế bước vào đời em\r\nQuá đỗi nhẹ nhàng\r\n\r\nChorus:\r\nCó một người chẳng cần em phải lớn\r\nCó một người cho em quyền giận hờn\r\nMột người thích ngắm mãi lúc em cười\r\nSẽ hạnh phúc khi thấy em vui\r\n\r\nCó một người xem em là thế giới\r\nLắng nghe em từng điều nhỏ nhoi\r\nNgười lau khô nỗi đau của em\r\nNgười cho em thấy mình thật sự may mắn\r\nMột người quan tâm\r\nMột người ấm áp\r\nLà anh\r\n\r\n\r\nLời 2:\r\n\r\nĐôi khi em hỏi tại sao\r\nMình thấy nhau giữa 8 tỷ người\r\nDù thêm ngàn năm nữa\r\nNhiều cuộc đời nữa\r\nVẫn chỉ mong được có em\r\n\r\n\r\nPre:\r\nChẳng thể ngờ một người giỏi giang đến vậy\r\nLại ấp úng trước em thế này\r\nNgày từng ngày \r\nAnh cứ thế bước vào đời em\r\nQuá đỗi nhẹ nhàng\r\n\r\nChorus:\r\nCó một người chẳng cần em phải lớn\r\nCó một người cho em quyền giận hờn\r\nMột người thích ngắm mãi lúc em cười\r\nSẽ hạnh phúc khi thấy em vui\r\n\r\nCó một người xem em là thế giới\r\nLắng nghe em từng điều nhỏ nhoi\r\nNgười lau khô nỗi đau của em\r\nNgười cho em thấy mình thật sự may mắn\r\nMột người quan tâm\r\nMột người ấm áp\r\nLà anh\r\n\r\n\r\nMình vụng về nghe con tim dẫn lối\r\nĐể đắm say trong hôm nay phút giây bồi hồi\r\nDẫu khi vui hay khi giận hờn\r\nHứa yêu nhau răng long bạc đầu\r\nCảm ơn người đã chọn bên anh\r\nTừ nay và mãi mãi\r\n",
+      "isReleased": false,
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "backgroundUrl": "/uploads/1780781428617-344034473-1780781428620.webp",
+      "secretKey": "1ca365d382888d54",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "author": "",
+      "template": "7",
+      "createdAt": 1780781537464,
+      "title": "Có Một Người",
+      "slug": "co-mot-nguoi",
+      "audioUrl": "/uploads/1780781526413-58796953.mp3",
+      "password": ""
+    },
+    {
+      "secretKey": "2774bcc0b6cf856d",
+      "backgroundUrl": "/uploads/1780782363165-421442536-1780782363321.webp",
+      "createdAt": 1780782605058,
+      "template": "16",
+      "composer": "A.C Xuân Tài, Thanh Maii",
+      "status": "public",
+      "author": "",
+      "title": "Làm Sao Mà Yêu Nhau Được",
+      "password": "123321",
+      "audioUrl": "/uploads/1780782602713-932989815.mp3",
+      "slug": "lam-sao-ma-yeu-nhau-duoc",
+      "coverUrl": "/uploads/1780782712285-627532016-1780782712626.webp",
+      "isReleased": false,
+      "id": "1780782605057",
+      "lyrics": "Nơi anh đang nắng ấm hay mưa\r\nKhông biết anh cơm nước hay chưa\r\nMà sao em vẫn cứ mãi đợi chờ\r\nĐợi chờ một tình yêu mập mờ\r\n\r\nLời yêu thương đâu khó nói anh ơi\r\nQuan tâm thì càng dễ hơn thôi\r\nMà sao anh vẫn cứ mãi kiệm lời\r\nLàm sao để được cạnh nhau vậy trời\r\n\r\nCứ mãi thế thôi thì làm sao mà yêu nhau được\r\nCứ mãi thế thôi thì ta vẫn như ngày trước\r\nVẫn cứ hỏi thăm rằng người kia đang như thế nào\r\nMà ta vẫn chẳng là gì của nhau\r\n\r\nNói tiếng yêu mà sao lại khó thế này\r\nBiết trái tim này đã yêu người đấy\r\nVẫn cứ mong về một ngày ta thành đôi\r\nMà chẳng dám nói ra rằng chỉ yêu người thôi\r\n\r\nNam ( A.C Xuân Tài ):\r\n\r\nNgày thì cứ nhớ nhớ\r\nđến đêm mơ mơ\r\nCứ ngóng cứ trông ngu ngơ\r\nXong lại thẫn thờ\r\nNhiều điều muốn nói lắm\r\nviết thật nhiều dòng\r\nmà rồi lại xóa sạch, ôi thật ngốc\r\nMình cứ mập mập mờ thế thôi\r\nBỏ lỡ biết bao nhiêu cơ hội mất rồi\r\nCứ chờ nhau hoài rồi chẳng một dám làm người ngỏ lời\r\n\r\nNgười thở than\r\nngười kia ủi an\r\nNhưng thứ quan tâm trên tình bạn\r\nCứ thấy em gần chàng trai khác trong anh thấy bất an nóng hết tim gan\r\nVà anh biết\r\nlà em cũng thế\r\nMình cứ loay hoay mông lung mãi chán chê\r\nLàm bạn thân không vui đâu\r\nĐừng chờ lâu sao không chọn làm người yêu nhau",
+      "singer": "A.C Xuân Tài, secret",
+      "playlistIds": [
+        "1780774046282"
+      ]
+    },
+    {
+      "linkYoutubeMusic": "",
+      "isDraft": false,
+      "linkApple": "",
+      "id": "1780783310943",
+      "lyrics": "verse:\nTại sao đêm đã khuya em vẫn online thế này\nPhải chăng còn mãi ôm những nỗi buồn sau chia tay\nTại sao em cứ giam em trong cô đơn như vậy\nNhìn xem còn có anh luôn chờ em này\n\npre:\nDù biết cuộc đời không dễ, anh vẫn sẽ luôn gần kề\nĐể lắng nghe em, ủi an vỗ về\nmột vòng tay dang rộng để em yên lòng nương náu khi bộn bề\nChỉ chờ đợi một cái gật đầu khẽ\n\nchorus:\nĐể anh ôm lấy em\nBước qua ngày dài tối đen\nRồi cơn mưa sẽ tạnh\nVết thương lại lành\nNhìn em thổn thức ngậm ngùi\nLòng anh đau đến thấu bầu trời\nSẽ ổn thôi, đừng lo, anh đây rồi\n\nĐể anh ôm lấy em\nChở che bàn tay ấm êm\nĐể anh lau nỗi buồn còn vương trên mắt em\nĐể anh thay em mang âu lo mỗi ngày\nGiữa thế giới không suôn sẻ này\nCó anh luôn chờ đợi em gật đầu\n\nVerse 2:\nMuộn sầu tạm gác đi, cất dưới chiếc gối em nằm\nNgủ thật ngon nhé, em đã kiên cường mạnh mẽ lắm\nRồi cô gái bé xinh sẽ thức giấc trong yên bình\nVà em sẽ biết yêu hơn bản thân mình\n\npre:\nĐừng mãi nghĩ về quá khứ, chuyện gì qua hãy cho qua\nVà chớ quên em còn anh nữa mà\nMột ngày nếu nỗi buồn dậy sóng hãy tìm anh khóc cho nhẹ lòng,\nNép vào bờ vai anh trước bão giông\n\nchorus:\nĐể anh ôm lấy em\nBước qua ngày dài tối đen\nRồi cơn mưa sẽ tạnh\nVết thương lại lành\nNhìn em thổn thức ngậm ngùi\nLòng anh đau đến thấu bầu trời\nSẽ ổn thôi, đừng lo, anh đây rồi\n\nĐể anh ôm lấy em\nChở che bàn tay ấm êm\nĐể anh lau nỗi buồn còn vương trên mắt em\nĐể anh thay em mang âu lo mỗi ngày\nGiữa thế giới không suôn sẻ này\nCó anh luôn chờ đợi em gật đầu",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "linkYoutube": "",
+      "createdAt": 1780783310943,
+      "template": "14",
+      "linkZing": "",
+      "secretKey": "0eacbe86b17d8a42",
+      "slug": "cho-mot-cai-gat-dau",
+      "coverUrl": "/uploads/1780783220692-90214699-1780783220704.webp",
+      "achievements": [],
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "singer": "A.C Xuân Tài",
+      "isReleased": false,
+      "linkSpotify": "",
+      "author": "",
+      "releaseYear": "2026",
+      "backgroundUrl": "/uploads/1780783368405-319216992-1780783368631.webp",
+      "audioUrl": "/uploads/1780783308156-362234941.mp3",
+      "password": "",
+      "title": "Chờ Một Cái Gật Đầu",
+      "linkType": "direct"
+    },
+    {
+      "coverUrl": "/uploads/1780786670006-545025433-1780786670024.webp",
+      "singer": "A.C Xuân Tài, secret",
+      "id": "1780786684987",
+      "lyrics": "Verse:\r\nEm nghe trái tim thầm thì\r\nTừng nhịp đập cất lên mỗi khi\r\nĐược gần bên anh,\r\nLàm em cứ thẫn thờ suy nghĩ\r\n\r\nLiệu cảm xúc kia là gì ?\r\nCó phải là tình yêu không ?\r\nVì ai mà em ngốc nghếch mơ mộng đến thế ?\r\n\r\nChorus:\r\nlà vì anh\r\nEm yêu thêm những cơn mưa, được cùng anh ngắm dưới bầu trời\r\nLà vì anh\r\nKhiến em rối bời, thổn thức không nên lời, khép đôi mi thảnh thơi\r\nLà vì anh\r\nEm mang nỗi nhớ bao đêm, là cơn mơ em chẳng mong tỉnh giấc\r\nAnh mắt đôi môi nụ cười, và hơi ấm người\r\nEm sẽ mãi luôn in sâu trong trái tim của em\r\nSuốt đời\r\n\r\nLời 2:\r\n\r\nEm như chút mưa ngày hạ\r\nNhư giọt sương sớm mai mát lành\r\nDựa vào vai anh\r\nEm kể anh nghe điều em nghĩ\r\n\r\nLiệu cảm xúc kia là gì\r\nCó phải là tình yêu ?\r\nVì em là người anh muốn chở che mãi mãi\r\n\r\nChorus:\r\nlà vì anh\r\nEm yêu thêm những cơn mưa, được cùng anh ngắm dưới bầu trời\r\nLà vì anh\r\nKhiến em rối bời, thổn thức không nên lời, khép đôi mi thảnh thơi\r\nLà vì anh\r\nEm mang nỗi nhớ bao đêm, là cơn mơ em chẳng mong tỉnh giấc\r\nAnh mắt đôi môi nụ cười, và hơi ấm người\r\nEm sẽ mãi luôn in sâu trong trái tim của em\r\nSuốt đời",
+      "isReleased": false,
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "backgroundUrl": "/uploads/1780786677614-148813806-1780786677663.webp",
+      "secretKey": "e8503639d82ae9fe",
+      "status": "public",
+      "composer": "A.C Xuân Tài",
+      "author": "",
+      "template": "13",
+      "createdAt": 1780786684988,
+      "title": "Là Vì Anh",
+      "slug": "la-vi-anh",
+      "audioUrl": "/uploads/1780786524464-470994828.mp3",
+      "password": ""
+    },
+    {
+      "password": "",
+      "audioUrl": "/uploads/1780787040429-530788429.mp3",
+      "slug": "sau-30",
+      "title": "Sau 30 ( solo version )",
+      "createdAt": 1780787045738,
+      "template": "18",
+      "author": "",
+      "composer": "A.C Xuân Tài",
+      "status": "public",
+      "secretKey": "9ae2f5c17eb81ebe",
+      "backgroundUrl": "",
+      "playlistIds": [
+        "1780774046282"
+      ],
+      "isReleased": false,
+      "id": "1780787045738",
+      "lyrics": "-Lời 1-\r\nSao cứ đứng đấy lặng thinh\r\nHay là lại vừa thất tình\r\nYêu đương gì mà cứ mấy bữa lại cãi nhau linh đình\r\n\r\nThôi quên anh ta dần đi\r\nXem ra cũng chẳng tốt gì\r\nĐời còn cậuo nhiêu con trai mà chẳng cần luyến tiếc làm gì\r\n\r\nTrái đất này vẫn quay dù cậu có khóc hay cười\r\nChỉ có tôi lo lắng thôi những khi cậu buồn hay vui\r\nDẫu nắng mưa, sớm trưa, buồn bực chi cứ nói với tôi\r\nChẳng thể yên tâm khi nhìn thấy cậu yếu đuối\r\n\r\nHay là...\r\nNếu như sau 30 hai ta vẫn cứ còn độc thân\r\nVậy thì bỏ cuộc đi thôi, số phận rồi, tốt nhất ta nên thành đôi\r\nvì\r\nNếu như sau 30 cậu cứ nhất quyết không chịu tôi\r\nThì chẳng còn một ai trên đời thương cậu hiểu cậu nữa đâu\r\ncậu sẽ ế suốt đời\r\n\r\n-Lời 2-\r\n\r\nHôm qua cậu đi đâu mà không nghe máy tôi\r\nHay lại cứ khóc lóc thút thít bởi anh chàng kia không đáp lời\r\nChuyện tình sao cứ loay hoay hoài mà chẳng thấy lối ra\r\nVậy thì thôi bỏ qua,\r\nĐể tôi chăm sóc quan tâm cậu nha\r\n\r\nHay là...\r\nNếu như sau 30 hai ta vẫn cứ còn độc thân\r\nVậy thì bỏ cuộc đi thôi, số phận rồi, tốt nhất ta nên thành đôi\r\nvì\r\nNếu như sau 30 cậu cứ nhất quyết không chịu tôi\r\nThì chẳng còn một ai trên đời thương cậu hiểu cậu nữa đâu\r\ncậu sẽ ế suốt đời",
+      "singer": "A.C Xuân Tài",
+      "coverUrl": "/uploads/1780786981677-93222487-1780786981681.webp"
+    },
+    {
+      "coverUrl": "",
+      "deleted": true,
+      "playlistIds": [],
+      "deletedAt": 1781204799538,
+      "singer": "A.C Xuân Tài",
+      "isReleased": false,
+      "lyrics": "test lời xem sao nè",
+      "id": "1780958118225",
+      "author": "",
+      "status": "public",
+      "composer": "A.C Xuân Tài",
+      "createdAt": 1780958118225,
+      "template": "9",
+      "backgroundUrl": "",
+      "secretKey": "c5f78b58ef105494",
+      "audioUrl": "",
+      "slug": "nhap-test",
+      "password": "",
+      "title": "Nháp test"
+    },
+    {
+      "linkYoutubeMusic": "",
+      "isDraft": false,
+      "id": "1781772544307",
+      "lyrics": "",
+      "linkApple": "https://music.apple.com/us/song/b%C3%A1c-t%C3%A0i-xanh-xin-ch%C3%A0o/6769171335",
+      "linkZing": "https://zingmp3.vn/album/Bac-Tai-Xanh-Xin-Chao-Single-Dong-Hung-XT-Production-Green-SM-A-C-Xuan-Tai/6CFB9AO6.html",
+      "secretKey": "b7295c5d650017f6",
+      "status": "public",
+      "composer": "A.C Xuân Tài, Mai Xuân Thứ",
+      "linkYoutube": "https://www.youtube.com/watch?v=rp_lph4p5tg",
+      "template": "1",
+      "createdAt": 1781772544307,
+      "slug": "bac-tai-xanh-xin-chao",
+      "achievements": [],
+      "coverUrl": "/uploads/1781788587020-426870941-1781788587054.webp",
+      "singer": "Đông Hùng",
+      "linkSpotify": "https://open.spotify.com/track/4BVhGFqLoKOtRgOhIgvupl?si=d7b16f1141284348",
+      "isReleased": false,
+      "playlistIds": [],
+      "backgroundUrl": "",
+      "releaseYear": "2026",
+      "author": "",
+      "title": "Bác Tài Xanh Xin Chào",
+      "linkType": "indirect",
+      "audioUrl": "",
+      "password": ""
+    },
+    {
+      "linkYoutubeMusic": "",
+      "isDraft": false,
+      "linkApple": "",
+      "lyrics": "Verse:\nMùa hạ năm ấy\nngả mình sau tán cây\nBố đã thấy ngay\nĐằng xa ấy\nMột nụ cười quên hết trời mây\nNgất ngây\nLàm bố đắm say\nMất mấy giây\nRồi cứ thế mỗi ngày\nLại đến đây, quyết tâm sẽ cưa được cô ấy\nNhiều lần tỏ bày rồi cũng gặp may\nĐã cưới được mẹ con đấy\n\nChorus:\nMắt này con giống mẹ\nNên mới tròn đáng yêu\nMôi này, con giống mẹ\nNên mới cười rất nhiều\n\nMũi cao, trán cũng cao \nGiống bố đẹp biết bao\nLàn da trắng với má hồng hây hây\nChắc cũng từ mẹ con đấy\n\nDỗi nè, hay khóc nhè, con giống vợ bố ghê\nĂn gì, gì cũng được, nhưng món gì cũng chê\nSáng chiều, nói rất nhiều, đôi lúc lại nói điêu\nToàn nói ghét thế anh chả yêu em\nNhưng tình yêu thì vẫn cứ lâu bền\n\nRap:\nCon là thiên thần, món quà đến từ thiên đường sau thời gian mẹ con đã kiên cường\nCon hồn nhiên nằm trong vòng tay bình yên mẹ nhìn con vừa khóc vừa cười ở trên giường\nNhững vì sao trong đôi mắt con\nKết tinh từ tình yêu sắt son\nYên tâm, mẹ nấu ăn rất ngon\nBước đi chưa vững, bố sẽ dìu dắt con\nTrước khi mà con ra đời thì mẹ con là người bố yêu nhất\nNhưng mà giờ con đây rồi thì nếu mà hỏi yêu ai nhiều hơn bố cũng chịu thật\nYêu con nhiều hơn, bởi vì con là mẹ phiên bản tí hon\nYêu mẹ nhiều hơn, không thì bố và con cả 2 sẽ ăn đòn\n\nChorus:\nMắt này con giống mẹ\nNên mới tròn đáng yêu\nMôi này, con giống mẹ\nNên mới cười rất nhiều\n\nMũi cao, trán cũng cao \nGiống bố đẹp biết bao\nLàn da trắng với má hồng hây hây\nChắc cũng từ mẹ con đấy\n\nDỗi nè, hay khóc nhè, con giống vợ bố ghê\nĂn gì, gì cũng được, nhưng món gì cũng chê\nSáng chiều, nói rất nhiều, đôi lúc lại nói điêu\nToàn nói ghét thế anh chả yêu em\nNhưng tình yêu thì vẫn cứ lâu bền",
+      "id": "1781806120141",
+      "status": "hidden",
+      "linkYoutube": "",
+      "composer": "A.C Xuân Tài",
+      "createdAt": 1781806120143,
+      "template": "16",
+      "linkZing": "",
+      "secretKey": "4aba749a2fca24b0",
+      "slug": "khi-bo-gap-me",
+      "coverUrl": "/uploads/1781806053511-415598145-1781806053923.webp",
+      "achievements": [],
+      "playlistIds": [],
+      "singer": "A.C Xuân Tài",
+      "isReleased": false,
+      "linkSpotify": "",
+      "author": "",
+      "releaseYear": "",
+      "backgroundUrl": "",
+      "audioUrl": "/uploads/1781806059616-762812333-1781806060056.mp3",
+      "password": "",
+      "title": "Khi Bố Gặp Mẹ",
+      "linkType": "direct"
+    }
+  ],
+  "artistName": "A.C Xuân Tài",
+  "youtubePlaylistUrl": "https://www.youtube.com/watch?v=wuWB3Q2gTVs&list=PLYhxSEggsw6pQynJA2XvQQ4tUG2z7zBNS",
+  "socialTiktok": "https://www.tiktok.com/@acxuantai",
+  "artistBio": "Thiên đường âm nhạc của",
+  "socialYoutube": "http://youtube.com/@ACXUANTAI/",
+  "globalPassword": "123321",
+  "slideshowImages": [
+    "/uploads/1780665960823-60910314-1780665961105.webp",
+    "/uploads/1780665965368-453491446-1780665965513.webp",
+    "/uploads/1780665969985-693723295-1780665970129.webp",
+    "/uploads/1780665993706-288364849-1780665993809.webp"
+  ],
+  "spotifyUrl": "https://open.spotify.com/artist/4cXmPRr3FNM39g79G2IovE",
+  "adminPassword": "MatKhauDay123",
+  "ogImageUrl": "/uploads/1780785531410-988675359-1780785531433.webp",
+  "socialFacebook": "https://www.facebook.com/nXuanTai/",
+  "pageTitle": "Kho nhạc của A.C Xuân Tài",
+  "memberPassword": "XuanTaiDepTrai",
+  "faviconUrl": "/uploads/1780618358557-156203877.png",
+  "socialInstagram": "https://instagram.com/acxuantai",
+  "templateConfigs": [
+    {
+      "order": 1,
+      "id": "1",
+      "name": "Vui vẻ (Ấm áp)"
+    },
+    {
+      "order": 2,
+      "name": "Căng Cực (Sôi động)",
+      "id": "2"
+    },
+    {
+      "name": "Buồn (Sâu lắng)",
+      "id": "3",
+      "order": 3
+    },
+    {
+      "order": 4,
+      "name": "Thư giãn (Nhẹ nhàng)",
+      "id": "4"
+    },
+    {
+      "order": 5,
+      "id": "5",
+      "name": "Đáng yêu (Đỏ, Nhảy múa)"
+    },
+    {
+      "order": 6,
+      "name": "Hạnh Phúc (Hồng, Hoa rơi)",
+      "id": "6"
+    },
+    {
+      "id": "7",
+      "name": "Học Đường (Trắng, Lá vàng rơi)",
+      "order": 7
+    },
+    {
+      "name": "Tổ Quốc (Đỏ, Cờ phấp phới)",
+      "id": "8",
+      "order": 8
+    },
+    {
+      "id": "9",
+      "name": "Bầu trời xanh (Mây trắng)",
+      "order": 9
+    },
+    {
+      "order": 10,
+      "name": "Hip Hop (Đường phố)",
+      "id": "10"
+    },
+    {
+      "name": "Kỳ bí (Đen vàng, Trăng khói mưa)",
+      "id": "11",
+      "order": 11
+    },
+    {
+      "order": 12,
+      "name": "Cổ điển (Nâu, retro)",
+      "id": "12"
+    },
+    {
+      "name": "Hoàng hôn (Cam đỏ trời chiều)",
+      "id": "13",
+      "order": 13
+    },
+    {
+      "name": "Đại Dương (Sóng biển)",
+      "id": "14",
+      "order": 14
+    },
+    {
+      "name": "Retro 8-Bit (Game)",
+      "id": "15",
+      "order": 15
+    },
+    {
+      "order": 16,
+      "id": "16",
+      "name": "Xếp hình Puzzle"
+    },
+    {
+      "id": "17",
+      "titleColor": "",
+      "bgColor": "",
+      "lyricsColor": "",
+      "name": "Cổ vũ (Mây, mặt trời)",
+      "order": 17
+    },
+    {
+      "id": "18",
+      "name": "Pháo hoa (Năm mới)",
+      "order": 18
+    }
+  ],
+  "homeCoverUrl": "/uploads/1780614616129-996341897.jpg"
+}

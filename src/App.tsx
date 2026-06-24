@@ -2526,6 +2526,11 @@ function PlaylistPlayer() {
      }
   }, [currentIndex, resetTimer, songs.length]);
 
+  const [isProtected, setIsProtected] = useState(false);
+  const [password, setPassword] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [protectedInfo, setProtectedInfo] = useState<{ title?: string; coverUrl?: string }>({});
+
   useEffect(() => {
     if (id === 'released') {
       fetch('/api/data')
@@ -2559,12 +2564,23 @@ function PlaylistPlayer() {
         setLoading(false);
       });
     } else {
-      fetch(`/api/playlists/${id}`, {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('secret') || urlParams.get('token') || sessionStorage.getItem(`playlist_token_${id}`) || '';
+      fetch(`/api/playlists/${id}${token ? `?token=${encodeURIComponent(token)}` : ''}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken') || localStorage.getItem('memberToken') || ''}` }
       })
-      .then(res => res.json())
-      .then(data => {
+      .then(async res => {
+        const data = await res.json();
+        if (res.status === 401 && data.isProtected) {
+           setIsProtected(true);
+           setProtectedInfo({ title: data.title, coverUrl: data.coverUrl });
+           setLoading(false);
+           return;
+        }
         if (data.error) throw new Error(data.error);
+        if (token) {
+           sessionStorage.setItem(`playlist_token_${id}`, token);
+        }
         setPlaylist(data.playlist);
         setSongs(data.songs);
         setLoading(false);
@@ -2575,6 +2591,29 @@ function PlaylistPlayer() {
       });
     }
   }, [id]);
+
+  const verifyPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setVerifying(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/playlists/${id}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        sessionStorage.setItem(`playlist_token_${id}`, data.token);
+        window.location.reload();
+      } else {
+        setError('Sai mật khẩu!');
+      }
+    } catch (err) {
+      setError('Lỗi kết nối!');
+    }
+    setVerifying(false);
+  };
 
   const handleNext = useCallback(() => {
      if (songs.length === 0) return;
@@ -2633,7 +2672,33 @@ function PlaylistPlayer() {
 
   if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t.load}</div>;
   if (error || !playlist) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Error: {error || 'Playlist not found'}</div>;
-  
+  if (isProtected) return (
+     <div className="min-h-screen bg-stone-950 flex items-center justify-center p-4 relative overflow-hidden">
+        {protectedInfo.coverUrl && (
+          <div className="absolute inset-0 z-0">
+             <div className="absolute inset-0 bg-stone-950/80 backdrop-blur-2xl z-10" />
+             <img src={protectedInfo.coverUrl} className="w-full h-full object-cover opacity-50" alt="background" />
+          </div>
+        )}
+        <div className="w-full max-w-sm bg-stone-900/80 backdrop-blur-md p-8 rounded-3xl border border-white/10 shadow-2xl relative z-10">
+          <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+             <Lock className="w-8 h-8 text-white/80" />
+          </div>
+          <h2 className="text-xl font-bold text-white text-center mb-2">Playlist được bảo vệ</h2>
+          {protectedInfo.title && <p className="text-stone-400 text-sm text-center mb-6">{protectedInfo.title}</p>}
+          <form onSubmit={verifyPassword} className="space-y-4">
+             <div>
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Nhập mật khẩu playlist..." autoFocus className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-stone-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-center" />
+             </div>
+             <button type="submit" disabled={verifying || !password} className="w-full bg-white text-black font-bold py-3 rounded-xl disabled:opacity-50 hover:bg-stone-200 transition-colors">
+                {verifying ? 'Đang kiểm tra...' : 'Truy cập'}
+             </button>
+             <p className="text-stone-500 text-xs text-center">Hoặc sử dụng Secret Link nếu có.</p>
+          </form>
+        </div>
+     </div>
+  );
+
   return (
     <div 
       className="relative min-h-screen bg-black overflow-hidden"
@@ -2641,7 +2706,7 @@ function PlaylistPlayer() {
     >
       {currentSong && (
          <div className="absolute inset-0 z-0 overflow-y-auto custom-scrollbar">
-            <DemoPlayer songIdP={currentSong.slug || currentSong.id} onEnd={handleEnd} onAlmostEnded={handleAlmostEnded} playlistSongs={songs} playlistContext={{ handlePrev, handleNext, shuffle, setShuffle, repeat, setRepeat }} />
+            <DemoPlayer songIdP={currentSong.slug || currentSong.id} playlistId={id} onEnd={handleEnd} onAlmostEnded={handleAlmostEnded} playlistSongs={songs} playlistContext={{ handlePrev, handleNext, shuffle, setShuffle, repeat, setRepeat }} />
          </div>
       )}
 
@@ -3077,7 +3142,14 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
     setError('');
     pwdTouchedRef.current = false;
 
-    const queryParam = secretKey ? `?secret=${encodeURIComponent(secretKey)}` : '';
+    let queryParam = secretKey ? `?secret=${encodeURIComponent(secretKey)}` : '';
+    if (playlistId) {
+      const pToken = sessionStorage.getItem(`playlist_token_${playlistId}`);
+      if (pToken) {
+        queryParam += (queryParam ? '&' : '?') + `playlistId=${encodeURIComponent(playlistId)}&playlistToken=${encodeURIComponent(pToken)}`;
+      }
+    }
+
     const memberToken = localStorage.getItem('memberToken') || '';
     const isMember = memberToken === 'XuanTaiDepTrai';
     fetch(`/api/demos/${id}${queryParam}`, {
@@ -3091,7 +3163,7 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
         if (!data.requiresPassword || isAdmin || isMember) setUnlocked(true);
         setLoading(false);
       });
-  }, [id, isAdmin, playlistSongs, previewData]);
+  }, [id, isAdmin, playlistSongs, previewData, playlistId]);
 
   useEffect(() => {
     if (unlocked && window.innerWidth < 768) {
@@ -3104,10 +3176,15 @@ function DemoPlayer({ songIdP, playlistSongs, setNextSong, onEnd, onAlmostEnded,
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload: any = { password };
+    if (playlistId) {
+       payload.playlistId = playlistId;
+       payload.playlistToken = sessionStorage.getItem(`playlist_token_${playlistId}`) || '';
+    }
     const res = await fetch(`/api/demos/${id}/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
     if (data.success) {
@@ -4372,12 +4449,36 @@ function AdminDatabaseSettings() {
           <h2 className="text-2xl font-bold mb-2 text-stone-900">Quản Lý Cơ Sở Dữ Liệu</h2>
           <p className="text-sm text-stone-500">Chuyển đổi giữa các Firebase config (DB mới / DB cũ) an toàn.</p>
         </div>
-        <button onClick={() => {
-          setEditingConfigId('new');
-          setEditForm({ name: '', config: { projectId: '', apiKey: '', appId: '', authDomain: '', storageBucket: '', messagingSenderId: '', measurementId: '', firestoreDatabaseId: 'default' } });
-        }} className="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 text-sm">
-          <Plus className="w-4 h-4" /> Thêm DB mới
-        </button>
+        <div className="flex gap-2">
+          <button onClick={async () => {
+            if (window.confirm('CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu (bài hát, playlist, cài đặt) trong Database ĐANG DÙNG. Bạn có chắc chắn muốn làm mới Database này?')) {
+              setLoading(true);
+              try {
+                const res = await fetch('/api/admin/firebase-wipe', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                if (res.ok) {
+                  setSuccess('Đã xóa sạch dữ liệu trong DB hiện tại. Vui lòng tải lại trang!');
+                } else {
+                  setError('Lỗi khi xóa DB');
+                }
+              } catch (e) {
+                setError('Lỗi kết nối máy chủ');
+              } finally {
+                setLoading(false);
+              }
+            }
+          }} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 text-sm">
+            <Trash2 className="w-4 h-4" /> Làm mới DB này
+          </button>
+          <button onClick={() => {
+            setEditingConfigId('new');
+            setEditForm({ name: '', config: { projectId: '', apiKey: '', appId: '', authDomain: '', storageBucket: '', messagingSenderId: '', measurementId: '', firestoreDatabaseId: 'default' } });
+          }} className="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 text-sm">
+            <Plus className="w-4 h-4" /> Thêm DB mới
+          </button>
+        </div>
       </div>
 
       {success && <div className="p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 font-medium">{success}</div>}
@@ -5286,8 +5387,8 @@ function AdminDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
-                              <Link to={`/admin/playlist/${pl.id}`} className="bg-stone-100 text-stone-700 hover:bg-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
-                                Quản lý bài viết
+                              <Link to={`/admin/playlist/${pl.id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Chỉnh sửa playlist">
+                                <Edit3 className="w-4 h-4 text-blue-600" />
                               </Link>
                               <button type="button" onClick={() => handleDeleteClick('playlist', pl.id, pl.title)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors font-bold" title="Xóa playlist">
                                 <X className="w-4 h-4 text-red-500 stroke-[3]" />
@@ -7108,6 +7209,9 @@ function AdminPlaylistEdit() {
   const [appData, setAppData] = useState<AppData | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedNewSongIds, setSelectedNewSongIds] = useState<string[]>([]);
+  const [isDraft, setIsDraft] = useState(false);
+  const [password, setPassword] = useState('');
+  const [secretLink, setSecretLink] = useState('');
 
   const getPreviewUrl = (url: string | undefined) => {
     if (!url) return '';
@@ -7151,6 +7255,9 @@ function AdminPlaylistEdit() {
       setPlaylist(playlistData.playlist);
       setTitle(playlistData.playlist.title);
       setCoverUrlPreview(playlistData.playlist.coverUrl || '');
+      setIsDraft(playlistData.playlist.isDraft || false);
+      setPassword(playlistData.playlist.password || '');
+      setSecretLink(playlistData.playlist.secretLink || '');
       setSongs(playlistData.songs);
       setAppData(data);
       setIsLoading(false);
@@ -7165,7 +7272,7 @@ function AdminPlaylistEdit() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}` 
       },
-      body: JSON.stringify({ title, coverUrl: coverUrlPreview, songIds })
+      body: JSON.stringify({ title, coverUrl: coverUrlPreview, songIds, isDraft, password, secretLink })
     });
     setToast('Đã lưu thành công!');
     setTimeout(() => setToast(''), 3000);
@@ -7216,6 +7323,50 @@ function AdminPlaylistEdit() {
                onChange={e => setTitle(e.target.value)} 
                className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 font-bold" 
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
+            <div>
+               <label className="block text-sm font-bold text-stone-700 mb-2">Trạng thái (Hiển thị)</label>
+               <select value={isDraft ? 'true' : 'false'} onChange={e => setIsDraft(e.target.value === 'true')} className="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-stone-900 bg-white">
+                  <option value="false">Công khai (hiện ở trang chủ)</option>
+                  <option value="true">Riêng tư / Bản nháp (ẩn khỏi trang chủ)</option>
+               </select>
+            </div>
+            <div>
+               <label className="block text-sm font-bold text-stone-700 mb-2">Mật khẩu Playlist (tùy chọn)</label>
+               <div className="relative">
+                 <Lock className="absolute left-3 top-3.5 w-5 h-5 text-stone-400" />
+                 <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="Bỏ trống nếu không cần" className="w-full border border-stone-300 rounded-xl pl-10 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-shadow" />
+               </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-stone-100">
+             <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-bold text-stone-700">Secret Link (Link Bí Mật)</label>
+                <button type="button" onClick={() => {
+                   if (!secretLink || confirm("Tạo mới Secret Link? Link cũ sẽ không thể truy cập nữa.")) {
+                      setSecretLink(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+                   }
+                }} className="text-xs bg-stone-100 hover:bg-stone-200 text-stone-800 px-3 py-1.5 rounded-lg font-bold transition-colors">Tạo Link Mới</button>
+             </div>
+             {secretLink ? (
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                   <p className="text-emerald-800 text-sm font-medium mb-2">Sử dụng link sau để truy cập trực tiếp (không cần nhập mật khẩu playlist):</p>
+                   <div className="flex items-center gap-2">
+                      <input readOnly value={`${window.location.origin}/playlist/${id}?secret=${secretLink}`} className="flex-1 bg-white border border-emerald-300 rounded-lg px-3 py-2 text-sm text-emerald-900 focus:outline-none" />
+                      <button type="button" onClick={async () => {
+                         await navigator.clipboard.writeText(`${window.location.origin}/playlist/${id}?secret=${secretLink}`);
+                         setToast('Đã copy Secret Link!');
+                         setTimeout(() => setToast(''), 3000);
+                      }} className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-emerald-700">Copy</button>
+                      <button type="button" onClick={() => setSecretLink('')} className="bg-red-100 text-red-600 px-3 py-2 rounded-lg font-bold text-sm hover:bg-red-200">Xóa</button>
+                   </div>
+                </div>
+             ) : (
+                <p className="text-sm text-stone-500 italic">Chưa tạo Secret Link cho Playlist này.</p>
+             )}
           </div>
 
           <div>

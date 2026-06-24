@@ -621,9 +621,12 @@ async function startServer() {
 
     // Do not leak passwords
     let publicDemos = data.demos.map((d: any) => ({ ...d, password: !!(d.password || data.globalPassword) })); 
+    let publicPlaylists = data.playlists
+        ?.filter((p: any) => !p.isDraft)
+        .map((p: any) => ({ ...p, password: !!p.password, hasSecretLink: !!p.secretLink, secretLink: undefined })) || [];
     publicDemos = injectCoverUrl(publicDemos, data.slideshowImages);
     // We send back both for simplicity, but let's just make it simple
-    res.json({ ...data, demos: publicDemos });
+    res.json({ ...data, demos: publicDemos, playlists: publicPlaylists });
   });
 
   // Admin authentication endpoints
@@ -778,6 +781,34 @@ async function startServer() {
     }
   });
 
+  app.post('/api/admin/firebase-wipe', async (req, res) => {
+    if (!isRequestAdmin(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      const defaultData = {
+        pageTitle: '',
+        artistName: 'Tên nghệ sĩ',
+        artistBio: 'Mô tả ngắn...',
+        homeCoverUrl: '',
+        faviconUrl: '',
+        ogImageUrl: '',
+        youtubePlaylistUrl: '',
+        spotifyUrl: '',
+        releasedSongs: [],
+        demos: [],
+        playlists: [],
+        adminPassword: currentAdminPassword,
+        memberPassword: currentMemberPassword
+      };
+      await setDoc(DOC_REF, defaultData);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Lỗi khi xóa DB Firebase:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post('/api/profile', async (req, res) => {
     if (!isRequestAdmin(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -849,6 +880,8 @@ async function startServer() {
               demo.coverUrl = newUrl;
               updatedCount++;
               logs.push(`-> Đồng bộ xong Ảnh Bìa bài [${demo.title}] thành: ${newUrl}`);
+            } else if (!newUrl.includes(firebaseConfig.storageBucket)) {
+              logs.push(`❌ Lỗi đồng bộ Ảnh Bìa bài [${demo.title}]. Vui lòng kiểm tra lại Firebase Storage!`);
             }
           }
 
@@ -860,6 +893,8 @@ async function startServer() {
               demo.audioUrl = newUrl;
               updatedCount++;
               logs.push(`-> Đồng bộ xong Nhạc (Audio) bài [${demo.title}] thành: ${newUrl}`);
+            } else if (!newUrl.includes(firebaseConfig.storageBucket)) {
+              logs.push(`❌ Lỗi đồng bộ Nhạc (Audio) bài [${demo.title}]. Vui lòng kiểm tra lại Firebase Storage!`);
             }
           }
         }
@@ -885,7 +920,7 @@ async function startServer() {
         await saveData(data);
         logs.push(`Đã lưu dữ liệu mới cập nhật vào Firestore! Đã đồng bộ thành công ${updatedCount} tệp tin.`);
       } else {
-        logs.push("Không phát hiện ảnh bìa cũ nào cần nạp. Toàn bộ ảnh bìa đều đã được lưu trữ trên Firebase Storage rồi!");
+        logs.push("Không có tệp tin nào được đồng bộ. Có thể tất cả tệp đã ở trên Cloud, hoặc Cloud Storage chưa được bật trên Firebase project này.");
       }
 
       res.json({ success: true, updatedCount, logs });
@@ -1328,7 +1363,10 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
     const data = await loadData();
     const newPlaylist = {
        id: Date.now().toString(),
-       title: req.body.title || 'Untitled Playlist'
+       title: req.body.title || 'Untitled Playlist',
+       isDraft: req.body.isDraft || false,
+       password: req.body.password || '',
+       secretLink: req.body.secretLink || ''
     };
     if (!data.playlists) data.playlists = [];
     data.playlists.push(newPlaylist);
@@ -1347,6 +1385,9 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
        if (req.body.title !== undefined) data.playlists[idx].title = req.body.title;
        if (req.body.coverUrl !== undefined) data.playlists[idx].coverUrl = req.body.coverUrl;
        if (req.body.songIds !== undefined) data.playlists[idx].songIds = req.body.songIds;
+       if (req.body.isDraft !== undefined) data.playlists[idx].isDraft = req.body.isDraft;
+       if (req.body.password !== undefined) data.playlists[idx].password = req.body.password;
+       if (req.body.secretLink !== undefined) data.playlists[idx].secretLink = req.body.secretLink;
        await saveData(data);
        res.json(data.playlists[idx]);
     } else {
@@ -1436,8 +1477,27 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
     const data = await loadData();
     let demo = data.demos.find((d: any) => d.id === req.params.id || d.slug === req.params.id);
     if (!demo) return res.status(404).json({ error: 'Not found' });
+
+    let isAuthorized = false;
+    
+    // Check demo password
     const expectedPassword = demo.linkType === 'indirect' ? demo.password : (demo.isReleased ? null : (demo.password || data.globalPassword));
     if (expectedPassword && expectedPassword === req.body.password) {
+       isAuthorized = true;
+    }
+    
+    // Check if bypassed by playlist token
+    if (!isAuthorized && req.body.playlistId && req.body.playlistToken) {
+       const playlist = data.playlists?.find((p: any) => p.id === req.body.playlistId);
+       if (playlist) {
+          if ((playlist.password && playlist.password === req.body.playlistToken) || 
+              (playlist.secretLink && playlist.secretLink === req.body.playlistToken)) {
+             isAuthorized = true;
+          }
+       }
+    }
+
+    if (!expectedPassword || isAuthorized) {
       if (!demo.coverUrl) {
           const imagesToUse = (data.slideshowImages && data.slideshowImages.length > 0)
               ? data.slideshowImages
@@ -1460,6 +1520,20 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
     }
   });
 
+  app.post('/api/playlists/:id/verify', async (req, res) => {
+    const data = await loadData();
+    let playlist = data.playlists?.find((p: any) => p.id === req.params.id);
+    if (!playlist) return res.status(404).json({ error: 'Not found' });
+    
+    if (req.body.password && playlist.password && playlist.password === req.body.password) {
+       res.json({ success: true, token: playlist.password });
+    } else if (req.body.secretLink && playlist.secretLink && playlist.secretLink === req.body.secretLink) {
+       res.json({ success: true, token: playlist.secretLink });
+    } else {
+       res.status(401).json({ error: 'Wrong password or secret link' });
+    }
+  });
+
   app.get('/api/playlists/:id', async (req, res) => {
       const data = await loadData();
       const playlist = data.playlists?.find((p: any) => p.id === req.params.id && !p.deleted);
@@ -1467,6 +1541,22 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       
       const isUserAdmin = isRequestAdmin(req);
       const isUserMember = isRequestMember(req);
+
+      let authorized = isUserAdmin;
+      if (!authorized) {
+         const token = req.headers['x-playlist-token'] || req.query.token;
+         if ((playlist.password && playlist.password === token) || 
+             (playlist.secretLink && playlist.secretLink === token)) {
+             authorized = true;
+         } else if (!playlist.password && !playlist.secretLink) {
+             authorized = true;
+         }
+      }
+
+      if (!authorized) {
+          return res.status(401).json({ error: 'Mật khẩu không đúng', isProtected: true, coverUrl: playlist.coverUrl ? formatUrl(playlist.coverUrl, data.globalBaseUrl) : undefined, title: playlist.title });
+      }
+
       let songs = data.demos.filter((d: any) => {
          if (d.deleted) return false;
          if (d.status !== 'public' && !isUserAdmin) return false;
@@ -1511,7 +1601,10 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
 
       const formattedPlaylist = {
          ...playlist,
-         coverUrl: playlist.coverUrl ? formatUrl(playlist.coverUrl, data.globalBaseUrl) : (songs[0]?.coverUrl || '')
+         coverUrl: playlist.coverUrl ? formatUrl(playlist.coverUrl, data.globalBaseUrl) : (songs[0]?.coverUrl || ''),
+         password: !!playlist.password,
+         hasSecretLink: !!playlist.secretLink,
+         secretLink: undefined
       };
 
       res.json({ playlist: formattedPlaylist, songs });
@@ -1548,8 +1641,18 @@ app.post('/api/demos', upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'c
       const isUserMember = isRequestMember(req);
       const fromPlaylist = req.query.fromPlaylist === 'true';
       const providedSecret = req.query.secret as string | undefined;
-      const isValidSecret = !!(demo.secretKey && providedSecret && demo.secretKey === providedSecret);
+      let isValidSecret = !!(demo.secretKey && providedSecret && demo.secretKey === providedSecret);
       
+      if (!isValidSecret && req.query.playlistId && req.query.playlistToken) {
+         const playlist = data.playlists?.find((p: any) => p.id === req.query.playlistId);
+         if (playlist) {
+            if ((playlist.password && playlist.password === req.query.playlistToken) || 
+                (playlist.secretLink && playlist.secretLink === req.query.playlistToken)) {
+               isValidSecret = true;
+            }
+         }
+      }
+
       // If it requires password, only return basic metadata without audio/lyrics
       if (expectedPassword && expectedPassword !== req.query.pwd && !isValidSecret && !isUserAdmin && !isUserMember) {
           return res.json({ 
